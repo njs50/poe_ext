@@ -93,6 +93,7 @@ function parseItem(itemDiv, loc) {
 	item.category = itemCategory(item);
 	item.rareName = itemRareName(item);
 	item.quality = itemQuality(itemDiv);
+	item.quantity = itemQuantity(item);
 	return item;
 }
 
@@ -105,7 +106,7 @@ function itemBaseType(item) {
 		return item.name; 
 	}
 	if (item.rarity == 'rare') {
-		return item.name.split(' ').slice(2).join(' ')
+		return item.name.split(' ').slice(2).join(' ');
 	}
 	if (item.rarity == 'magic') {
 		// Split off the first word and everything after "of", these are suffix mods.
@@ -124,8 +125,30 @@ function itemBaseType(item) {
 		}
 		// If that didn't work, we're at a loss.
 	}
+	if(item.rarity == 'currency') {
+		var name = item.name;
+		var hasQuantity = item.name.match(/\b\d{1,2}x /);
+		if(hasQuantity!=null) {
+			// we have a quantity prepended to the name so chip it off.
+			
+			name = item.name.substring(hasQuantity[0].length);
+			
+		}
+		return name;
+	}
 	// TODO(jaguilar): handle uniques.
 	return item.name;
+}
+
+function itemQuantity(item) {
+	var quantity = 1;
+	if(item.rarity=='currency') {
+		var hasQuantity = item.name.match(/\b\d{1,2}x /);
+		if(hasQuantity!=null) {
+			quantity = hasQuantity[0].substring(0,hasQuantity[0].length-2);
+		}
+	}
+	return quantity;
 }
 
 function itemRarity(item) {
@@ -145,6 +168,7 @@ function itemCategory(item) {
 	if (item.name.match(/\bamulet\b/i)) { return 'amulet'; }
 	if (item.name.match(/\bquiver\b/i)) { return 'quiver'; }
 	if (item.baseType in ITEM_TYPE_DATA) { return ITEM_TYPE_DATA[item.baseType]; }
+	if (item.baseType in CURRENCY_DATA) { return CURRENCY_DATA[item.baseType]; }
 	return null;
 }
 

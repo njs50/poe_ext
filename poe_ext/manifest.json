@@ -1,11 +1,15 @@
 {
   // Required
-  "name": "poe",
-  "version": "0.11",
+  "name": "poe_plus",
+  "version": "0.111",
   "manifest_version": 2,
 
   // Recommended
   "description": "Does path of exile stuff.",
+
+  "background": {
+    "page": "background.html"
+  },
 
   "app": {
     "launch": {
@@ -14,12 +18,12 @@
     }
   },
 
-  "update_url": "https://github.com/jaguilar/poe_ext/raw/master/poe_updates.xml",
+  //"update_url": "https://github.com/jaguilar/poe_ext/raw/master/poe_updates.xml",
 
   // Add any of these that you need
   // "background": [ {
   //  "matches": [ "http://www.pathofexile.com/private-messages/inbox" ],
   //  "js": ["jquery.js","myscript.js"]
   // } ],
-  "permissions": ["http://www.pathofexile.com/*","http://webcdn.pathofexile.com/*"]
+  "permissions": ["http://www.pathofexile.com/*","http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead"]
 }
