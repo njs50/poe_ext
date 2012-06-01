@@ -19,14 +19,16 @@ function getEndpoint(method) {
 function allItems(charName) {
 	var deferred = $.Deferred();
 
-	$.post(getEndpoint('get-items'), {character: charName})
-	.done(function(itemsResp) {
-		var items = responseToItems(itemsResp, {section: 'character', page: null});
-		getStash(itemsResp).done(function (stash) {
-			deferred.resolve($.merge(items, stash));
+	postThrottle.check().done(function() {
+		$.post(getEndpoint('get-items'), {character: charName})
+		.done(function(itemsResp) {
+			var items = responseToItems(itemsResp, {section: 'character', page: null});
+			getStash(itemsResp).done(function (stash) {
+				deferred.resolve($.merge(items, stash));
+			});
+		}).fail(function () {
+			deferred.reject();
 		});
-	}).fail(function () {
-		deferred.reject();
 	});
 
 	return deferred.promise();
@@ -37,19 +39,23 @@ function getStash(itemsResp) {
 	// the pages (because page 0 tells us how many there are).
 	var deferred = $.Deferred();
 	var stashEndpoint = getEndpoint('get-stash-items');
+	postThrottle.check().done(function() {
 	$.post(stashEndpoint, {league: itemsResp.character.league, page: 0})
 	.done(function (stashResp) {
-		var stashItems = responseToItems(stashResp, {section:'stash', page: 0})
+		var stashItems = responseToItems(stashResp, {section:'stash', page: 0});
 		var stashPromises = [];
 		for (var i = 1; i < stashResp.numTabs; ++i) {
 			var location = {section:'stash', page: i};
 			var pageDeferred = $.Deferred();
-			$.post(stashEndpoint, {league: itemsResp.character.league, tabIndex: i})
-			.done(function (pageDeferred, location) {
-				return function (stashResp) {
-					pageDeferred.resolve(responseToItems(stashResp, location));
-				}
-			}(pageDeferred, location));
+			postThrottle.check().done(function(pageDeferred, location, i) {
+				return function() {
+				$.post(stashEndpoint, {league: itemsResp.character.league, tabIndex: i})
+				.done(function (pageDeferred, location) {
+					return function (stashResp) {
+						pageDeferred.resolve(responseToItems(stashResp, location));
+					}
+				}(pageDeferred, location));
+			}}(pageDeferred, location, i));
 			stashPromises.push(pageDeferred.promise());
 		}
 
@@ -61,6 +67,7 @@ function getStash(itemsResp) {
 		}).fail(deferred.reject);
 	}).fail(function () {
 		deferred.reject();
+	});
 	});
 
 	return deferred.promise();	

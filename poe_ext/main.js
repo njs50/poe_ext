@@ -1,22 +1,27 @@
 var timer = null;
 var currentItems = null;
+var postThrottle = null;
 
 $(document).ready(function () {
 	$('#spinner').ajaxStart(function() {
 		$(this).show();
 	}).ajaxStop(function (){
 		$(this).hide();
-	})
+	});
+	
+	postThrottle = new Throttle(15, 60000);
 
-	$.post(getEndpoint('get-characters'))
-	.done(function (charResp) {
-		if (charResp == null) {
+	postThrottle.check().done(function() {
+		$.post(getEndpoint('get-characters'))
+		.done(function (charResp) {
+			if (charResp == null) {
+				showCharError();
+				return;
+			}
+			setDropdown(charResp);	
+		}).fail(function () {
 			showCharError();
-			return;
-		}
-		setDropdown(charResp);	
-	}).fail(function () {
-		showCharError();
+		});
 	});
 
 	$('#refresh').click(function () {
@@ -39,7 +44,7 @@ $(document).ready(function () {
 			var theirLines = theirData.split('\n');
 	
 			// apply a regex to find the rare names (of the form "forename surname") on each line.
-			// this is quite tollerant of junk on the line. So long as the rare's name is the first word pair on the line, it'll find it.
+			// this is quite tolerant of junk on the line. So long as the rare's name is the first word pair on the line, it'll find it.
 			var regexedLines = theirLines.map(function(i) {
 				var match = i.match(/\w+\s\w+/);
 				return match==null?null:match[0];
@@ -109,6 +114,56 @@ $(document).ready(function () {
 		}
 	});
 });
+
+//constructor for a new throttle instance
+function Throttle(callsPerPeriod, periodDuration) {
+	
+	var self = this;
+	this.maxCalls = callsPerPeriod;
+	this.period = periodDuration;
+	
+	this.callCount = 0;
+	
+	this.delayQueue = [];
+	
+	//function polled by the delay timer
+	this.delayPoll = function() {
+		if(self.delayQueue.length>0) {
+			var deferred = self.delayQueue.shift();
+			deferred.resolve();
+			setTimeout(self.delayPoll, self.period);
+		}
+		else {
+			self.callCount--;
+		}
+		$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (self.maxCalls-self.callCount) + ", queued: " + self.delayQueue.length);
+	};
+	
+	// queues future calls to delay until the specified timeout (in milliseconds) has passed.
+	// used to prevent flooding GGG's servers with too many stash requests in a short time.  
+	this.check = function() {
+
+		var deferred = $.Deferred();
+		
+		if(this.callCount< this.maxCalls) {
+			// no need to queue, we have not hit the throttle yet.
+			deferred.resolve();
+			this.callCount++;
+//			console.log("Event passed. callCount: " + this.callCount);
+			setTimeout(this.delayPoll, this.period);
+		}
+		else {
+			// too many calls in the last 60 seconds.
+			// queue up the deferred so it can be processed when a slot becomes available
+			// and simply return.
+			this.delayQueue.push(deferred);
+//			console.log("Event queued. Queue size: " + this.delayQueue.length);
+		}
+		$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (this.maxCalls-this.callCount) + ", queued: " + this.delayQueue.length);
+		return deferred.promise();
+	};
+}
+
 
 function setDropdown(charResp) {
 	$('#pleaseSelect').show();
