@@ -11,7 +11,7 @@ $(document).ready(function () {
 	
 	postThrottle = new Throttle(15, 60000);
 
-	postThrottle.check().done(function() {
+//	postThrottle.check().done(function() {
 		$.post(getEndpoint('get-characters'))
 		.done(function (charResp) {
 			if (charResp == null) {
@@ -22,7 +22,7 @@ $(document).ready(function () {
 		}).fail(function () {
 			showCharError();
 		});
-	});
+//	});
 
 	$('#refresh').click(function () {
 		var charName = $('#charDropDown').val();
