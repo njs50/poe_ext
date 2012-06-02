@@ -307,10 +307,10 @@ var BaseTypeAndRarityMatch = Match.extend({
 
 
 var FullsetMatch = Match.extend({
-	init: function(rarity, topQuality, allowedToBePartlyIdentified) {
+	init: function(rarity, mustBeTopQuality, mustBeUnidentified) {
 		this.rarity = rarity;
-		this.topQuality = topQuality;
-		this.allowedToBePartlyIdentified = allowedToBePartlyIdentified;
+		this.mustBeTopQuality = mustBeTopQuality;
+		this.mustBeUnidentified = mustBeUnidentified;
 		this.matchedParts = {
 			head: [],
 			chest: [],
@@ -411,9 +411,9 @@ var FullsetMatch = Match.extend({
 	},
 
 	take: function(i) {
-		if(!this.allowedToBePartlyIdentified && i.identified) { return false; }
+		if(this.mustBeUnidentified && i.identified) { return false; }
 		if (this.rarity != i.rarity) { return false; }
-		if (this.topQuality && i.quality < 20) { return false; }
+		if (this.mustBeTopQuality && i.quality != 20) { return false; }
 		if (i.category in this.matchedParts) {
 			this.matchedParts[i.category].push(i);
 		}
@@ -429,35 +429,35 @@ function allMatches(items) {
 	// the recipe order found here:
 	// http://www.pathofexile.com/forum/view-thread/15223
 	var matchRules = $.map([
-	                        {result: "Armorer's Scrap", matcher: new QualityMatch('armor'), lock:0.98},
-	                		{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), lock:0.98},
-	                		{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, true), lock: 0.6, display:0.3},
-	                		{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, false), lock: 0.6, display:0.3},
+	                        {result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.98},
+	                		{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},
+	                		{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
+	                		{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},
 	                		{result: "Chromatic Orb", matcher: TricolorMatch()},
 	                		{result: "Divine Orb", matcher: SocketMatch(6, true)},
 
-	                		{result: "Gemcutter's Prism", matcher: new QualityMatch('skillGem'), lock:0.5, display:0.3},
+	                		{result: "Gemcutter's Prism", matcher: new QualityMatch('skillGem'), display:0.3},
 	                		{result: "Glassblower's Bauble", matcher: new QualityMatch('flask')},
 	                		
-	                		{result: "Jeweler's Orb", matcher: new CurrencyMatch([{name:'chromaticOrb'},{name:'fusingOrb'}]), lock:0.98},
+	                		{result: "Jeweler's Orb", matcher: new CurrencyMatch([{name:'chromaticOrb'},{name:'fusingOrb'}])},
 	                		{result: "7 Jeweler's Orbs", matcher: SocketMatch(6, false)},
 
-	                		{result: "Orb of Alchemy", matcher: new RarenameMatch(2), lock:0.51},
-	                		{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), lock:0.51},
-	                		{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), lock:0.51}, //This rule is unverified.
+	                		{result: "Orb of Alchemy", matcher: new RarenameMatch(2), display:0.51},
+	                		{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), display:0.51},
+	                		{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), display:0.51}, //This rule is unverified.
 	                		
-	                		{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), lock:0.51},
-	                		{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), lock:0.51},
+	                		{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), display:0.51},
+	                		{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), display:0.51},
 	                		{result: "Orb of Augmentation", matcher: RareModMatch(6)}, //This rule is flawed. It is impossible to reliably determine if a rare has 6 mods.
 
-	                		{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magical', 'normal'], false, true), lock:0.7, display: 0.5},
-	                		{result: "Regal Orb", matcher: new RarenameMatch(3), lock:0.34},
+	                		{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magical', 'normal'], false, true), display: 0.5},
+	                		{result: "Regal Orb", matcher: new RarenameMatch(3), display:0.34},
 	                		
-	                		{result: "Regal Orb", matcher: new FullsetMatch('rare', true, true), lock: 0.2, display:0.1},
-	                		{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, false), lock: 0.2, display:0.1},
-	                		{result: "1 Divine, 2 Exalted and 5 Regal Orbs",  matcher: new CurrencyMatch([{name:'mirrorOfKalandra'}]), lock:0.98},
+	                		{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},
+	                		{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, true), display:0.3},
+	                		{result: "1 Divine, 2 Exalted and 5 Regal Orbs",  matcher: new CurrencyMatch([{name:'mirrorOfKalandra'}]), display:0.98},
 	                		
-	                		{result: "New unidentified item of same base type & rarity",  matcher: new BaseTypeAndRarityMatch(5), lock:0.5}
+	                		{result: "New unidentified item of same base type & rarity",  matcher: new BaseTypeAndRarityMatch(5), display:0.5}
 	                		
 	                		//TODO The rules that rely upon allowedToBePartlyIdentified are slightly bugged at the moment.
 	                		// When set they'll accept all unidentified, which should be taken by the more valuable rule. 
@@ -466,9 +466,7 @@ function allMatches(items) {
 		
 	], function (v, _) {
 		// Defaults.
-		// remove the locking feature for now.
-		if (v.lock == null) { v.lock = 0;}
-		if (v.display == null) { v.display = v.lock; }
+		if (v.display == null) { v.display = 0; }
 		return v;
 	});
 	
@@ -482,16 +480,6 @@ function allMatches(items) {
 		// filter out matches that fall below the display threshold. 
 		var matches = (matcher.getMatches().filter(function(m) { return m.complete > rule.display; }));
 		
-		// filter & flatten the items claimed (locked) by this matcher
-//		var completeMatchItems = $.map(matches, function (v, _) {
-//			if (v.complete > rule.lock) {
-//				return v.items;
-//			}
-//		});
-		
-		// remove the items that have been claimed by this matcher.(so that future matches cannot claim them) 
-//		available = available.filter(function (v, _) {  return $.inArray(v, completeMatchItems) < 0 });
-
 		// if this rule made any matches, then the matches need adding to the results
 		if (matches.length) {
 			if (results[rule.result] == null) {

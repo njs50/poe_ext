@@ -9,6 +9,10 @@ $(document).ready(function () {
 		$(this).hide();
 	});
 	
+	getVersion(function (version){
+		$('#version').html("Version: " + version);
+	});
+	
 	postThrottle = new Throttle(15, 60000);
 
 //	postThrottle.check().done(function() {
@@ -30,6 +34,8 @@ $(document).ready(function () {
 			poll(charName, false);
 		}
 	});
+	
+	$('#copyToClipboard,#copyFromClipboard').attr('disabled',true);
 	
 	$('#copyToClipboard').click(function () {
 		if(currentItems!=null) {
@@ -115,6 +121,16 @@ $(document).ready(function () {
 	});
 });
 
+function getVersion(callback) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open('GET', 'manifest.json');
+    xmlhttp.onload = function (e) {
+        var manifest = JSON.parse(xmlhttp.responseText);
+        callback(manifest.version);
+    }
+    xmlhttp.send(null);
+}
+
 //constructor for a new throttle instance
 function Throttle(callsPerPeriod, periodDuration) {
 	
@@ -125,6 +141,8 @@ function Throttle(callsPerPeriod, periodDuration) {
 	this.callCount = 0;
 	
 	this.delayQueue = [];
+	
+	$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (self.maxCalls-self.callCount) + ", queued: " + self.delayQueue.length);
 	
 	//function polled by the delay timer
 	this.delayPoll = function() {
@@ -159,7 +177,7 @@ function Throttle(callsPerPeriod, periodDuration) {
 			this.delayQueue.push(deferred);
 //			console.log("Event queued. Queue size: " + this.delayQueue.length);
 		}
-		$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (this.maxCalls-this.callCount) + ", queued: " + this.delayQueue.length);
+		$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (self.maxCalls-self.callCount) + ", queued: " + self.delayQueue.length);
 		return deferred.promise();
 	};
 }
@@ -173,6 +191,7 @@ function setDropdown(charResp) {
 	$('#charDropDown').val(0);
 	$('#charDropDown').change(function () {
 		$('#output').html('');
+		$('#rareList').html('');
 		clearTimeout(timer);
 		var charName = $('#charDropDown').val();
 		if (charName != '') {
@@ -190,8 +209,8 @@ function showCharError() {
 }
 
 function poll(charName, reschedule) {
-	var controls = $.merge($.merge($.merge($('#charDropDown'), $('#refresh')),$('#copyToClipboard')),$('#copyFromClipboard'));
-	controls.attr('disabled', 'true');
+	var controls = $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard');
+	controls.attr('disabled', true);
 	currentItems = null;
 	
 	allItems(charName).done(function (items) {
@@ -228,7 +247,7 @@ function poll(charName, reschedule) {
 		$('#err').html('Error requesting item data from path of exile. Please refresh ' +
 					   'the page and try again. If the error persists, contact the author.');
 	}).then(function () {
-		controls.removeAttr('disabled');
+		controls.attr('disabled',false);
 		if (reschedule) {
 			timer = setTimeout(function() { poll(charName, true); }, 10 * 60 * 1000);
 		}

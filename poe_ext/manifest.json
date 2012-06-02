@@ -1,10 +1,8 @@
 {
-  // Required
   "name": "poe_plus",
-  "version": "0.23",
+  "version": "0.24",
   "manifest_version": 2,
 
-  // Recommended
   "description": "Does path of exile stuff.",
 
   "background": {
@@ -18,12 +16,5 @@
     }
   },
 
-  //"update_url": "https://github.com/jaguilar/poe_ext/raw/master/poe_updates.xml",
-
-  // Add any of these that you need
-  // "background": [ {
-  //  "matches": [ "http://www.pathofexile.com/private-messages/inbox" ],
-  //  "js": ["jquery.js","myscript.js"]
-  // } ],
   "permissions": ["http://www.pathofexile.com/*","http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead"]
 }

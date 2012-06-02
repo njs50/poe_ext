@@ -13,13 +13,15 @@
 	<script src="/matcher.js"></script>
 	<script src="/main.js"></script>
 	<body>
-	<select id="charDropDown"><option>Fetching characters . . .</option></select><button id="refresh">Refresh</button><img id="spinner" src='/ajax-loader.gif'><span id="waitOnQueue" style="font-size:80% color:darkgray"></span>
+	<span id="version" style="font-size:80% color:darkgray"></span><br>
+	<span id="waitOnQueue" style="font-size:80% color:darkgray"></span><br>
+	<select id="charDropDown"><option>Fetching characters . . .</option></select><button id="refresh">Refresh</button><img id="spinner" src='/ajax-loader.gif'><br>
+	<button id="copyToClipboard">Copy your rares to Clipboard</button><button id="copyFromClipboard">Compare your rares to Clipboard</button>
 	<p><p>
 	<div id="pleaseSelect" style="display:none;">Please select a character from the dropdown.</div>
 	<div id="err"></div>
 	<div id="output"></div>
 	<p>
-    <button id="copyToClipboard">Copy your rares to Clipboard</button><button id="copyFromClipboard">Compare your rares to Clipboard</button>
 	<div id="rareList"></div>
 	<p><p><p>
 	<span style="font-size:80% color:darkgray">Please report defects and feature suggestions <a href="http://www.pathofexile.com/forum/view-thread/29916">in this thread</a>.</span>
