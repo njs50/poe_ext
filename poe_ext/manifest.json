@@ -1,6 +1,6 @@
 {
   "name": "poe_plus",
-  "version": "0.24",
+  "version": "0.25",
   "manifest_version": 2,
 
   "description": "Does path of exile stuff.",
@@ -15,6 +15,8 @@
       "container": "panel"
     }
   },
+  
+  "update_url": "https://github.com/TehJumpingJawa/poe_ext/raw/master/poe_updates.xml"
 
   "permissions": ["http://www.pathofexile.com/*","http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead"]
 }
