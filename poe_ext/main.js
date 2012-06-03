@@ -3,11 +3,7 @@ var currentItems = null;
 var postThrottle = null;
 
 $(document).ready(function () {
-//	$('#spinner').ajaxStart(function() {
-//		$(this).show();
-//	}).ajaxStop(function (){
-//		$(this).hide();
-//	});
+
 	$('#spinner').hide();
 	
 	getVersion(function (version){
