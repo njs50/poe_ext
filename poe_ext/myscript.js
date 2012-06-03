@@ -22,10 +22,20 @@ function allItems(charName) {
 	postThrottle.check().done(function() {
 		$.post(getEndpoint('get-items'), {character: charName})
 		.done(function(itemsResp) {
+			if(itemsResp.error != undefined) {
+				// early exit if web server returns the "you've requested too frequently" error
+				deferred.reject();
+				return;
+			}
+
 			var items = responseToItems(itemsResp, {section: 'character', page: null});
-			getStash(itemsResp).done(function (stash) {
+			getStash(itemsResp)
+			.done(function (stash) {
 				deferred.resolve($.merge(items, stash));
-			});
+			})
+			.fail(function(){
+				deferred.reject();
+			})
 		}).fail(function () {
 			deferred.reject();
 		});
@@ -40,34 +50,53 @@ function getStash(itemsResp) {
 	var deferred = $.Deferred();
 	var stashEndpoint = getEndpoint('get-stash-items');
 	postThrottle.check().done(function() {
-	$.post(stashEndpoint, {league: itemsResp.character.league, page: 0})
-	.done(function (stashResp) {
-		var stashItems = responseToItems(stashResp, {section:'stash', page: 0});
-		var stashPromises = [];
-		for (var i = 1; i < stashResp.numTabs; ++i) {
-			var location = {section:'stash', page: i};
-			var pageDeferred = $.Deferred();
-			postThrottle.check().done(function(pageDeferred, location, i) {
-				return function() {
-				$.post(stashEndpoint, {league: itemsResp.character.league, tabIndex: i})
-				.done(function (pageDeferred, location) {
-					return function (stashResp) {
-						pageDeferred.resolve(responseToItems(stashResp, location));
-					}
-				}(pageDeferred, location));
-			}}(pageDeferred, location, i));
-			stashPromises.push(pageDeferred.promise());
-		}
-
-		$.when.apply(null, stashPromises).done(function () {
-			for (var i = 0; i < arguments.length; ++i) {
-				stashItems = $.merge(stashItems, arguments[i]);
+		$.post(stashEndpoint, {league: itemsResp.character.league, page: 0})
+		.done(function (stashResp) {
+			if(stashResp.error != undefined) {
+				// early exit if web server returns the "you've requested too frequently" error
+				deferred.reject();
+				return;
+			}		
+			
+			var stashItems = responseToItems(stashResp, {section:'stash', page: 0});
+			var stashPromises = [];
+			for (var i = 1; i < stashResp.numTabs; ++i) {
+				var location = {section:'stash', page: i};
+				var pageDeferred = $.Deferred();
+				postThrottle.check().done(function(pageDeferred, location, i) {
+					return function() {
+						$.post(stashEndpoint, {league: itemsResp.character.league, tabIndex: i})
+						.done(function (pageDeferred, location) {
+							return function (stashResp) {
+								// early exit if web server returns the "you've requested too frequently" error
+								if(stashResp.error != undefined) {
+									pageDeferred.reject();
+									return;
+								}
+								
+								pageDeferred.resolve(responseToItems(stashResp, location));
+							};
+						}(pageDeferred, location));
+					};
+				}(pageDeferred, location, i));
+				
+				stashPromises.push(pageDeferred.promise());
 			}
-			deferred.resolve(stashItems);
-		}).fail(deferred.reject);
-	}).fail(function () {
-		deferred.reject();
-	});
+			
+			$.when.apply(null, stashPromises)
+			.done(function () {
+				for (var i = 0; i < arguments.length; ++i) {
+					stashItems = $.merge(stashItems, arguments[i]);
+				}
+				deferred.resolve(stashItems);
+			})
+			.fail(function() {
+				deferred.reject();
+			});
+		})
+		.fail(function() {
+			deferred.reject();
+		});
 	});
 
 	return deferred.promise();	

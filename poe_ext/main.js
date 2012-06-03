@@ -3,11 +3,12 @@ var currentItems = null;
 var postThrottle = null;
 
 $(document).ready(function () {
-	$('#spinner').ajaxStart(function() {
-		$(this).show();
-	}).ajaxStop(function (){
-		$(this).hide();
-	});
+//	$('#spinner').ajaxStart(function() {
+//		$(this).show();
+//	}).ajaxStop(function (){
+//		$(this).hide();
+//	});
+	$('#spinner').hide();
 	
 	getVersion(function (version){
 		$('#version').html("Version: " + version);
@@ -18,7 +19,7 @@ $(document).ready(function () {
 //	postThrottle.check().done(function() {
 		$.post(getEndpoint('get-characters'))
 		.done(function (charResp) {
-			if (charResp == null) {
+			if (charResp == null || charResp.error != undefined) {
 				showCharError();
 				return;
 			}
@@ -209,13 +210,15 @@ function showCharError() {
 }
 
 function poll(charName, reschedule) {
+	$('#spinner').show();
 	var controls = $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard');
 	controls.attr('disabled', true);
 	currentItems = null;
-	
-	allItems(charName).done(function (items) {
+	allItems(charName)
+	.done(function (items) {
 		currentItems = items;
 		var matches = allMatches(items);
+		$('#err').html('');
 		$('#output').html('<table><tbody><tr><th></th><th>Matched</th><th>Missing</th>' + 
 			              $.map(matches, function (matches, rule) {
 			var numRows = matches.length;
@@ -241,13 +244,17 @@ function poll(charName, reschedule) {
 		}).join('') + '</tbody></table>');
 		
 		$('#rareList').html(formatRareList("Your Rare Items", getSortedRares(items)));
-		
-		
-	}).fail(function () {
-		$('#err').html('Error requesting item data from path of exile. Please refresh ' +
-					   'the page and try again. If the error persists, contact the author.');
-	}).then(function () {
 		controls.attr('disabled',false);
+	})
+	.fail(function () {
+		$('#output').html('');
+		$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
+					   'click refresh to try again. If the error persists, contact the author.');
+		$('#charDropDown,#refresh').attr('disabled',false);
+		
+
+	}).then(function () {
+		$('#spinner').hide();
 		if (reschedule) {
 			timer = setTimeout(function() { poll(charName, true); }, 10 * 60 * 1000);
 		}
