@@ -16,7 +16,7 @@
     }
   },
   
-  "update_url": "https://github.com/TehJumpingJawa/poe_ext/raw/master/poe_updates.xml"
+  "update_url": "https://github.com/TehJumpingJawa/poe_ext/raw/master/poe_updates.xml",
 
   "permissions": ["http://www.pathofexile.com/*","http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead"]
 }
