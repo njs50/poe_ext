@@ -130,6 +130,8 @@ function parseItem(itemDiv, loc) {
 	item.rareName = itemRareName(item);
 	item.quality = itemQuality(itemDiv);
 	item.quantity = itemQuantity(item);
+//	item.prefixes = itemPrefixes(item);
+//	item.suffixes = itemSuffixes(item);
 	return item;
 }
 
@@ -147,20 +149,40 @@ function itemBaseType(item) {
 	if (item.rarity == 'magic') {
 		// Split off the first word and everything after "of", these are suffix mods.
 		var baseType = item.name.split(' ');
-		var ofLocation = baseType.indexOf('of');
-		if (ofLocation >= 0) {
-			baseType = baseType.slice(ofLocation - 1);
+		var ofLocation = baseType.lastIndexOf('of');
+		if (ofLocation > 0) {
+			var suffixMod = baseType.slice(ofLocation).join(' ');
+			if(suffixMod in MOD_SUFFIX_DATA) {
+				// fine
+			}
+			else {
+				console.log("Unrecognised suffixMod");
+				console.log(suffixMod);
+			}
+			
+			// remove the suffix mod
+			baseType = baseType.slice(0,ofLocation);
+			
 		}
-		if (baseType.join(' ') in ITEM_TYPE_DATA) {
-			return baseType.join(' ');
+		else if(ofLocation==0) {
+			console.log("Unexpected position of 'of' keyword");
+			console.log(item);
 		}
-		// If we didn't match, the item might have a prefix mod, split that off.
-		baseType = baseType.slice(1);
-		if (baseType.join(' ') in ITEM_TYPE_DATA) {
-			return baseType.join(' ');
+		
+		if(baseType[0] in MOD_PREFIX_DATA) {
+			// first word is recognised prefix, so slice it off.
+			baseType = baseType.slice(1);
 		}
-		console.log(item);
-		// If that didn't work, we're at a loss.
+		
+		var baseName = baseType.join(' ');
+		// this test isn't strictly necessary
+		if (baseName in ITEM_TYPE_DATA) {
+			return baseName;
+		}
+		else {
+			// this is fine too, it means the item must be a ring, amulet, belt, or potion.
+			return baseName;
+		}
 	}
 	if(item.rarity == 'currency') {
 		var name = item.name;
@@ -198,14 +220,14 @@ function itemRarity(item) {
 }
 
 function itemCategory(item) {
+	if (item.baseType in ITEM_TYPE_DATA) { return ITEM_TYPE_DATA[item.baseType]; }
+	if (item.baseType in CURRENCY_DATA) { return CURRENCY_DATA[item.baseType]; }
+	if (item.baseType.match(/\(Level \d+\)/i)) { return 'skillGem'; }
 	if (item.baseType.match(/\b(?:flask|vial)\b/i)) { return 'flask'; }
 	if (item.baseType.match(/\b(?:belt|chain|sash)\b/i)) { return 'belt'; }
-	if (item.baseType.match(/\(Level \d+\)/i)) { return 'skillGem'; }
 	if (item.baseType.match(/\bring\b/i)) { return 'ring'; }
 	if (item.baseType.match(/\bamulet\b/i)) { return 'amulet'; }
 	if (item.baseType.match(/\bquiver\b/i)) { return 'quiver'; }
-	if (item.baseType in ITEM_TYPE_DATA) { return ITEM_TYPE_DATA[item.baseType]; }
-	if (item.baseType in CURRENCY_DATA) { return CURRENCY_DATA[item.baseType]; }
 	return null;
 }
 
