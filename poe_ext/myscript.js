@@ -156,8 +156,8 @@ function itemBaseType(item) {
 				// fine
 			}
 			else {
-				console.log("Unrecognised suffixMod");
-				console.log(suffixMod);
+				console.log("Unrecognised suffixMod: " + suffixMod);
+				console.log(item);
 			}
 			
 			// remove the suffix mod
@@ -168,13 +168,24 @@ function itemBaseType(item) {
 			console.log("Unexpected position of 'of' keyword");
 			console.log(item);
 		}
-		
+
+		// We first test if we've already got a base type.
+		// this has to be done to prevent erroneous behaviour
+		// when a prefix modifier begins with the same word as an item type. 
+		// e.g. "Lacquered Lacquered Garb", "Studded Studded Round Shield", etc.
+		var baseName = baseType.join(' ');
+		if (baseName in ITEM_TYPE_DATA) {
+			return baseName;
+		}
+
+		// now we test the first word against the known prefix list
 		if(baseType[0] in MOD_PREFIX_DATA) {
-			// first word is recognised prefix, so slice it off.
+			// if present, we strip it off
 			baseType = baseType.slice(1);
 		}
 		
-		var baseName = baseType.join(' ');
+		// and retest against the known base type list.
+		baseName = baseType.join(' ');
 		if (baseName in ITEM_TYPE_DATA) {
 			return baseName;
 		}
@@ -192,14 +203,14 @@ function itemBaseType(item) {
 			// we can also test for unrecognised prefix by removing the first word and testing it against the known items
 			var shorterName = baseType.slice(1).join(' ');
 			if(shorterName in ITEM_TYPE_DATA) {
-				console.log("Unrecognised prefixMod");
-				console.log(baseType[0]);
+				console.log("Unrecognised prefixMod: " + baseType[0]);
+				console.log(item);
 				return shorterName;
 			}
 
 			// we must have an unrecognised  item type
-			console.log("Unrecognised item type");
-			console.log(baseName);
+			console.log("Unrecognised item type: " + baseName);
+			console.log(item);
 
 			return baseName;
 		}
