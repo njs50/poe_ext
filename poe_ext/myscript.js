@@ -175,12 +175,32 @@ function itemBaseType(item) {
 		}
 		
 		var baseName = baseType.join(' ');
-		// this test isn't strictly necessary
 		if (baseName in ITEM_TYPE_DATA) {
 			return baseName;
 		}
 		else {
-			// this is fine too, it means the item must be a ring, amulet, belt, or potion.
+			// at this point we SHOULD have a potion.
+			// but we might also have an unrecognised prefix
+			// or an unrecognised item basetype
+			
+			// we can reliably recognise a potion
+			if(baseName.match(/\b(?:flask|vial)\b/i)) {
+				// though if it's both a potion AND an unrecognised prefix we've got a problem. 
+				return baseName;
+			}
+			
+			// we can also test for unrecognised prefix by removing the first word and testing it against the known items
+			var shorterName = baseType.slice(1).join(' ');
+			if(shorterName in ITEM_TYPE_DATA) {
+				console.log("Unrecognised prefixMod");
+				console.log(baseType[0]);
+				return shorterName;
+			}
+
+			// we must have an unrecognised  item type
+			console.log("Unrecognised item type");
+			console.log(baseName);
+
 			return baseName;
 		}
 	}
@@ -224,16 +244,13 @@ function itemCategory(item) {
 	if (item.baseType in CURRENCY_DATA) { return CURRENCY_DATA[item.baseType]; }
 	if (item.baseType.match(/\(Level \d+\)/i)) { return 'skillGem'; }
 	if (item.baseType.match(/\b(?:flask|vial)\b/i)) { return 'flask'; }
-	if (item.baseType.match(/\b(?:belt|chain|sash)\b/i)) { return 'belt'; }
-	if (item.baseType.match(/\bring\b/i)) { return 'ring'; }
-	if (item.baseType.match(/\bamulet\b/i)) { return 'amulet'; }
 	if (item.baseType.match(/\bquiver\b/i)) { return 'quiver'; }
 	return null;
 }
 
 function itemRareName(item) {
 	if (item.rarity != 'rare' || !item.identified) { return null; }
-	return item.name.split(' ').splice(0, 2).join(' ');
+	return item.name.split(' ').slice(0, 2).join(' ');
 }
 
 function itemSockets(sdiv) {
