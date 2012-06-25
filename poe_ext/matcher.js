@@ -50,7 +50,7 @@ var RarenameMatch = Match.extend({
 });
 
 var CurrencyMatch = Match.extend({
-	// currencyRequirements; an array of objects with name:"shortCurrencyName", [quantity:numberNeededForMatch] (optional)
+	// currencyRequirements; an array of objects with name:<shortCurrencyName>, [quantity:numberNeededForMatch] (optional)
 	init: function(currencyRequirements) {
 		this.currencyRequirements = currencyRequirements;
 		this.currencyRequirements.forEach(function(currency) {

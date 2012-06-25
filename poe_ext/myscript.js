@@ -235,7 +235,7 @@ function itemQuantity(item) {
 	if(item.rarity=='currency') {
 		var hasQuantity = item.name.match(/\b\d{1,2}x /);
 		if(hasQuantity!=null) {
-			quantity = hasQuantity[0].substring(0,hasQuantity[0].length-2);
+			quantity = parseInt(hasQuantity[0].substring(0,hasQuantity[0].length-2));
 		}
 	}
 	return quantity;
