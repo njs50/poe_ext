@@ -1,9 +1,9 @@
 {
   "name": "poe_plus",
-  "version": "0.32",
+  "version": "0.33",
   "manifest_version": 2,
 
-  "description": "Does path of exile stuff.",
+  "description": "Inventory and Crafting Helper for Path of Exile",
 
   "background": {
     "page": "background.html"
@@ -12,11 +12,14 @@
   "app": {
     "launch": {
       "local_path": "main.html",
-      "container": "panel",
-      "width": 1280,
-      "height":1024
+      "container": "tab"
     }
   },
+
+  "icons" : {
+      "16" : "icon_16.png",
+      "128" : "icon_128.png"
+    },
   
   "update_url": "https://github.com/TehJumpingJawa/poe_ext/raw/master/poe_updates.xml",
 
