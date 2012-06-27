@@ -10,113 +10,141 @@ $(document).ready(function () {
 		$('#version').html("Version: " + version);
 	});
 	
+
 	postThrottle = new Throttle(15, 60000);
 
-//	postThrottle.check().done(function() {
-		$.post(getEndpoint('get-characters'))
-		.done(function (charResp) {
-			if (charResp == null || charResp.error != undefined) {
-				showCharError();
-				return;
-			}
-			setDropdown(charResp);	
-		}).fail(function () {
-			showCharError();
-		});
-//	});
+	var dbOpenPromise = $.indexedDB("poe_plus");
 
-	$('#refresh').click(function () {
-		var charName = $('#charDropDown').val();
-		if (charName != '') {
-			poll(charName, false);
-		}
-	});
 	
-	$('#copyToClipboard,#copyFromClipboard').attr('disabled',true);
-	
-	$('#copyToClipboard').click(function () {
-		if(currentItems!=null) {
-			chrome.extension.getBackgroundPage().copy(formatRareListPlain(getSortedRares(currentItems),true));
-		}
+
+	dbOpenPromise.done(function(db, event){
+		// load list of chars from server (or cache)
+		getChars();
 	});
 
-	$('#copyFromClipboard').click(function () {
-		if(currentItems!=null) {
-			var theirData = chrome.extension.getBackgroundPage().paste();
-			// split by line
-			var theirLines = theirData.split('\n');
+
 	
-			// apply a regex to find the rare names (of the form "forename surname") on each line.
-			// this is quite tolerant of junk on the line. So long as the rare's name is the first word pair on the line, it'll find it.
-			var regexedLines = theirLines.map(function(i) {
-				var match = i.match(/\w+\s\w+/);
-				return match==null?null:match[0];
-			});
-			// remove any lines that were not matched by the regex above.
-			var theirRares = regexedLines.filter(function(i) {
-				return i!=null;
-			});
-			
-			// sort them into descending alphabetical order to make the comparison more efficient 
-			theirRares.sort(function(a,b) {
-				if(a<b) {
-					return -1;
-				}
-				else if(a>b) {
-					return 1;
-				}
-				return 0;
-			});
-	
-			// get the names of our rares.
-			var ourRareItems = getSortedRares(currentItems);
-	
-			var matches = [];
-			
-			var theirIndex = 0;
-			for (var i = 0; i < ourRareItems.length; i++) {
-				var ourRare = ourRareItems[i].rareName;
-				while(theirIndex<theirRares.length && theirRares[theirIndex]<ourRare) {
-					//iterate through until we reach one of their rares that matches, or is alphabetically beyond our rare.
-					theirIndex++;
-				}
-				
-				if(theirIndex==theirRares.length) {
-					// reached the end of their Rares, 
-					// there cannot be any further matches, as there's nothing more to check.
-					break;
-				}
-	
-				var theirCount = 0;
-				var theirIndex2 = theirIndex;
-				while(theirIndex2<theirRares.length && theirRares[theirIndex2++]==ourRare) {
-					// for added usefulness we count the number of their instances that match ours.	
-					theirCount++;
-				}
-	
-				if(theirCount>0) {
-					// take a (shallow) copy of the rare items that match
-					var ourRareItemCopy = $.extend({}, ourRareItems[i]);
-					// so that a new attribute can be added.
-					ourRareItemCopy.theirCount = theirCount;
-					matches.push(ourRareItemCopy);
-				}
-			}
-			
-			if(matches.length==0) {
-				$.colorbox({html:"<h4>No matches found</h2>"});
-			}
-			else {
-				
-				chrome.extension.getBackgroundPage().copy(formatRareListPlain(matches),false);
-				// output the matches here
-				$.colorbox({html:'<body>'+formatRareList("Your rares that matched",matches) +'<h4>Match list has been copied to the clipboard</h2></body>',
-							transition:"none",
-							});
-			}
-		}
-	});
 });
+
+
+$('#refresh').click(function () {
+
+	// clear all stored data
+	resetCache(function(){
+
+		// store charname before we reset list of chars
+		var charName = $('#charDropDown').val();
+
+		getChars(function(){
+
+			// reset charName and make sure it still exists
+			charName = $('#charDropDown').val(charName).val();
+
+			if (charName != '') {
+				poll(charName, false);
+			}
+
+		});
+
+	});
+
+
+});
+
+
+function resetCache(callback) {
+
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", true);
+
+	var promise = objectStore.clear();
+
+	promise.done(function(result, event){
+	    if(jQuery.isFunction(callback)) callback();
+	});
+
+	promise.fail(function(error, event){
+		console.log('Error clearing cache DB');
+		console.log(error);
+	});	
+	
+}
+
+
+
+function getCache(cacheName) {
+
+	var deferred = new $.Deferred();
+
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", 0);
+	var promise = objectStore.get(cacheName);
+
+	promise.done(function(result, event){
+	    if (typeof result == 'undefined'){
+	    	deferred.reject();
+	    } else {
+	    	deferred.resolve(result);
+	    }
+	});
+
+	promise.fail(function(error, event){
+		console.log('Error getting object from cache');
+		console.log(error);
+		deferred.reject();
+	});		
+
+	return deferred.promise();
+
+}
+
+function setCache(cacheName,value) {
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", true);
+	var promise = objectStore.put(value,cacheName);
+
+	promise.fail(function(error, event){
+		console.log('Error putting object into cache');
+		console.log(error);		
+	});		
+	
+}
+
+
+function getChars(callback) {
+	
+	
+	getCache('chars')
+
+		.done(function(oChars) {			
+			setDropdown(oChars);
+			if(jQuery.isFunction(callback)) callback();
+		})
+
+		.fail(function(){
+
+			$.post(getEndpoint('get-characters'))
+
+				.done(function (charResp) {
+					
+					if (charResp == null || charResp.error != undefined) {
+						showCharError();
+						return;
+					}
+
+					setCache('chars',charResp);
+
+					setDropdown(charResp);
+					if(jQuery.isFunction(callback)) callback();
+
+				})
+
+				.fail(function () {
+					showCharError();
+				})
+			;
+		})
+	;
+
+}
+
 
 function getVersion(callback) {
     var xmlhttp = new XMLHttpRequest();
@@ -139,7 +167,7 @@ function Throttle(callsPerPeriod, periodDuration) {
 	
 	this.delayQueue = [];
 	
-	$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (self.maxCalls-self.callCount) + ", queued: " + self.delayQueue.length);
+	$('#waitOnQueue').html("Que: " + self.delayQueue.length + "/" + (self.maxCalls-self.callCount));
 	
 	//function polled by the delay timer
 	this.delayPoll = function() {
@@ -151,7 +179,7 @@ function Throttle(callsPerPeriod, periodDuration) {
 		else {
 			self.callCount--;
 		}
-		$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (self.maxCalls-self.callCount) + ", queued: " + self.delayQueue.length);
+		$('#waitOnQueue').html("Que: " + self.delayQueue.length + "/" + (self.maxCalls-self.callCount));
 	};
 	
 	// queues future calls to delay until the specified timeout (in milliseconds) has passed.
@@ -174,29 +202,30 @@ function Throttle(callsPerPeriod, periodDuration) {
 			this.delayQueue.push(deferred);
 //			console.log("Event queued. Queue size: " + this.delayQueue.length);
 		}
-		$('#waitOnQueue').html("Throttle status. Actions: remaining: "+ (self.maxCalls-self.callCount) + ", queued: " + self.delayQueue.length);
+		$('#waitOnQueue').html("Que: " + self.delayQueue.length + "/" + (self.maxCalls-self.callCount));
 		return deferred.promise();
 	};
 }
 
 
 function setDropdown(charResp) {
-	$('#pleaseSelect').show();
+	
 	var charOptions = $.map(charResp.characters, 
 							function (v) { return '<option>' + v.name + '</option>'; }).join('');
 	$('#charDropDown').html('<option></option>' + charOptions);
 	$('#charDropDown').val(0);
 	$('#charDropDown').change(function () {
+
 		$('#output').html('');
 		$('#rareList').html('');
 		clearTimeout(timer);
+
 		var charName = $('#charDropDown').val();
+
 		if (charName != '') {
-			poll(charName, false);
-			$('#pleaseSelect').hide();
-		} else {
-			$('#pleaseSelect').show();
+			poll(charName, false);	
 		}
+
 	})
 }
 
@@ -207,55 +236,123 @@ function showCharError() {
 
 function poll(charName, reschedule) {
 	$('#spinner').show();
-	var controls = $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard');
-	controls.attr('disabled', true);
-	currentItems = null;
-	allItems(charName)
-	.done(function (items) {
-		currentItems = items;
-		var matches = allMatches(items);
-		$('#err').html('');
-		$('#output').html('<table><tbody><tr><th></th><th>Matched</th><th>Missing</th>' + 
-			              $.map(matches, function (matches, rule) {
-			var numRows = matches.length;
-			var out = '';
-			for (var i = 0; i < numRows; ++i) {
-				out += sprintf('<tr class="%s">', i == numRows - 1 ? 'lastrow' : '');
-				var match = matches[i];
-				if (i == 0) {
-					
-					var moreThanComplete = "";
-					if((match.complete|0) >1) {
-						moreThanComplete = sprintf("(x%d)", match.complete);
-					}
-					
-					out += sprintf('<th class="recipe" rowspan="%d">%s%s</th>', numRows, rule, moreThanComplete);
-				}
-				out += sprintf('<td class="items">%s</td>', $.map(match.items, itemSpan).join('<br>'))
-				out += sprintf('<td class="missing">%s</td>',
-							   (match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '');
-				out += '</tr>';
-			}
-			return out;
-		}).join('') + '</tbody></table>');
-		
-		$('#rareList').html(formatRareList("Your Rare Items", getSortedRares(items)));
-		controls.attr('disabled',false);
-	})
-	.fail(function () {
-		$('#output').html('');
-		$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
-					   'click refresh to try again. If the error persists, contact the author.');
-		$('#charDropDown,#refresh').attr('disabled',false);
-		
 
-	}).then(function () {
-		$('#spinner').hide();
-		if (reschedule) {
-			timer = setTimeout(function() { poll(charName, true); }, 10 * 60 * 1000);
+	$('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard').attr('disabled', true);
+	
+	currentItems = null;
+
+	getCache('items-' + charName)
+
+		.done(function(aRawItems){
+			
+			// reconstruct item data from raw data in cache
+			var items = [];
+			for (var i = 0; i < aRawItems.length; i++){
+				items.push(parseItem(aRawItems[i].html, aRawItems[i].location));
+			}
+
+			processItems(items);
+			
+		})
+
+		.fail(function(){
+			allItems(charName)
+
+				.done(function (items) {
+					
+					// add raw item data to the cache
+					var aRawItems = [];
+					for (var i = 0; i < items.length; i++){
+						aRawItems.push({html: items[i].raw.html(), location: items[i].location});
+					}
+					setCache('items-' + charName,aRawItems);
+
+					processItems(items);
+
+				})
+
+				.fail(function () {
+					$('#output').html('');
+					$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
+								   'click refresh to try again. If the error persists, contact the author.');				
+
+				})
+
+				.then(function () {
+					$('#spinner').hide();
+					if (reschedule) {
+						timer = setTimeout(function() { poll(charName, true); }, 10 * 60 * 1000);
+					}
+				})
+			;
+		})
+	;
+
+	
+}
+
+function processItems(items){
+	currentItems = items;
+	var matches = allMatches(items);
+
+	var idx = 0;
+
+	$('ul#craftingTabs li.crafting-page').remove();
+	$('div#crafting-content').empty();
+
+	for (item in matches) {
+		idx++;
+
+		$('ul#craftingTabs').append('<li class="crafting-page"><a data-index="' + idx + '">' + item + '</a></li>');
+
+		var table = '<table class="table table-striped table-condensed"><thead><tr><th>Matched</th><th>Missing</th><thead><tbody>'
+
+		var match_group = matches[item];
+
+		for (var i = 0; i < match_group.length; i++) {
+
+			var match = match_group[i];
+
+			table += '<tr>';
+			table += '<td>' + $.map(match.items, itemSpan).join('<br>') + '</td>';
+			table += '<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>'
+			table += '</tr>';			
+
 		}
-	});
-};
+
+		table += '</tbody></table>'
+
+		$('div#crafting-content').append('<div class="hide" data-index="' + idx + '">' + table + '</div>');
+
+	}
+
+	$('ul#craftingTabs .dropdown-toggle').dropdown();
+
+	$('div#crafting-content').show();
+
+	$('ul#craftingTabs li.crafting-page a, #openRareList').click(function(){
+		$('#rareList').hide();
+		$('div#crafting-content div').hide();
+		$('ul.nav li,ul#craftingTabs li').removeClass('active');
+		$(this).parent().addClass('active');		
+	})
+
+	$('ul#craftingTabs li.crafting-page a').click(function(){
+		$(this).closest('.dropdown').addClass('active');		
+		$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
+	})
+
+	$('#openRareList').click(function(){
+		$('#rareList').show();
+	})
+
+	$('ul#craftingTabs li.crafting-page a:first').trigger('click');
+	
+	$('#rareList').html(formatRareList("Your Rare Items", getSortedRares(items)));
+
+    $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard').attr('disabled', false);
+	$('#spinner').hide();
+}
 
 function formatRareListPlain(sortedRares, separators) {
 	var count = sortedRares.length;
