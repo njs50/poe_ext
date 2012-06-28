@@ -108,20 +108,21 @@ function responseToItems(response, location) {
 		// We filter out any items that are in a character response but aren't in the
 		// main inventory. I.e. we don't include what you're wearing.
 		if (location.section != 'character' || v.inventory_id == 'MainInventory') {
-			items.push(parseItem($(v.html), location))
+			items.push(parseItem(v.html, location))
 		}
 	})
 	return items;
 }
 
-function parseItem(itemDiv, loc) {
+function parseItem(rawData, loc) {
+	var itemDiv = $(rawData);
 	var itemNameDiv = $('.itemName', itemDiv)[0]
 	var item = {
 		name: itemName(itemNameDiv),
 		location: loc,
 		sockets: itemSockets($('.sockets', itemDiv)[0]),
 		explicitModCount: $('div .explicitMod', itemDiv).length,
-		raw: $(itemDiv)
+		raw: rawData
 	};
 	item.identified = $(':contains(Unidentified)', itemDiv).length == 0;
 	item.rarity = itemRarity(itemNameDiv);

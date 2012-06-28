@@ -263,7 +263,7 @@ function poll(charName, reschedule) {
 					// add raw item data to the cache
 					var aRawItems = [];
 					for (var i = 0; i < items.length; i++){
-						aRawItems.push({html: items[i].raw.html(), location: items[i].location});
+						aRawItems.push({html: items[i].raw, location: items[i].location});
 					}
 					setCache('items-' + charName,aRawItems);
 
@@ -303,9 +303,18 @@ function processItems(items){
 	for (item in matches) {
 		idx++;
 
+		// add navigation entry
 		$('ul#craftingTabs').append('<li class="crafting-page"><a data-index="' + idx + '">' + item + '</a></li>');
 
-		var table = '<table class="table table-striped table-condensed"><thead><tr><th>Matched</th><th>Missing</th><thead><tbody>'
+		// add content div
+		var oDiv = $('<div class="hide crafting-block" data-index="' + idx + '">');
+
+		// add title
+		oDiv.append('<h2>' + item + '</h2>');
+
+		var oTable = $('<table class="table table-striped table-condensed"><thead><tr><th>%<th>Matched</th><th>Missing</th><thead></table>');
+
+		var oTBody = $('<tbody>').appendTo(oTable);
 
 		var match_group = matches[item];
 
@@ -313,16 +322,21 @@ function processItems(items){
 
 			var match = match_group[i];
 
-			table += '<tr>';
-			table += '<td>' + $.map(match.items, itemSpan).join('<br>') + '</td>';
-			table += '<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>'
-			table += '</tr>';			
+			$('<tr>')
+				.append('<td>' + parseInt(match.complete * 10000) / 100 + '%</td>')
+				.append($('<td>').append(getItemsUL(match.items)))
+				.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')			
+				.appendTo(oTBody)
+			;
+			
 
 		}
 
-		table += '</tbody></table>'
+		
 
-		$('div#crafting-content').append('<div class="hide" data-index="' + idx + '">' + table + '</div>');
+		oDiv.append(oTable);
+
+		$('div#crafting-content').append(oDiv);
 
 	}
 
@@ -332,7 +346,7 @@ function processItems(items){
 
 	$('ul#craftingTabs li.crafting-page a, #openRareList').click(function(){
 		$('#rareList').hide();
-		$('div#crafting-content div').hide();
+		$('div#crafting-content div.crafting-block').hide();
 		$('ul.nav li,ul#craftingTabs li').removeClass('active');
 		$(this).parent().addClass('active');		
 	})
@@ -352,6 +366,57 @@ function processItems(items){
 
     $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard').attr('disabled', false);
 	$('#spinner').hide();
+}
+
+
+
+function getItemsUL(aItems) {
+	
+	var oUL = $('<ul class="unstyled">');
+
+	for (var i=0; i < aItems.length; i++) {
+		
+		var item = aItems[i];
+
+		var oItem = $('<a>')
+			.append(item.name)
+			.data('raw',item.raw)			
+			.popover({
+				// title: item.name, 
+				content: function(){ 
+										
+					var html = $(this).data('raw') ;
+
+					var oData = $( html ).addClass('itemPlaced').addClass('itemHovered');
+
+					oData.find('.hidden').removeClass('hidden');
+
+					oData.find('.itemPopupContainer').addClass('pull-left');
+					
+					oData.find('.itemIconContainer').addClass('pull-left').prependTo(oData);
+
+					
+
+					return $('<div>').append(oData).append('<div class="clearfix"></div>');
+				},
+				placement: 'bottom',
+				delay: { show: 500, hide: 100 },				
+				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner-poe"><div class="popover-content"><p></p></div></div></div>'
+			})
+			.click(function(){
+				$(this).popover('show');
+			})
+		;
+
+		$('<li>')
+			.append('<span style="width:20px;float:left;">' + (item.location.page === null ? 0 : parseInt(item.location.page) + 1)  + '</span>')
+			.append(oItem)
+			.appendTo(oUL)
+		;
+	}
+
+	return oUL;
+
 }
 
 function formatRareListPlain(sortedRares, separators) {
