@@ -79,9 +79,9 @@ $(function(){
 				
 				chrome.extension.getBackgroundPage().copy(formatRareListPlain(matches),false);
 				// output the matches here
-				var html = formatRareList("Matching rares copied to clipboard",matches);
+				var html = formatRareList(matches,false);
 			
-				$('#clipboardMatch .modal-body').empty().html(html);
+				$('#clipboardMatch .modal-body').empty().html(html).find('table').stupidtable();
 
 				$('#clipboardMatch').modal('show');
 			}

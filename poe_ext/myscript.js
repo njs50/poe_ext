@@ -131,9 +131,74 @@ function parseItem(rawData, loc) {
 	item.rareName = itemRareName(item);
 	item.quality = itemQuality(itemDiv);
 	item.quantity = itemQuantity(item);
+
+	item.requirements = itemRequirements(itemDiv);
+	item.properties = itemProperties(itemDiv);
+	item.explicitMods = itemExplicitMods(itemDiv);
+
+	item.itemRealType = itemRealType(item);
+
+	
 //	item.prefixes = itemPrefixes(item);
 //	item.suffixes = itemSuffixes(item);
 	return item;
+}
+
+function itemRealType(item){
+
+	if (item.properties.hasOwnProperty('Weapon Class') ) {
+		return item.properties['Weapon Class'].toLowerCase();
+	}
+	
+	if (item.category != null) return item.category;
+
+	return '';
+
+}
+
+function itemRequirements(item) {
+	return parseNameValuePairs( item.find('div.requirements span.lc span.name,div.requirements span.lc span.value') );
+}
+
+function itemProperties(item) {
+	return parseNameValuePairs( item.find('div.displayProperty span.lc span.name,div.displayProperty span.lc span.value') );
+}
+
+function itemExplicitMods(item) {
+	var aMods = [];
+	item.find('div.explicitMod span.lc').each(function(idx,item){
+		aMods.push($(item).text());
+	});
+	return aMods;
+}
+
+function parseNameValuePairs(aPairs) {
+	
+	var idx=0;
+	var oPairs = {};
+
+	var lastKey = '';
+
+
+	while(idx < aPairs.length) {
+
+		var thisItem = $(aPairs[idx]);
+
+		if ( thisItem.hasClass('name') ) {
+
+			lastKey = thisItem.text().replace(/^[^A-Za-z]+/,'').replace(/[^A-Za-z]+$/,'');
+
+			oPairs[lastKey] = '';
+
+		} else if ( lastKey != '' && thisItem.hasClass('value') ) {
+			oPairs[lastKey] = $.trim(thisItem.text());
+		}
+
+		idx++;
+
+	}
+
+	return oPairs;
 }
 
 function itemName(itemNameDiv) {

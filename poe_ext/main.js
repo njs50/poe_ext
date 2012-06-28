@@ -19,7 +19,12 @@ $(document).ready(function () {
 
 	dbOpenPromise.done(function(db, event){
 		// load list of chars from server (or cache)
-		getChars();
+		// callback will select last selected char if there is one in the cache
+		getChars(function(){
+			getCache('last-char').done(function(charName) {							
+				if ($('#charDropDown').val(charName).val() != '') poll(charName, false);			
+			})
+		});
 	});
 
 
@@ -37,11 +42,10 @@ $('#refresh').click(function () {
 
 		getChars(function(){
 
-			// reset charName and make sure it still exists
-			charName = $('#charDropDown').val(charName).val();
-
-			if (charName != '') {
-				poll(charName, false);
+			// reset charName and make sure it still exists			
+			if ($('#charDropDown').val(charName).val() != '') {
+				setCache('last-char',charName);
+				poll(charName, false);			
 			}
 
 		});
@@ -210,9 +214,9 @@ function Throttle(callsPerPeriod, periodDuration) {
 
 function setDropdown(charResp) {
 	
-	var charOptions = $.map(charResp.characters, 
-							function (v) { return '<option>' + v.name + '</option>'; }).join('');
-	$('#charDropDown').html('<option></option>' + charOptions);
+	var charOptions = $.map(charResp.characters, function (v) { return '<option value="' + v.name + '">' + v.name + '</option>'; }).join('');
+
+	$('#charDropDown').html('<option value="">Select Character</option>' + charOptions);
 	$('#charDropDown').val(0);
 	$('#charDropDown').change(function () {
 
@@ -223,6 +227,7 @@ function setDropdown(charResp) {
 		var charName = $('#charDropDown').val();
 
 		if (charName != '') {
+			setCache('last-char',charName);
 			poll(charName, false);	
 		}
 
@@ -294,7 +299,6 @@ function poll(charName, reschedule) {
 function processItems(items){
 	currentItems = items;
 	var matches = allMatches(items);
-
 	var idx = 0;
 
 	$('ul#craftingTabs li.crafting-page').remove();
@@ -340,31 +344,44 @@ function processItems(items){
 
 	}
 
-	$('ul#craftingTabs .dropdown-toggle').dropdown();
+	
+	$('#rareList').append( formatRareList(getSortedRares(items),true) ).find('table').stupidtable();
+    $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard').attr('disabled', false);
 
 	$('div#crafting-content').show();
 
-	$('ul#craftingTabs li.crafting-page a, #openRareList').click(function(){
+	$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li a').click(function(){
 		$('#rareList').hide();
 		$('div#crafting-content div.crafting-block').hide();
 		$('ul.nav li,ul#craftingTabs li').removeClass('active');
 		$(this).parent().addClass('active');		
-	})
+	});
 
 	$('ul#craftingTabs li.crafting-page a').click(function(){
 		$(this).closest('.dropdown').addClass('active');		
 		$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
-	})
+	});
+
+	$('ul#rares-menu li.filter a').click(function(){
+		$(this).closest('.dropdown').addClass('active');
+		$('#rareList')
+			.find('table tbody tr')
+				.addClass('hide')
+				.end()
+			.find('table tbody tr.' + $(this).data('type'))
+				.removeClass('hide')
+				.end()
+			.show()
+		;
+	});
 
 	$('#openRareList').click(function(){
-		$('#rareList').show();
-	})
+		$(this).closest('.dropdown').addClass('active');
+		$('#rareList').show().find('table tbody tr.hide').removeClass('hide');
+	});
 
 	$('ul#craftingTabs li.crafting-page a:first').trigger('click');
-	
-	$('#rareList').html(formatRareList("Your Rare Items", getSortedRares(items)));
 
-    $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard').attr('disabled', false);
 	$('#spinner').hide();
 }
 
@@ -378,25 +395,33 @@ function getItemsUL(aItems) {
 		
 		var item = aItems[i];
 
+		var oItem = getItemLink(item);
+		;
+
+		$('<li>')
+			.append('<span style="width:20px;float:left;">' + (item.location.page === null ? 0 : parseInt(item.location.page) + 1)  + '</span>')
+			.append(oItem)
+			.appendTo(oUL)
+		;
+	}
+
+	return oUL;
+
+}
+
+function getItemLink(item) {
+
 		var oItem = $('<a>')
 			.append(item.name)
 			.data('raw',item.raw)			
 			.popover({
 				// title: item.name, 
-				content: function(){ 
-										
+				content: function(){ 										
 					var html = $(this).data('raw') ;
-
-					var oData = $( html ).addClass('itemPlaced').addClass('itemHovered');
-
+					var oData = $( html );
 					oData.find('.hidden').removeClass('hidden');
-
-					oData.find('.itemPopupContainer').addClass('pull-left');
-					
+					oData.find('.itemPopupContainer').addClass('pull-left');					
 					oData.find('.itemIconContainer').addClass('pull-left').prependTo(oData);
-
-					
-
 					return $('<div>').append(oData).append('<div class="clearfix"></div>');
 				},
 				placement: 'bottom',
@@ -408,14 +433,7 @@ function getItemsUL(aItems) {
 			})
 		;
 
-		$('<li>')
-			.append('<span style="width:20px;float:left;">' + (item.location.page === null ? 0 : parseInt(item.location.page) + 1)  + '</span>')
-			.append(oItem)
-			.appendTo(oUL)
-		;
-	}
-
-	return oUL;
+	return oItem;
 
 }
 
@@ -439,27 +457,59 @@ function formatRareListPlain(sortedRares, separators) {
 }
 
 
-function formatRareList(title, sortedRares) {
-	var count = sortedRares.length;
-	var out = sprintf('<table><tbody><tr><th>%s</th></tr><tr><td>',title);
-	var prevForename = null;
-	for (var i = 0; i < count; ++i) {
-		var rareName = sortedRares[i].rareName;
-		var forename = rareName.substring(0, rareName.indexOf(' '));
-		if(prevForename!=null && prevForename!=forename) {
-			// new row
-			out+='</td></tr><tr><td>';
+function formatRareList(sortedRares, bSetupDropdown) {
+	
 
+	var oTypes = {};
+	
+
+	var oTable = $('<table class="table table-condensed table-striped">');		
+
+	var oHead = $('<thead>');
+
+	var oBody = $('<tbody>');
+
+	// remove existing filters in rares dropdown
+	if (bSetupDropdown) $('#rares-menu li.filter').remove();
+
+	for (var i = 0; i < sortedRares.length; ++i) {
+
+		var item = sortedRares[i];
+
+		// update options in rares dropdown
+		var typeClass = item.itemRealType.replace(/\s/g,'-');
+
+		if (bSetupDropdown) {			
+			if (item.itemRealType != '' && !oTypes.hasOwnProperty(item.itemRealType)) {			
+				oTypes[item.itemRealType] = typeClass;
+				$('#rares-menu').append('<li class="filter"><a data-type="' + typeClass  + '">' + item.itemRealType + '</a></li>')
+			}
 		}
-		prevForename = forename;
-		out += itemSpan(sortedRares[i]);
-		if(sortedRares[i].theirCount>1) {
-			out+=sprintf(' (clipboard has %s)', sortedRares[i].theirCount);
-		}
-		out+='<br>';
+
+		$('<tr>')
+			.addClass(typeClass)
+			.append( $('<td>').text( item.location.page === null ? 0 : parseInt(item.location.page) + 1 ) )
+			
+			.append( $('<td>').text( typeof item.requirements['Required Level'] === 'undefined' ? 1 : parseInt(item.requirements['Required Level']) ) )
+			.append( $('<td>').append( getItemLink(item) ) )
+			.appendTo(oBody)
+		;
 	}
-	out+='</td></tr></tbody></table>';
-	return out;
+
+	$('<tr>')
+		.append( $('<th>').text('Page') )
+		
+		.append( $('<th class="type-int">').text('Level') )
+		.append( $('<th class="type-string">').text('Name') )
+		.appendTo(oHead)
+	;
+
+	oTable
+		.append(oHead)
+		.append(oBody)
+	;
+
+	return oTable;
 }
 
 function getSortedRares(items) {

@@ -66,7 +66,17 @@
 				    </ul>
 				  </li>
 
-				  <li><a id="openRareList">Rares</a></li>
+
+				  <li class="dropdown" id="menu3">
+				    <a class="dropdown-toggle" data-toggle="dropdown" href="#menu3">
+				      Rares
+				      <b class="caret"></b>
+				    </a>
+				    <ul class="dropdown-menu" id="rares-menu">
+				  		<li><a id="openRareList">All</a></li>
+						<li class="divider"></li>
+				    </ul>
+				  </li>
 
 				  <li class="dropdown" id="menu1">
 				    <a class="dropdown-toggle" data-toggle="dropdown" href="#menu1">
@@ -126,12 +136,15 @@
 
 			<canvas id="tmpCanvas" width="100" height="100" style="visibility:hidden;"></canvas>
 
+			<p style="height:400px;">&nbsp;</p>
+
 	    </div> <!-- /container -->
 
 		<script src="/assets/js/date.js"></script>
 		<script src="/assets/js/json2.js"></script>
 		<script src="/assets/js/jquery-1.7.2.js"></script>
 		<script src="/assets/js/jquery.indexeddb.js"></script>
+		<script src="/assets/js/jquery.stupidtable.js"></script>
 
 		<script src="/assets/bootstrap/js/bootstrap.js"></script>
 		<script src="/sprintf-0.7-beta1.js"></script>		
