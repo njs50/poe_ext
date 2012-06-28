@@ -124,6 +124,7 @@ function parseItem(rawData, loc) {
 		explicitModCount: $('div .explicitMod', itemDiv).length,
 		raw: rawData
 	};
+	
 	item.identified = $(':contains(Unidentified)', itemDiv).length == 0;
 	item.rarity = itemRarity(itemNameDiv);
 	item.baseType = itemBaseType(item);
@@ -138,10 +139,22 @@ function parseItem(rawData, loc) {
 
 	item.itemRealType = itemRealType(item);
 
+	item.level = itemLevel(item);
+
 	
 //	item.prefixes = itemPrefixes(item);
 //	item.suffixes = itemSuffixes(item);
 	return item;
+}
+
+function itemLevel(item) {
+
+	if (item.requirements.hasOwnProperty('Required Level')) return parseInt(item.requirements['Required Level']);
+	if (item.properties.hasOwnProperty('Required Level')) return parseInt(item.properties['Required Level']);
+
+	if (item.category == 'skillGem') console.log(item);
+
+	return 1;
 }
 
 function itemRealType(item){

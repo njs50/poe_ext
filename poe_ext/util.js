@@ -24,3 +24,14 @@ function any(collection, f) {
 function all(collection, f) {
 	return !any(collection, function (v, k) { return !f(v, k)})
 }
+
+function sortUL(list){
+	
+	var mylist = $(list);
+	var listitems = mylist.children('li').get();
+	listitems.sort(function(a, b) {
+	   return $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
+	})
+	$.each(listitems, function(idx, itm) { mylist.append(itm); });
+
+}

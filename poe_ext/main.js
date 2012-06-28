@@ -160,6 +160,10 @@ function getVersion(callback) {
     xmlhttp.send(null);
 }
 
+function updateQueueStatus(queued,available){
+	$('#waitOnQueue').html("Queued Requests: " + queued + " | Available Requests: " + available);
+}
+
 //constructor for a new throttle instance
 function Throttle(callsPerPeriod, periodDuration) {
 	
@@ -171,7 +175,7 @@ function Throttle(callsPerPeriod, periodDuration) {
 	
 	this.delayQueue = [];
 	
-	$('#waitOnQueue').html("Que: " + self.delayQueue.length + "/" + (self.maxCalls-self.callCount));
+	updateQueueStatus(self.delayQueue.length,self.maxCalls-self.callCount);
 	
 	//function polled by the delay timer
 	this.delayPoll = function() {
@@ -183,7 +187,7 @@ function Throttle(callsPerPeriod, periodDuration) {
 		else {
 			self.callCount--;
 		}
-		$('#waitOnQueue').html("Que: " + self.delayQueue.length + "/" + (self.maxCalls-self.callCount));
+		updateQueueStatus(self.delayQueue.length,self.maxCalls-self.callCount);
 	};
 	
 	// queues future calls to delay until the specified timeout (in milliseconds) has passed.
@@ -206,7 +210,7 @@ function Throttle(callsPerPeriod, periodDuration) {
 			this.delayQueue.push(deferred);
 //			console.log("Event queued. Queue size: " + this.delayQueue.length);
 		}
-		$('#waitOnQueue').html("Que: " + self.delayQueue.length + "/" + (self.maxCalls-self.callCount));
+		updateQueueStatus(self.delayQueue.length,self.maxCalls-self.callCount);
 		return deferred.promise();
 	};
 }
@@ -246,6 +250,8 @@ function poll(charName, reschedule) {
 	
 	currentItems = null;
 
+	$.blockUI({message: '<h3>Loading...</h3><h4 id="waitOnQueue"></h4>'});
+
 	getCache('items-' + charName)
 
 		.done(function(aRawItems){
@@ -257,6 +263,8 @@ function poll(charName, reschedule) {
 			}
 
 			processItems(items);
+
+			$.unblockUI();
 			
 		})
 
@@ -273,6 +281,8 @@ function poll(charName, reschedule) {
 					setCache('items-' + charName,aRawItems);
 
 					processItems(items);
+
+					$.unblockUI();
 
 				})
 
@@ -375,6 +385,9 @@ function processItems(items){
 		;
 	});
 
+	sortUL('#rares-menu');	
+	sortUL('#craftingTabs');	
+
 	$('#openRareList').click(function(){
 		$(this).closest('.dropdown').addClass('active');
 		$('#rareList').show().find('table tbody tr.hide').removeClass('hide');
@@ -399,7 +412,7 @@ function getItemsUL(aItems) {
 		;
 
 		$('<li>')
-			.append('<span style="width:20px;float:left;">' + (item.location.page === null ? 0 : parseInt(item.location.page) + 1)  + '</span>')
+			.append('<span style="width:60px;float:left;clear:left;">Page ' + (item.location.page === null ? 0 : parseInt(item.location.page) + 1)  + '</span>')
 			.append(oItem)
 			.appendTo(oUL)
 		;
@@ -490,7 +503,8 @@ function formatRareList(sortedRares, bSetupDropdown) {
 			.addClass(typeClass)
 			.append( $('<td>').text( item.location.page === null ? 0 : parseInt(item.location.page) + 1 ) )
 			
-			.append( $('<td>').text( typeof item.requirements['Required Level'] === 'undefined' ? 1 : parseInt(item.requirements['Required Level']) ) )
+			.append( $('<td>').text( item.level ) )
+			.append( $('<td>').text( item.quality ) )
 			.append( $('<td>').append( getItemLink(item) ) )
 			.appendTo(oBody)
 		;
@@ -500,14 +514,15 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		.append( $('<th>').text('Page') )
 		
 		.append( $('<th class="type-int">').text('Level') )
-		.append( $('<th class="type-string">').text('Name') )
+		.append( $('<th class="type-int">').text('Quality') )
+		.append( $('<th class="type-string">').text('Item') )
 		.appendTo(oHead)
 	;
 
 	oTable
 		.append(oHead)
 		.append(oBody)
-	;
+	;	
 
 	return oTable;
 }
@@ -516,7 +531,7 @@ function getSortedRares(items) {
 	var available = items.slice(0);
 	
 	var rares = available.filter(function(i) {
-		return i.rarity == 'rare' && i.identified;
+		return (i.category == 'skillGem' || i.category == 'flask' || i.rarity == 'rare') && i.identified;
 	});
 	
 	var sortedRares = rares.sort(function(a,b) {
