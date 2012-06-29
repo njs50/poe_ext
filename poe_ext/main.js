@@ -543,7 +543,7 @@ function getItemLink(item) {
 				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner-poe"><div class="popover-content"><p></p></div></div></div>'
 			})
 			.click(function(){
-				$(this).popover('show');
+				console.log(item);
 			})
 		;
 
@@ -609,8 +609,20 @@ function formatRareList(sortedRares, bSetupDropdown) {
 			.addClass(oRarity[item.rarity])
 			.append( $('<td>').text( item.location.page === null ? 0 : item.location.page ) )			
 			.append( $('<td>').text( item.level ) )
-			.append( $('<td>').text( item.quality ) )
 			.append( $('<td>').append( getItemLink(item) ) )
+			.append( $('<td>').text( item.quality ) )
+			.append( $('<td>').text( item.speed ) )
+			.append( $('<td>').text( item.armour ) )
+			.append( $('<td>').text( item.evasionRating ) )
+			.append( $('<td>').text( item.energyShield ) )
+			.append( $('<td>').text( item.maxMana ) )
+			.append( $('<td>').text( item.maxLife ) )
+
+			.append( $('<td>').text( item.averageDamage ) )
+			.append( $('<td>').text( item.averageLightningDamage ) )
+			.append( $('<td>').text( item.averageFireDamage ) )
+			.append( $('<td>').text( item.averageColdDamage ) )
+			.append( $('<td>').text( item.averagePhysicalDamage ) )
 			.appendTo(oBody)
 		;
 	}
@@ -618,8 +630,19 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	$('<tr>')
 		.append( $('<th class="type-int">').text('Tab') )		
 		.append( $('<th class="type-int">').text('Level') )
-		.append( $('<th class="type-int">').text('Quality') )
 		.append( $('<th class="type-string">').text('Item') )
+		.append( $('<th class="type-int">').text('Quality') )		
+		.append( $('<th class="type-float">').text('Speed') )
+		.append( $('<th class="type-int">').text('Armor') )
+		.append( $('<th class="type-int">').text('Evasion') )
+		.append( $('<th class="type-int">').text('E.S') )
+		.append( $('<th class="type-int">').text('Mana') )
+		.append( $('<th class="type-int">').text('Life') )
+		.append( $('<th class="type-float">').text('Av Dam') )
+		.append( $('<th class="type-float">').text('+Lght.') )
+		.append( $('<th class="type-float">').text('+Fire') )
+		.append( $('<th class="type-float">').text('+Cold') )
+		.append( $('<th class="type-float">').text('+Phys.') )
 		.appendTo(oHead)
 	;
 

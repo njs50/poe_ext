@@ -149,12 +149,33 @@ function parseItem(rawData, loc) {
 
 		item.requirements = itemRequirements(itemDiv);
 		item.properties = itemProperties(itemDiv);
-		item.explicitMods = itemExplicitMods(itemDiv);
+		item.rawExplicitMods = itemExplicitMods(itemDiv);
+		
+		item.rawImplicitMods = itemImplicitMods(itemDiv);
+
+		item.explicitMods = processMods(item.rawExplicitMods);
+		item.implicitMods = processMods(item.rawImplicitMods);
 
 		item.itemRealType = itemRealType(item);
 
 		item.level = itemLevel(item);
 
+		item.speed = item.properties.hasOwnProperty('Attacks per Second') ? parseFloat(item.properties['Attacks per Second']) : 0;
+
+		item.armour =  getPropertyOrModsInt(item,'Armour');
+		item.evasionRating =  getPropertyOrModsInt(item,'Evasion Rating');
+		item.energyShield = getPropertyOrModsInt(item,'Energy Shield');
+
+		item.maxMana = getPropertyOrModsInt(item,'maximum Mana');
+		item.maxLife = getPropertyOrModsInt(item,'maximum Life');
+
+		item.averageLightningDamage = getAverageDamageOfType(item,'Lightning Damage');
+		item.averageColdDamage = getAverageDamageOfType(item,'Cold Damage');
+		item.averageFireDamage = getAverageDamageOfType(item,'Fire Damage');
+		item.averageChaosDamage = getAverageDamageOfType(item,'Chaos Damage');
+		item.averagePhysicalDamage = getAverageDamageOfType(item,'Physical Damage');		
+
+		item.averageDamage = averageDamage(item);
 
 	} catch(e) {
 
@@ -174,6 +195,108 @@ function parseItem(rawData, loc) {
 //	item.prefixes = itemPrefixes(item);
 //	item.suffixes = itemSuffixes(item);
 	return item;
+}
+
+
+function averageDamage(item) {
+
+	var dps = 0;
+
+	var aTemp, aTemp2 = [];
+
+	// if this is a weap, work it out as dps?
+	if (item.properties.hasOwnProperty('Weapon Class')) {
+
+		// physical
+		aTemp = item.properties['Physical Damage'].split(' to ');
+
+		dps += ( parseInt(aTemp[0]) + parseInt(aTemp[1]) ) / 2;
+
+		if (item.properties.hasOwnProperty('Elemental Damage')) {
+
+			aTemp = item.properties['Elemental Damage'].split(', ');
+
+			aTemp2 = $.map(aTemp,function(range){				
+				dps += calcAvRange(range);
+			})
+
+		}
+
+		// for weaps multiply av dam by dps
+		dps = Math.round(dps * item.speed * 10) / 10;
+
+	} else {
+		// not a weap, add up any elemental bonuses
+		dps += item.averageLightningDamage;		
+		dps += item.averageColdDamage;
+		dps += item.averageFireDamage;
+		dps += item.averageChaosDamage;
+		dps += item.averagePhysicalDamage;
+
+	}
+
+	return dps;
+
+}
+
+function getAverageDamageOfType(item,mod) {
+	var dps = 0;
+	dps += item.implicitMods.hasOwnProperty(mod) ? calcAvRange(item.implicitMods[mod]) : 0;
+	dps += item.explicitMods.hasOwnProperty(mod) ? calcAvRange(item.explicitMods[mod]) : 0;
+	return dps;
+}
+
+function calcAvRange(range) {
+	var aTemp2 = range.split('-');
+	return ( parseInt(aTemp2[0]) + parseInt(aTemp2[1]) ) / 2;
+}
+
+// possibly need to combine an implicit + explicit mod.
+function getPropertyOrModsInt(item,prop) {
+	if (item.properties.hasOwnProperty(prop)) return item.properties[prop];
+
+	var amt = 0;
+
+	if (item.implicitMods.hasOwnProperty(prop)) amt += parseInt(item.implicitMods[prop]);
+	if (item.explicitMods.hasOwnProperty(prop)) amt += parseInt(item.explicitMods[prop]);
+
+	return amt;
+}
+
+function processMods(aExplicit) {
+
+	var oExplicit = {};
+
+	var bonusRegexp =   /^\+?(\d+%?) to (.*)$/;
+	var percentRegexp = /^\+?(\d+%?) (.*)$/;
+	var damRegexp = /^Adds (\d+-\d+) (.* Damage)$/i;
+	
+
+	var aMatch = [];
+
+	for(var i = 0; i < aExplicit.length; i++) {
+
+		var thisMod = aExplicit[i];
+
+		aMatch = bonusRegexp.exec(thisMod);
+		if (aMatch != null) {
+			oExplicit[aMatch[2]] = aMatch[1];
+		} else {
+			aMatch = percentRegexp.exec(thisMod);
+			if (aMatch != null) { 
+				oExplicit[aMatch[2]] = aMatch[1];
+			} else {
+				aMatch = damRegexp.exec(thisMod);
+				if (aMatch != null) oExplicit[aMatch[2]] = aMatch[1];
+			}
+		}
+
+
+
+	}
+
+	return oExplicit;
+
 }
 
 function itemLevel(item) {
@@ -211,6 +334,14 @@ function itemProperties(item) {
 function itemExplicitMods(item) {
 	var aMods = [];
 	item.find('div.explicitMod span.lc').each(function(idx,item){
+		aMods.push($(item).text());
+	});
+	return aMods;
+}
+
+function itemImplicitMods(item) {
+	var aMods = [];
+	item.find('div.implicitMod span.lc').each(function(idx,item){
 		aMods.push($(item).text());
 	});
 	return aMods;
