@@ -241,7 +241,7 @@ function showCharError() {
 				   'Path of Exile</a>.<p>Please sign in and refresh this page.');
 }
 
-function poll(charName, reschedule) {
+function poll(charName) {
 
 	// clear existing crafting info
 	$('ul#craftingTabs li').remove();
@@ -256,181 +256,241 @@ function poll(charName, reschedule) {
 
 	$.blockUI({message: '<h3>Loading...</h3><h4 id="waitOnQueue"></h4>', baseZ: 10000});
 
-	getCache('items-' + charName)
 
-		.done(function(aRawItems){
-			
-			// reconstruct item data from raw data in cache
-			var items = [];
-			for (var i = 0; i < aRawItems.length; i++){
-				items.push(parseItem(aRawItems[i].html, aRawItems[i].location));
-			}
 
-			processItems(items);
+		getCache('items-' + charName)
 
-			$.unblockUI();
-			
-		})
+			.done(function(aRawItems){
+				
+				// reconstruct item data from raw data in cache
+				
+				var items = [];
+				var i = 0;
 
-		.fail(function(){
-			allItems(charName)
-
-				.done(function (items) {
-					
-					// add raw item data to the cache
-					var aRawItems = [];
-					for (var i = 0; i < items.length; i++){
-						aRawItems.push({html: items[i].raw, location: items[i].location});
+				try {
+					for (i = 0; i < aRawItems.length; i++){
+						items.push(parseItem(aRawItems[i].html, aRawItems[i].location));
 					}
-					setCache('items-' + charName,aRawItems);
 
-					processItems(items);
+				} catch (e) {
 
-					$.unblockUI();
+					console.log('Error while reconstructing stash from cache - try clicking "Refresh Data"');
+					$('#err').html('An error occured while reconstructing stash from cache. Please ' +
+								   'click refresh data to try again. If the error persists, contact the author.');		
+					console.log('Error:');
+					console.log(e);
+					console.log('Last processed Item:');
+					console.log(aRawItems[i]);
 
-				})
+				}
 
-				.fail(function () {
-					$('#output').html('');
-					$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
-								   'click refresh to try again. If the error persists, contact the author.');				
+				processItems(items);
 
-				})
+				$.unblockUI();
+				
+			})
 
-				.then(function () {					
-					if (reschedule) {
-						timer = setTimeout(function() { poll(charName, true); }, 10 * 60 * 1000);
-					}
-				})
-			;
-		})
-	;
+			.fail(function(){
+				allItems(charName)
+
+					.done(function (items) {
+						
+						// add raw item data to the cache
+
+						try {
+
+							var aRawItems = [];
+							var i = 0;
+							for (i = 0; i < items.length; i++){
+								aRawItems.push({html: items[i].raw, location: items[i].location});
+							}
+							setCache('items-' + charName,aRawItems);
+
+						} catch (e){
+							console.log('An error occured while writing fetched stash data to the cache');
+							$('#err').html('An error occured while saving stash to cache. Please ' +
+										   'click refresh data to try again. If the error persists, contact the author.');		
+							console.log('Error:');
+							console.log(e);
+							console.log('Last processed Item:');
+							console.log(items[i]);							
+						}
+
+						processItems(items);
+
+						$.unblockUI();
+
+					})
+
+					.fail(function () {						
+						$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
+									   'click refresh data to try again. If the error persists, contact the author.');
+						console.log('Error while fetching from pathofexile.com - try clicking "Refresh Data"');
+									   				
+
+					})
+
+				;
+			})
+		;
+
 
 	
 }
 
 function processItems(items){
-	currentItems = items;
-	var matches = allMatches(items);
-	var idx = 0;
 
-	for (item in matches) {
-		idx++;
+	try {
 
-		// add navigation entry
-		$('ul#craftingTabs').append('<li class="crafting-page"><a data-index="' + idx + '">' + item + '</a></li>');
+		currentItems = items;
+		var matches = allMatches(items);
+		var idx = 0;
 
-		// add content div
-		var oDiv = $('<div class="hide crafting-block" data-index="' + idx + '">');
+		var item = {};
 
-		// add title
-		oDiv.append('<h2>' + item + '</h2>');
+		var match = {};
 
-		var oTable = $('<table class="table table-striped table-condensed"><thead><tr><th>%<th>Matched</th><th>Missing</th><thead></table>');
+		for (item in matches) {
+			idx++;
 
-		var oTBody = $('<tbody>').appendTo(oTable);
+			// add navigation entry
+			$('ul#craftingTabs').append('<li class="crafting-page"><a data-index="' + idx + '">' + item + '</a></li>');
 
-		var match_group = matches[item];
+			// add content div
+			var oDiv = $('<div class="hide crafting-block" data-index="' + idx + '">');
 
-		for (var i = 0; i < match_group.length; i++) {
+			// add title
+			oDiv.append('<h2>' + item + '</h2>');
 
-			var match = match_group[i];
+			var oTable = $('<table class="table table-striped table-condensed"><thead><tr><th>%<th>Matched</th><th>Missing</th><thead></table>');
 
-			$('<tr>')
-				.append('<td>' + parseInt(match.complete * 10000) / 100 + '%</td>')
-				.append($('<td>').append(getItemsUL(match.items)))
-				.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')			
-				.appendTo(oTBody)
-			;
-			
+			var oTBody = $('<tbody>').appendTo(oTable);
+
+			var match_group = matches[item];
+
+			for (var i = 0; i < match_group.length; i++) {
+
+				match = match_group[i];
+
+				$('<tr>')
+					.append('<td>' + parseInt(match.complete * 10000) / 100 + '%</td>')
+					.append($('<td>').append(getItemsUL(match.items)))
+					.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')			
+					.appendTo(oTBody)
+				;
+				
+
+			}
+
+			oDiv.append(oTable);
+
+			$('div#crafting-content').append(oDiv);
 
 		}
 
-		
 
-		oDiv.append(oTable);
+	} catch (e) {
 
-		$('div#crafting-content').append(oDiv);
-
-	}
-
-	// load inventory list
-	$('#rareList').append( formatRareList(getSortedItems(items),true) ).find('table').stupidtable();    
-
-	// sort inventory optionsand add all option to inventory menu
-	sortUL('#rares-menu');	
-	$('#rares-menu').prepend('<li><a id="openRareList">All Inventory</a></li><li class="divider"></li>')
-
-	// sort crafting tabs
-	sortUL('#craftingTabs');
-
-
-	$('div#crafting-content').show();
-
-	$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li input[type=checkbox]').click(function(){
-		$('#rareList').hide();
-		$('div#crafting-content div.crafting-block').hide();
-		$('ul.nav li,ul#craftingTabs li').removeClass('active');
-		$(this).parent().addClass('active');		
-	});
-
-	$('ul#craftingTabs li.crafting-page a').click(function(){
-		$(this).closest('.dropdown').addClass('active');		
-		$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
-	});
-
-	$('ul#rares-menu li input[type=checkbox]').click(function(e){		
-
+		console.log('error occured while processing items for stash');
 		console.log(e);
 
-		$(this).closest('.dropdown').addClass('active');
+		$('#err').html('An error occured while processing matches in the stash. Please ' +
+					   'click refresh to try again. If the error persists, contact the author.');
 
-		var aSelector = [];
+		console.log('last match item processed');
+		console.log(match);
 
-		$('ul#rares-menu input[name=item-filter]:checked').each(function(idx,item){			
-			aSelector.push('table tbody tr.' + $(item).val());
-		})
+		console.log('last match group processed:');
+		console.log(item);
+		
+	}
 
-		var selector = aSelector.join(', ');
+	try {
 
-		if (selector != '') {
+		// load inventory list
+		$('#rareList').append( formatRareList(getSortedItems(items),true) ).find('table').stupidtable();    
 
-			$('#rareList')
-				.find('table tbody tr')
-					.addClass('hide')
-					.end()
-				.find(selector)
-					.removeClass('hide')
-					.addClass('wtf')
-					.end()
-				.show()
-			;
-			
-			// prevent menu from closing	
-			e.stopPropagation();
+		// sort inventory optionsand add all option to inventory menu
+		sortUL('#rares-menu');	
+		$('#rares-menu').prepend('<li><a id="openRareList">All Inventory</a></li><li class="divider"></li>')
 
-		} else {
-			console.log('nothing checked');
-			$('#openRareList').trigger('click');
-		}
-
-	});
-
-	// prevent label click events from triggering menu close (the follow up checkbox click still can)
-	$('ul#rares-menu li label').click(function(e){
-		e.stopPropagation();
-	})
+		// sort crafting tabs
+		sortUL('#craftingTabs');
 
 
-	$('#openRareList')		
-		.click(function(){
+		$('div#crafting-content').show();
+
+		$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li input[type=checkbox]').click(function(){
+			$('#rareList').hide();
+			$('div#crafting-content div.crafting-block').hide();
+			$('ul.nav li,ul#craftingTabs li').removeClass('active');
+			$(this).parent().addClass('active');		
+		});
+
+		$('ul#craftingTabs li.crafting-page a').click(function(){
+			$(this).closest('.dropdown').addClass('active');		
+			$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
+		});
+
+		$('ul#rares-menu li input[type=checkbox]').click(function(e){		
+
+
 			$(this).closest('.dropdown').addClass('active');
-			$('#rareList').find('table tbody tr.hide').removeClass('hide').end().show();
-			$('ul#rares-menu li input[type=checkbox]:checked').removeProp('checked');
-		})
-	;
 
-	$('ul#craftingTabs li.crafting-page a:first').trigger('click');
+			var aSelector = [];
+
+			$('ul#rares-menu input[name=item-filter]:checked').each(function(idx,item){			
+				aSelector.push('table tbody tr.' + $(item).val());
+			})
+
+			var selector = aSelector.join(', ');
+
+			if (selector != '') {
+				$('#rareList')
+					.find('table tbody tr')
+						.addClass('hide')
+						.end()
+					.find(selector)
+						.removeClass('hide')
+						.addClass('wtf')
+						.end()
+					.show()
+				;
+				
+				// prevent menu from closing	
+				e.stopPropagation();
+
+			} else {
+				$('#openRareList').trigger('click');
+			}
+
+		});
+
+		// prevent label click events from triggering menu close (the follow up checkbox click still can)
+		$('ul#rares-menu li label').click(function(e){
+			e.stopPropagation();
+		})
+
+
+		$('#openRareList')		
+			.click(function(){
+				$(this).closest('.dropdown').addClass('active');
+				$('#rareList').find('table tbody tr.hide').removeClass('hide').end().show();
+				$('ul#rares-menu li input[type=checkbox]:checked').removeProp('checked');
+			})
+		;
+
+		$('ul#craftingTabs li.crafting-page a:first').trigger('click');
+
+	} catch (e) {
+
+		console.log('error occured while rendering stash');
+		console.log(e);
+
+		$('#err').html('An error occured while rendering the stash. Please ' +
+					   'click refresh to try again. If the error persists, contact the author.');
+		
+	}
 
 }
 
@@ -556,14 +616,14 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	oTable
 		.append(oHead)
 		.append(oBody)
-	;	
+	;		
 
 	return oTable;
 }
 
 function getSortedItems(items) {
 	
-	var sortedRares = items.sort(function(a,b) {
+	var sortedRares = items.slice(0).sort(function(a,b) {
 		if(a.rareName<b.rareName) {
 			return -1;
 		}
