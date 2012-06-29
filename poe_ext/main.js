@@ -276,9 +276,8 @@ function poll(charName) {
 
 					console.log('Error while reconstructing stash from cache - try clicking "Refresh Data"');
 					$('#err').html('An error occured while reconstructing stash from cache. Please ' +
-								   'click refresh data to try again. If the error persists, contact the author.');		
-					console.log('Error:');
-					console.log(e);
+								   'click refresh data to try again. If the error persists, contact the author.');							
+					errorDump(e);
 					console.log('Last processed Item:');
 					console.log(aRawItems[i]);
 
@@ -310,8 +309,7 @@ function poll(charName) {
 							console.log('An error occured while writing fetched stash data to the cache');
 							$('#err').html('An error occured while saving stash to cache. Please ' +
 										   'click refresh data to try again. If the error persists, contact the author.');		
-							console.log('Error:');
-							console.log(e);
+							errorDump(e);
 							console.log('Last processed Item:');
 							console.log(items[i]);							
 						}
@@ -410,13 +408,8 @@ function processItems(items){
 		// load inventory list
 		$('#rareList').append( formatRareList(getSortedItems(items),true) ).find('table').stupidtable();    
 
-		// sort inventory optionsand add all option to inventory menu
-		sortUL('#rares-menu');	
-		$('#rares-menu').prepend('<li><a id="openRareList">All Inventory</a></li><li class="divider"></li>')
-
 		// sort crafting tabs
 		sortUL('#craftingTabs');
-
 
 		$('div#crafting-content').show();
 
@@ -438,24 +431,31 @@ function processItems(items){
 			$(this).closest('.dropdown').addClass('active');
 
 			var aSelector = [];
-
 			$('ul#rares-menu input[name=item-filter]:checked').each(function(idx,item){			
 				aSelector.push('table tbody tr.' + $(item).val());
 			})
-
 			var selector = aSelector.join(', ');
 
-			if (selector != '') {
-				$('#rareList')
-					.find('table tbody tr')
-						.addClass('hide')
-						.end()
-					.find(selector)
-						.removeClass('hide')
-						.addClass('wtf')
-						.end()
-					.show()
-				;
+
+			var aSelectorRarity = [];
+			$('ul#rares-menu input[name=item-filter-rarity]:checked').each(function(idx,item){			
+				aSelectorRarity.push('table tbody tr.' + $(item).val());
+			})
+			var selectorRarity = aSelectorRarity.join(', ');
+
+			if (selector != '' || selectorRarity != '') {
+				
+				// hide list while we refilter
+				$('#rareList').hide().find('table tbody tr').addClass('hide');
+
+				var oFiltered = $('#rareList').hide().find('table tbody tr').addClass('hide');
+
+				if (selector != '') oFiltered = oFiltered.filter(selector);
+				if (selectorRarity != '') oFiltered = oFiltered.filter(selectorRarity);
+
+				oFiltered.removeClass('hide');
+
+				$('#rareList').show();
 				
 				// prevent menu from closing	
 				e.stopPropagation();
@@ -485,7 +485,7 @@ function processItems(items){
 	} catch (e) {
 
 		console.log('error occured while rendering stash');
-		console.log(e);
+		errorDump(e);
 
 		$('#err').html('An error occured while rendering the stash. Please ' +
 					   'click refresh to try again. If the error persists, contact the author.');
@@ -494,7 +494,11 @@ function processItems(items){
 
 }
 
-
+function errorDump(e) {
+	console.log(e);
+	if (e.hasOwnProperty('message')) console.log(e.message);
+	if (e.hasOwnProperty('stack')) console.log(e.stack);
+}
 
 function getItemsUL(aItems) {
 	
@@ -508,8 +512,8 @@ function getItemsUL(aItems) {
 		;
 
 		$('<li>')
-			.append('<span style="width:60px;float:left;clear:left;">Page ' + (item.location.page === null ? 0 : parseInt(item.location.page) + 1)  + '</span>')
 			.append(oItem)
+			.append(' (' + (item.location.page === null ? 'inventory' : 'tab:' + item.location.page )  + ')' )
 			.appendTo(oUL)
 		;
 	}
@@ -572,8 +576,12 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 	var oTypes = {};
 	
+	var oRarity = {}
 
-	var oTable = $('<table class="table table-condensed table-striped">');		
+	var ulType = $('<ul>');
+	var ulRarity = $('<ul>');
+
+	var oTable = $('<table class="table table-condensed">');		
 
 	var oHead = $('<thead>');
 
@@ -583,20 +591,23 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 		var item = sortedRares[i];
 
-		// update options in rares dropdown
-		var typeClass = item.itemRealType.replace(/\s/g,'-');
+		// update options in rares dropdown		
 
 		if (bSetupDropdown) {			
-			if (item.itemRealType != '' && !oTypes.hasOwnProperty(item.itemRealType)) {			
-				oTypes[item.itemRealType] = typeClass;
-				$('#rares-menu').append('<li class="filter"><label class="checkbox inline" for="cb-' + typeClass + '"><input class="checkbox inline" type="checkbox" id="cb-' + typeClass + '" name="item-filter" value="' + typeClass + '" />' + item.itemRealType + '</label></li>')
+			if (item.itemRealType != '' && !oTypes.hasOwnProperty(item.itemRealType)) {
+				oTypes[item.itemRealType] = item.itemRealType.replace(/\s/g,'-');
+				ulType.append('<li class="filter"><label class="checkbox inline" for="cb-' + oTypes[item.itemRealType] + '"><input class="checkbox inline" type="checkbox" id="cb-' + oTypes[item.itemRealType] + '" name="item-filter" value="' + oTypes[item.itemRealType] + '" />' + item.itemRealType + '</label></li>')
+			}
+			if (item.rarity != '' && !oRarity.hasOwnProperty(item.rarity)) {
+				oRarity[item.rarity] = item.rarity.replace(/\s/g,'-');
+				ulRarity.append('<li class="filter"><label class="checkbox inline" for="cbr-' + oRarity[item.rarity] + '"><input class="checkbox inline" type="checkbox" id="cbr-' + oRarity[item.rarity] + '" name="item-filter-rarity" value="' + oRarity[item.rarity] + '" />' + capitaliseFirstLetter(item.rarity) + '</label></li>')
 			}
 		}
 
 		$('<tr>')
-			.addClass(typeClass)
-			.append( $('<td>').text( item.location.page === null ? 0 : parseInt(item.location.page) + 1 ) )
-			
+			.addClass(oTypes[item.itemRealType])
+			.addClass(oRarity[item.rarity])
+			.append( $('<td>').text( item.location.page === null ? 0 : item.location.page ) )			
 			.append( $('<td>').text( item.level ) )
 			.append( $('<td>').text( item.quality ) )
 			.append( $('<td>').append( getItemLink(item) ) )
@@ -605,13 +616,26 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	}
 
 	$('<tr>')
-		.append( $('<th>').text('Page') )
-		
+		.append( $('<th class="type-int">').text('Tab') )		
 		.append( $('<th class="type-int">').text('Level') )
 		.append( $('<th class="type-int">').text('Quality') )
 		.append( $('<th class="type-string">').text('Item') )
 		.appendTo(oHead)
 	;
+
+	if (bSetupDropdown) {
+		// sort inventory optionsand add all option to inventory menu
+		sortUL(ulType);
+		sortUL(ulRarity);
+
+		$('#rares-menu')
+			.append('<li><a id="openRareList">All Inventory</a></li><li class="divider"></li>')
+			.append(ulType.children())
+			.append('<li class="divider"></li>')
+			.append(ulRarity.children())
+		;
+
+	}
 
 	oTable
 		.append(oHead)

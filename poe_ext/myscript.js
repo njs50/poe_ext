@@ -50,7 +50,7 @@ function getStash(itemsResp) {
 	var deferred = $.Deferred();
 	var stashEndpoint = getEndpoint('get-stash-items');
 	postThrottle.check().done(function() {
-		$.post(stashEndpoint, {league: itemsResp.character.league, page: 0})
+		$.post(stashEndpoint, {league: itemsResp.character.league, tabIndex: 0, tabs: 1})
 		.done(function (stashResp) {
 			if(stashResp.error != undefined) {
 				// early exit if web server returns the "you've requested too frequently" error
@@ -58,14 +58,17 @@ function getStash(itemsResp) {
 				return;
 			}		
 			
-			var stashItems = responseToItems(stashResp, {section:'stash', page: 0});
+			var oTabs = stashResp.tabs;
+
+			var stashItems = responseToItems(stashResp, {section:'stash', page: parseInt(oTabs[0].n)});
 			var stashPromises = [];
+
 			for (var i = 1; i < stashResp.numTabs; ++i) {
-				var location = {section:'stash', page: i};
+				var location = {section:'stash', page: parseInt(oTabs[i].n)};
 				var pageDeferred = $.Deferred();
 				postThrottle.check().done(function(pageDeferred, location, i) {
 					return function() {
-						$.post(stashEndpoint, {league: itemsResp.character.league, tabIndex: i})
+						$.post(stashEndpoint, {league: itemsResp.character.league, tabIndex: i, tabs: 0})
 						.done(function (pageDeferred, location) {
 							return function (stashResp) {
 								// early exit if web server returns the "you've requested too frequently" error
@@ -161,6 +164,8 @@ function parseItem(rawData, loc) {
 		console.log('Processed Item');
 		console.log(item);
 
+		errorDump(e);
+
 		$('#err').html('An error occured while parsing an item in the stash. Please ' +
 					   'click refresh to try again. If the error persists, contact the author.');		
 
@@ -184,12 +189,12 @@ function itemLevel(item) {
 function itemRealType(item){
 
 	if (item.properties.hasOwnProperty('Weapon Class') ) {
-		return item.properties['Weapon Class'].toLowerCase();
+		return item.properties['Weapon Class'];
 	}
 
-	if (item.rarity == 'currency') return 'currency';
+	if (item.rarity == 'currency') return 'Currency';
 	
-	if (item.category != null) return item.category;
+	if (item.category != null) return capitaliseFirstLetter(item.category);
 
 	return '';
 
