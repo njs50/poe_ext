@@ -3,8 +3,6 @@ var currentItems = null;
 var postThrottle = null;
 
 $(document).ready(function () {
-
-	$('#spinner').hide();
 	
 	getVersion(function (version){
 		$('#version').html("Version: " + version);
@@ -244,13 +242,19 @@ function showCharError() {
 }
 
 function poll(charName, reschedule) {
-	$('#spinner').show();
 
-	$('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard').attr('disabled', true);
+	// clear existing crafting info
+	$('ul#craftingTabs li').remove();
+	$('div#crafting-content').empty();
+	
+	//clear existing inventory info
+	$('#rares-menu li').remove();	
+	$('#rareList').empty();
 	
 	currentItems = null;
 
-	$.blockUI({message: '<h3>Loading...</h3><h4 id="waitOnQueue"></h4>'});
+
+	$.blockUI({message: '<h3>Loading...</h3><h4 id="waitOnQueue"></h4>', baseZ: 10000});
 
 	getCache('items-' + charName)
 
@@ -293,8 +297,7 @@ function poll(charName, reschedule) {
 
 				})
 
-				.then(function () {
-					$('#spinner').hide();
+				.then(function () {					
 					if (reschedule) {
 						timer = setTimeout(function() { poll(charName, true); }, 10 * 60 * 1000);
 					}
@@ -310,9 +313,6 @@ function processItems(items){
 	currentItems = items;
 	var matches = allMatches(items);
 	var idx = 0;
-
-	$('ul#craftingTabs li.crafting-page').remove();
-	$('div#crafting-content').empty();
 
 	for (item in matches) {
 		idx++;
@@ -354,13 +354,20 @@ function processItems(items){
 
 	}
 
-	
-	$('#rareList').append( formatRareList(getSortedRares(items),true) ).find('table').stupidtable();
-    $('#charDropDown,#refresh,#copyToClipboard,#copyFromClipboard').attr('disabled', false);
+	// load inventory list
+	$('#rareList').append( formatRareList(getSortedItems(items),true) ).find('table').stupidtable();    
+
+	// sort inventory optionsand add all option to inventory menu
+	sortUL('#rares-menu');	
+	$('#rares-menu').prepend('<li><a id="openRareList">All Inventory</a></li><li class="divider"></li>')
+
+	// sort crafting tabs
+	sortUL('#craftingTabs');
+
 
 	$('div#crafting-content').show();
 
-	$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li a').click(function(){
+	$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li input[type=checkbox]').click(function(){
 		$('#rareList').hide();
 		$('div#crafting-content div.crafting-block').hide();
 		$('ul.nav li,ul#craftingTabs li').removeClass('active');
@@ -372,30 +379,59 @@ function processItems(items){
 		$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
 	});
 
-	$('ul#rares-menu li.filter a').click(function(){
+	$('ul#rares-menu li input[type=checkbox]').click(function(e){		
+
+		console.log(e);
+
 		$(this).closest('.dropdown').addClass('active');
-		$('#rareList')
-			.find('table tbody tr')
-				.addClass('hide')
-				.end()
-			.find('table tbody tr.' + $(this).data('type'))
-				.removeClass('hide')
-				.end()
-			.show()
-		;
+
+		var aSelector = [];
+
+		$('ul#rares-menu input[name=item-filter]:checked').each(function(idx,item){			
+			aSelector.push('table tbody tr.' + $(item).val());
+		})
+
+		var selector = aSelector.join(', ');
+
+		if (selector != '') {
+
+			$('#rareList')
+				.find('table tbody tr')
+					.addClass('hide')
+					.end()
+				.find(selector)
+					.removeClass('hide')
+					.addClass('wtf')
+					.end()
+				.show()
+			;
+			
+			// prevent menu from closing	
+			e.stopPropagation();
+
+		} else {
+			console.log('nothing checked');
+			$('#openRareList').trigger('click');
+		}
+
 	});
 
-	sortUL('#rares-menu');	
-	sortUL('#craftingTabs');	
+	// prevent label click events from triggering menu close (the follow up checkbox click still can)
+	$('ul#rares-menu li label').click(function(e){
+		e.stopPropagation();
+	})
 
-	$('#openRareList').click(function(){
-		$(this).closest('.dropdown').addClass('active');
-		$('#rareList').show().find('table tbody tr.hide').removeClass('hide');
-	});
+
+	$('#openRareList')		
+		.click(function(){
+			$(this).closest('.dropdown').addClass('active');
+			$('#rareList').find('table tbody tr.hide').removeClass('hide').end().show();
+			$('ul#rares-menu li input[type=checkbox]:checked').removeProp('checked');
+		})
+	;
 
 	$('ul#craftingTabs li.crafting-page a:first').trigger('click');
 
-	$('#spinner').hide();
 }
 
 
@@ -426,6 +462,7 @@ function getItemLink(item) {
 
 		var oItem = $('<a>')
 			.append(item.name)
+			.addClass('item-' + item.rarity)
 			.data('raw',item.raw)			
 			.popover({
 				// title: item.name, 
@@ -482,9 +519,6 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 	var oBody = $('<tbody>');
 
-	// remove existing filters in rares dropdown
-	if (bSetupDropdown) $('#rares-menu li.filter').remove();
-
 	for (var i = 0; i < sortedRares.length; ++i) {
 
 		var item = sortedRares[i];
@@ -495,7 +529,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		if (bSetupDropdown) {			
 			if (item.itemRealType != '' && !oTypes.hasOwnProperty(item.itemRealType)) {			
 				oTypes[item.itemRealType] = typeClass;
-				$('#rares-menu').append('<li class="filter"><a data-type="' + typeClass  + '">' + item.itemRealType + '</a></li>')
+				$('#rares-menu').append('<li class="filter"><label class="checkbox inline" for="cb-' + typeClass + '"><input class="checkbox inline" type="checkbox" id="cb-' + typeClass + '" name="item-filter" value="' + typeClass + '" />' + item.itemRealType + '</label></li>')
 			}
 		}
 
@@ -527,11 +561,28 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	return oTable;
 }
 
+function getSortedItems(items) {
+	
+	var sortedRares = items.sort(function(a,b) {
+		if(a.rareName<b.rareName) {
+			return -1;
+		}
+		else if(a.rareName>b.rareName) {
+			return 1;
+		}
+		return 0;
+	});
+	
+	return sortedRares;
+	
+}
+
+
 function getSortedRares(items) {
 	var available = items.slice(0);
 	
 	var rares = available.filter(function(i) {
-		return (i.category == 'skillGem' || i.category == 'flask' || i.rarity == 'rare') && i.identified;
+		return (i.rarity == 'rare') && i.identified;
 	});
 	
 	var sortedRares = rares.sort(function(a,b) {

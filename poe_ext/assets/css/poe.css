@@ -1,4 +1,46 @@
 
+@font-face{
+	font-family:'FontinSmallCaps';
+	src:url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.ttf') format("truetype"), url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.svg#webfontSCusr8QL') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+	
+@font-face{
+	font-family:'FontinRegular';
+	src:url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.svg#webfontOAeglf7d') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+	
+	
+@font-face{
+	font-family:'FontinItalic';
+	src:url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.svg#webfontEqJqoBxP') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+	
+@font-face{
+	font-family:'FontinBold';
+	src:url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.svg#webfontvK7dhkXe') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+
+.FontinSmallCaps{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinSmallCaps', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.54}
+
+.FontinRegular{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinRegular', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.51}
+
+.FontinItalic{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinItalic', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.51}
+
+.FontinBold,h1.t1{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinBold', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.52}
+
+
 
 
 .itemPopupContainer {
@@ -78,7 +120,7 @@
 .unmet {
 	color: #ff4040
 }
-.textUnique,.flavourText {
+.textUnique,.flavourText, .item-unique {
 	color: #775B47
 }
 .flavourText {
@@ -87,16 +129,21 @@
 .textRare {
 	color: #FFFF77
 }
-.textMagic {
+
+.item-rare {
+	color: #BEAF00
+}
+
+.textMagic, .item-magic {
 	color: #8888FF
 }
-.textNormal {
+.textNormal, .item-normal {
 	color: #C8C8C8
 }
-.textGem {
+.textGem, .item-gem {
 	color: #AA9E82
 }
-.textCurrency {
+.textCurrency, .item-currency {
 	color: #AA9E82
 }
 .itemContainer {

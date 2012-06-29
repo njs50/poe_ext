@@ -133,6 +133,11 @@ function parseItem(rawData, loc) {
 	item.quality = itemQuality(itemDiv);
 	item.quantity = itemQuantity(item);
 
+	// rearrange the item name if there is a quantity in it (currency only?)
+	if (item.rarity == 'currency' && item.quantity > 1) {
+		item.name = item.name.replace(/^\s*(\d+)x\s*(.+?)\s*$/,'$2 ($1)');
+	}
+
 	item.requirements = itemRequirements(itemDiv);
 	item.properties = itemProperties(itemDiv);
 	item.explicitMods = itemExplicitMods(itemDiv);
@@ -162,6 +167,8 @@ function itemRealType(item){
 	if (item.properties.hasOwnProperty('Weapon Class') ) {
 		return item.properties['Weapon Class'].toLowerCase();
 	}
+
+	if (item.rarity == 'currency') return 'currency';
 	
 	if (item.category != null) return item.category;
 
@@ -314,7 +321,7 @@ function itemQuantity(item) {
 	if(item.rarity=='currency') {
 		var hasQuantity = item.name.match(/\b\d{1,2}x /);
 		if(hasQuantity!=null) {
-			quantity = parseInt(hasQuantity[0].substring(0,hasQuantity[0].length-2));
+			quantity = parseInt(hasQuantity[0].substring(0,hasQuantity[0].length-2));			
 		}
 	}
 	return quantity;
