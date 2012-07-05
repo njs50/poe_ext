@@ -169,6 +169,15 @@ function parseItem(rawData, loc) {
 		item.maxMana = getPropertyOrModsInt(item,'maximum Mana');
 		item.maxLife = getPropertyOrModsInt(item,'maximum Life');
 
+		item.dexterity = getPropertyOrModsInt(item,'Dexterity');
+		item.intelligence = getPropertyOrModsInt(item,'Intelligence');
+		item.strength = getPropertyOrModsInt(item,'Strength');
+		
+		item.itemQuantity = getPropertyOrModsInt(item,'increased Quantity of Items found');
+		item.itemRarity =  getPropertyOrModsInt(item,'increased Rarity of Items found');
+
+
+
 		item.averageLightningDamage = getAverageDamageOfType(item,'Lightning Damage');
 		item.averageColdDamage = getAverageDamageOfType(item,'Cold Damage');
 		item.averageFireDamage = getAverageDamageOfType(item,'Fire Damage');
@@ -176,6 +185,9 @@ function parseItem(rawData, loc) {
 		item.averagePhysicalDamage = getAverageDamageOfType(item,'Physical Damage');		
 
 		item.averageDamage = averageDamage(item);
+
+		item.linkedSockets = getSocketLinkage(itemDiv);
+		item.socketCount = item.sockets == null ? 0 : item.sockets.numSockets;
 
 	} catch(e) {
 
@@ -195,6 +207,99 @@ function parseItem(rawData, loc) {
 //	item.prefixes = itemPrefixes(item);
 //	item.suffixes = itemSuffixes(item);
 	return item;
+}
+
+	var oTop = {};
+	var oLeft = {};
+
+function getSocketLinkage(itemDiv) {
+
+	var aSockets = $(itemDiv).find('div.sockets img[src$="Socket_Link_Horizontal.png"], div.sockets img[src$="Socket_Link_Vertical.png"]');
+
+	if (aSockets.length == 0) return 0;
+	if (aSockets.length == 1) return 2;
+
+	var nodes = {};
+
+	var setMaxLink = function(num) {
+		for (var i = 1; i <= num; i++) {
+			nodes[i] = [i];
+		}
+	}
+	
+	var addLink = function(nodeSource,nodeTarget) {
+		
+		//console.log('joining ' + nodeSource + ' to ' + nodeTarget );
+		
+		var aMerged = union_arrays(nodes[nodeSource],nodes[nodeTarget]);
+		
+		for (var i= 0; i < aMerged.length; i++) {
+			nodes[aMerged[i]] = aMerged;
+		}			
+		
+	}
+
+	setMaxLink(6);
+
+	aSockets.each(function(index, item){
+
+		item = $(item)
+		
+		var oLink = item.parent();
+		var coords = oLink.attr('style').replace(/^.*top:(\d+).*left:(\d+).*$/,'($1,$2)')
+
+		switch(coords) {
+
+			case('(15,34)'):
+				addLink(1,2);
+				break;
+			case('(62,34)'):
+				addLink(3,4);
+				break;
+			case('(110,34)'):
+				addLink(5,6);
+				break;
+			case('(34,15)'):
+				addLink(1,3);
+				break;
+			case('(34,62)'):
+				addLink(2,4);
+				break;
+			case('(82,15)'):
+				addLink(3,5);
+				break;
+			case('(82,62)'):
+				addLink(4,6);
+				break;
+
+			default:
+				console.log('invalid coordinates for link: ' + coords);
+
+		}
+
+	});
+
+	var maxlength = 0;
+
+	for (var idx in nodes) {
+		if (nodes[idx].length > maxlength) maxlength = nodes[idx].length;
+	}
+
+	return maxlength;
+
+}
+
+
+function union_arrays (x, y) {
+  var obj = {};
+  for (var i = x.length-1; i >= 0; -- i) obj[x[i]] = x[i];
+  for (var i = y.length-1; i >= 0; -- i) obj[y[i]] = y[i];
+  
+  var res = []
+  for (var k in obj) {
+    res.push(obj[k]);
+  }
+  return res;
 }
 
 
@@ -267,8 +372,8 @@ function processMods(aExplicit) {
 
 	var oExplicit = {};
 
-	var bonusRegexp =   /^\+?(\d+%?) to (.*)$/;
-	var percentRegexp = /^\+?(\d+%?) (.*)$/;
+	var bonusRegexp =   /^\+?(\d+)%? to (.*)$/;
+	var percentRegexp = /^\+?(\d+)%? (.*)$/;
 	var damRegexp = /^Adds (\d+-\d+) (.* Damage)$/i;
 	
 

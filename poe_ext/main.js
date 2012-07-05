@@ -611,6 +611,9 @@ function formatRareList(sortedRares, bSetupDropdown) {
 			.append( $('<td>').text( item.level ) )
 			.append( $('<td>').append( getItemLink(item) ) )
 			.append( $('<td>').text( item.quality ) )
+			.append( $('<td>').text( item.socketCount ) )
+			.append( $('<td>').text( item.linkedSockets ) )
+
 			.append( $('<td>').text( item.speed ) )
 			.append( $('<td>').text( item.armour ) )
 			.append( $('<td>').text( item.evasionRating ) )
@@ -623,6 +626,16 @@ function formatRareList(sortedRares, bSetupDropdown) {
 			.append( $('<td>').text( item.averageFireDamage ) )
 			.append( $('<td>').text( item.averageColdDamage ) )
 			.append( $('<td>').text( item.averagePhysicalDamage ) )
+
+			.append( $('<td>').text( item.strength ) )
+			.append( $('<td>').text( item.dexterity ) )
+			.append( $('<td>').text( item.intelligence ) )
+
+			.append( $('<td>').text( item.itemRarity ) )
+			.append( $('<td>').text( item.itemQuantity ) )
+
+
+			
 			.appendTo(oBody)
 		;
 	}
@@ -632,6 +645,9 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		.append( $('<th class="type-int">').text('Level') )
 		.append( $('<th class="type-string">').text('Item') )
 		.append( $('<th class="type-int">').text('Quality') )		
+		.append( $('<th class="type-int">').text('Sockets') )	
+		.append( $('<th class="type-int">').text('Links') )	
+
 		.append( $('<th class="type-float">').text('Speed') )
 		.append( $('<th class="type-int">').text('Armor') )
 		.append( $('<th class="type-int">').text('Evasion') )
@@ -643,6 +659,15 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		.append( $('<th class="type-float">').text('+Fire') )
 		.append( $('<th class="type-float">').text('+Cold') )
 		.append( $('<th class="type-float">').text('+Phys.') )
+
+		.append( $('<th class="type-int">').text('Str') )
+		.append( $('<th class="type-int">').text('Dex') )
+		.append( $('<th class="type-int">').text('Int') )
+		
+		.append( $('<th class="type-int">').text('+Rare') )
+		.append( $('<th class="type-int">').text('+Quan') )
+
+
 		.appendTo(oHead)
 	;
 
