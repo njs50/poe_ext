@@ -49,6 +49,15 @@ function getCache(cacheName) {
 
 }
 
+function removeFromCache(cacheName) {
+
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", 0);
+	var promise = objectStore.delete(cacheName);		
+
+	return promise;
+
+}
+
 function setCache(cacheName,value) {
 	var objectStore = $.indexedDB("poe_plus").objectStore("cache", true);
 	var promise = objectStore.put(value,cacheName);

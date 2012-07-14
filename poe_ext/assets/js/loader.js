@@ -18,13 +18,7 @@ $(function(){
 		.done(function(db, event){
 			// load list of chars from server (or cache)
 			// callback will select last selected char if there is one in the cache
-			refreshData(function(){
-				getCache('last-league')
-					.done(function(charName) {
-						$('#leagueSelector li a[title=' + charName + ']').trigger('click');						
-					})
-				;
-			});
+			loadPageData();
 
 		})
 	;
@@ -32,6 +26,16 @@ $(function(){
 
 	
 });
+
+function loadPageData() {
+	refreshData(function(){
+		getCache('last-league')
+			.done(function(charName) {
+				$('#leagueSelector li a[title=' + charName + ']').trigger('click');						
+			})
+		;
+	});	
+}
 
 $('#refresh').click(function () {
 
@@ -56,10 +60,28 @@ $('#refresh').click(function () {
 
 });
 
+$('#applyPartialRefresh').click(function(){
+
+	var deleteQueue = new PromiseGroup();
+
+	$('#refreshChars input[type=checkbox]:checked, #refreshTabs input[type=checkbox]:checked').each(function(idx,item){
+		deleteQueue.addPromise( removeFromCache( $(item).val() ) );
+	});
+
+	deleteQueue.completed(function(){
+		loadPageData();
+	})
 
 
 
 
+});
+
+$('#partRefresh').click(function () {
+
+	$('#refreshSelection').modal('show');
+
+});
 
 function refreshData(callback) {	
 	
@@ -315,6 +337,9 @@ function loadLeagueData(league) {
 	//clear existing inventory info
 	$('#rares-menu li').remove();	
 	$('#rareList').empty();
+
+	// clear reset lists
+	$('#refreshChars, #refreshTabs').empty();
 	
 	currentItems = null;
 
@@ -328,12 +353,15 @@ function loadLeagueData(league) {
 
 		var loadQueue = new PromiseGroup();
 
+		
+
 		for (var i=0; i< aChars.length; i++) {		
 			loadQueue.addPromise(
 				getCharItems(aChars[i]).done(function(oChar){					
 					$.merge(items, responseToItems(oChar, {section: oChar.charName, page: null}))
 				})
 			);
+			$('#refreshChars').append('<li><label class="checkbox"><input type="checkbox" name="refreshChars" value="char-' + aChars[i] + '">' + aChars[i] + '</label></li>');
 		}
 
 		// get the first tab (and tab labels) first...		
@@ -343,6 +371,10 @@ function loadLeagueData(league) {
 			$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n) }))
 
 		}).done(function(){
+
+			for (var i=0; i < numTabs; i++ ) {
+				$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" value="stash-' + league + '-' + i + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
+			}
 
 			for (var i=1; i < numTabs; i++ ) {		
 				loadQueue.addPromise(

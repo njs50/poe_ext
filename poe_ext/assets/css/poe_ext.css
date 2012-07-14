@@ -5,3 +5,8 @@ body {
 ul#rares-menu label {
 	padding-left: 26px;
 }
+
+#refreshChars li, #refreshTabs li {
+	float: left;
+	width: 100px;
+}

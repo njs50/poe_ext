@@ -53,7 +53,21 @@
 				  </li>
 
 
-	              <li><a id="refresh">Refresh Data</a></li>
+	              
+
+
+				  <li class="dropdown" id="menuRefresh">
+				    <a class="dropdown-toggle" data-toggle="dropdown" href="#menuRefresh">
+				      Refresh
+				      <b class="caret"></b>
+				    </a>
+				    <ul class="dropdown-menu" >
+		              <li><a id="refresh">Full</a></li>
+		              <li><a id="partRefresh">Partial</a></li>
+				    </ul>
+				  </li>
+
+
 
 				  <li class="dropdown" id="menu2">
 				    <a class="dropdown-toggle" data-toggle="dropdown" href="#menu2">
@@ -128,6 +142,27 @@
 			  </div>
 			  <div class="modal-footer">
 			    <a href="#" class="btn" data-dismiss="modal">Close</a>			    
+			  </div>
+			</div>
+
+			<div class="modal hide" id="refreshSelection">
+			  <div class="modal-header">			    
+			    <h3>Partial Refresh</h3>
+			  </div>
+			  <div class="modal-body">
+			    	
+			    	<h3>Characters</h3>
+			    	<ul id="refreshChars" class="unstyled"></ul>
+			    	
+
+			    	<div class="clearfix"></div>
+			    	<h3>Tabs</h3>
+			    	<ul id="refreshTabs" class="unstyled"></ul>
+
+			  </div>
+			  <div class="modal-footer">
+			    <a href="#" class="btn" data-dismiss="modal">Close</a>
+			    <a href="#" class="btn btn-primary" data-dismiss="modal" id="applyPartialRefresh">Apply</a>
 			  </div>
 			</div>
 
