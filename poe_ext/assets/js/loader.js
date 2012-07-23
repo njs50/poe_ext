@@ -444,7 +444,7 @@ function responseToItems(response, location) {
 		// We filter out any items that are in a character response but aren't in the
 		// main inventory. I.e. we don't include what you're wearing.
 		if (location.section === 'stash' || v.inventory_id == 'MainInventory') {
-			items.push(parseItem(v.html, location))
+			items.push(parseItem(v, location))
 		}
 	})
 	return items;

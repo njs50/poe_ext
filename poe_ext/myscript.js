@@ -13,13 +13,60 @@ function ttj(t) {
 }
 
 
+function parseError(item,message) {
+	console.log(message);
+	console.log(item);
+}
 
-function parseItem(rawData, loc) {
+function parseItem(rawItem, loc) {
 
-	var item = {};
 
 	try{
 
+		var item = {
+			location: loc,
+			rarity: '',
+			name: $.trim(rawItem.name + ' ' + rawItem.typeLine),
+			quantity: 1,
+			identified: true,
+			properties: {},
+			rawItem: rawItem
+
+		};
+
+		if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties);
+
+		// item rarity
+		if (rawItem.hasOwnProperty('normal') && rawItem.normal) item.rarity = 'normal';
+		else if (rawItem.hasOwnProperty('magic') && rawItem.magic) item.rarity = 'magic';
+		else if (rawItem.hasOwnProperty('rare') && rawItem.rare) item.rarity = 'rare';
+		else if (rawItem.hasOwnProperty('unique') && rawItem.unique) item.rarity = 'unique';
+		else if (rawItem.hasOwnProperty('gem') && rawItem.gem) item.rarity = 'skillGem';
+		else if (rawItem.hasOwnProperty('currency') && rawItem.currency) {
+			item.rarity = 'currency';
+			var aMatch = item.name.match(/^\s*(\d+)x\s+(.*)$/);
+			if (aMatch) {
+				item.quantity = aMatch[1];
+				item.name = aMatch[2];
+			}			
+		} 		
+		if (item.rarity == '') parseError(item,'unknown item rarity');
+
+
+		item.baseType = itemBaseType(item);
+
+
+		item.category = itemCategory(item.baseType);
+		if(item.category == null)  parseError(item,'unknown item category');
+
+
+		item.itemRealType = itemRealType(item);
+
+		item.rareName = itemRareName(item);
+
+		//console.log(item);
+
+		/* 
 		var itemDiv = $(rawData);
 		var itemNameDiv = $('.itemName', itemDiv)[0]
 		
@@ -86,11 +133,13 @@ function parseItem(rawData, loc) {
 		item.linkedSockets = getSocketLinkage(itemDiv);
 		item.socketCount = item.sockets == null ? 0 : item.sockets.numSockets;
 
+		*/
+
 	} catch(e) {
 
 		console.log('Error parsing item from stash');
 		console.log('Raw Item Data:');
-		console.log(rawData);
+		console.log(rawItem);
 		console.log('Processed Item');
 		console.log(item);
 
@@ -106,8 +155,30 @@ function parseItem(rawData, loc) {
 	return item;
 }
 
-	var oTop = {};
-	var oLeft = {};
+function nameValueArrayToObj(aPairs){
+	var max  = aPairs.length;	
+	var oRet = {};
+	for (var i = 0; i < max; i++){
+		var val = aPairs[i].value;
+		if (val[0] == '<') val = $(val).text();
+		oRet[aPairs[i].name] = val;
+	}
+	return oRet;
+}
+
+
+function itemCategory(baseType) {
+	if (baseType in ITEM_TYPE_DATA) { return ITEM_TYPE_DATA[baseType]; }
+	if (baseType in CURRENCY_DATA) { return CURRENCY_DATA[baseType]; }
+	if (baseType.match(/\(Level \d+\)/i)) { return 'skillGem'; }
+	if (baseType.match(/\b(?:flask|vial)\b/i)) { return 'flask'; }
+	if (baseType.match(/\bquiver\b/i)) { return 'quiver'; }
+	return null;
+}
+
+
+var oTop = {};
+var oLeft = {};
 
 function getSocketLinkage(itemDiv) {
 
@@ -389,6 +460,9 @@ function itemBaseType(item) {
 	if (item.rarity == 'rare') {
 		return item.name.split(' ').slice(2).join(' ');
 	}
+	if(item.rarity == 'currency') {
+		return item.name;
+	}
 	if (item.rarity == 'magic') {
 		// Split off the first word and everything after "of", these are suffix mods.
 		var baseType = item.name.split(' ');
@@ -426,6 +500,8 @@ function itemBaseType(item) {
 			// if present, we strip it off
 			baseType = baseType.slice(1);
 		}
+
+
 		
 		// and retest against the known base type list.
 		baseName = baseType.join(' ');
@@ -458,49 +534,12 @@ function itemBaseType(item) {
 			return baseName;
 		}
 	}
-	if(item.rarity == 'currency') {
-		var name = item.name;
-		var hasQuantity = item.name.match(/\b\d{1,2}x /);
-		if(hasQuantity!=null) {
-			// we have a quantity prepended to the name so chip it off.
-			
-			name = item.name.substring(hasQuantity[0].length);
-			
-		}
-		return name;
-	}
+
 	// TODO(jaguilar): handle uniques.
 	return item.name;
 }
 
-function itemQuantity(item) {
-	var quantity = 1;
-	if(item.rarity=='currency') {
-		var hasQuantity = item.name.match(/\b\d{1,2}x /);
-		if(hasQuantity!=null) {
-			quantity = parseInt(hasQuantity[0].substring(0,hasQuantity[0].length-2));			
-		}
-	}
-	return quantity;
-}
 
-function itemRarity(item) {
-	if (item.className.search('Normal') != -1) { return 'normal'; }
-	if (item.className.search('Rare') != -1) { return 'rare'; }
-	if (item.className.search('Magic') != -1) { return 'magic'; }
-	if (item.className.search('Unique') != -1) { return 'unique'; }
-	if (item.className.search('Currency') != -1) { return 'currency'; }
-	return 'other';
-}
-
-function itemCategory(item) {
-	if (item.baseType in ITEM_TYPE_DATA) { return ITEM_TYPE_DATA[item.baseType]; }
-	if (item.baseType in CURRENCY_DATA) { return CURRENCY_DATA[item.baseType]; }
-	if (item.baseType.match(/\(Level \d+\)/i)) { return 'skillGem'; }
-	if (item.baseType.match(/\b(?:flask|vial)\b/i)) { return 'flask'; }
-	if (item.baseType.match(/\bquiver\b/i)) { return 'quiver'; }
-	return null;
-}
 
 function itemRareName(item) {
 	if (item.rarity != 'rare' || !item.identified) { return null; }

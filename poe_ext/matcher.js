@@ -443,14 +443,14 @@ function allMatches(items) {
 	                		{result: "7 Jeweler's Orbs", matcher: SocketMatch(6, false)},
 
 	                		{result: "Orb of Alchemy", matcher: new RarenameMatch(2), display:0.51},
-	                		{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), display:0.51},
-	                		{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), display:0.51}, //This rule is unverified.
+	                		//{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), display:0.51},
+	                		//{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), display:0.51}, //This rule is unverified.
 	                		
-	                		{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), display:0.51},
-	                		{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), display:0.51},
+	                		//{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), display:0.51},
+	                		//{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), display:0.51},
 	                		{result: "Orb of Augmentation", matcher: RareModMatch(6)}, //This rule is flawed. It is impossible to reliably determine if a rare has 6 mods.
 
-	                		{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magical', 'normal'], false, true), display: 0.5},
+	                		//{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magical', 'normal'], false, true), display: 0.5},
 	                		{result: "Regal Orb", matcher: new RarenameMatch(3), display:0.34},
 	                		
 	                		{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},

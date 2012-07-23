@@ -79,12 +79,13 @@ $(function(){
 				
 				chrome.extension.getBackgroundPage().copy(formatRareListPlain(matches),false);
 				// output the matches here
-				var html = formatRareList(matches,false);
+				html = formatRareList(matches,false);
 			
-				$('#clipboardMatch .modal-body').empty().html(html).find('table').stupidtable();
-
-				$('#clipboardMatch').modal('show');
 			}
+			
+			$('#clipboardMatch .modal-body').empty().html(html).find('table').stupidtable();
+
+			$('#clipboardMatch').modal('show');
 		}
 	});
 	

@@ -273,9 +273,9 @@ function formatRareList(sortedRares, bSetupDropdown) {
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
 			.append( $('<td>').text( item.location.page === null ? 0 : item.location.page ).attr('title',item.location.section) )			
-			.append( $('<td>').text( item.level ) )
+			// .append( $('<td>').text( item.level ) )
 			.append( $('<td>').append( getItemLink(item) ) )
-			.append( $('<td>').text( item.quality ) )
+			/*.append( $('<td>').text( item.quality ) )
 			.append( $('<td>').text( item.socketCount ) )
 			.append( $('<td>').text( item.linkedSockets ) )
 
@@ -298,7 +298,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 			.append( $('<td>').text( item.itemRarity ) )
 			.append( $('<td>').text( item.itemQuantity ) )
-
+*/
 
 			
 			.appendTo(oBody)
@@ -307,9 +307,9 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 	$('<tr>')
 		.append( $('<th class="type-int">').text('Tab') )		
-		.append( $('<th class="type-int">').text('Level') )
+//		.append( $('<th class="type-int">').text('Level') )
 		.append( $('<th class="type-string">').text('Item') )
-		.append( $('<th class="type-int">').text('Quality') )		
+/*		.append( $('<th class="type-int">').text('Quality') )		
 		.append( $('<th class="type-int">').text('Sockets') )	
 		.append( $('<th class="type-int">').text('Links') )	
 
@@ -331,7 +331,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		
 		.append( $('<th class="type-int">').text('+Rare') )
 		.append( $('<th class="type-int">').text('+Quan') )
-
+*/
 
 		.appendTo(oHead)
 	;
