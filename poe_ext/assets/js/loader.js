@@ -353,8 +353,6 @@ function loadLeagueData(league) {
 
 		var loadQueue = new PromiseGroup();
 
-		
-
 		for (var i=0; i< aChars.length; i++) {		
 			loadQueue.addPromise(
 				getCharItems(aChars[i]).done(function(oChar){					
@@ -363,6 +361,7 @@ function loadLeagueData(league) {
 			);
 			$('#refreshChars').append('<li><label class="checkbox"><input type="checkbox" name="refreshChars" value="char-' + aChars[i] + '">' + aChars[i] + '</label></li>');
 		}
+
 
 		// get the first tab (and tab labels) first...		
 		getStashPage(league,0).done(function(oData){
@@ -439,11 +438,11 @@ function loadLeagueData(league) {
 
 
 function responseToItems(response, location) {
-	items = []
+	var items = []
 	$.map(response.items, function (v) {
 		// We filter out any items that are in a character response but aren't in the
 		// main inventory. I.e. we don't include what you're wearing.
-		if (location.section === 'stash' || v.inventory_id == 'MainInventory') {
+		if (location.section === 'stash' || v.inventoryId == 'MainInventory') {
 			items.push(parseItem(v, location))
 		}
 	})
