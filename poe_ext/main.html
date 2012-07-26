@@ -5,7 +5,7 @@
 
 		<meta charset="utf-8">
 
-		<title>PoE Plus</title>
+		<title>PoE Helper</title>
 
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -33,7 +33,7 @@
 	            <span class="icon-bar"></span>
 	          </a>
 
-	          <a class="brand" href="#">PoE Plus</a>
+	          <a class="brand" href="#">PoE Helper</a>
 	          <span class="pull-right navbar-text" id="version"></span>
 	          
 	          <div class="nav-collapse">
@@ -85,9 +85,7 @@
 				      Inventory
 				      <b class="caret"></b>
 				    </a>
-				    
-				    <ul class="dropdown-menu" id="rares-menu"></ul>
-					
+				    <ul class="dropdown-menu" id="rares-menu"></ul>					
 				  </li>
 
 				  <li class="dropdown" id="menu1">
@@ -137,11 +135,34 @@
 			  <div class="modal-header">			    
 			    <h3>Clipboard Match</h3>
 			  </div>
-			  <div class="modal-body">
-			    
+			  <div class="modal-body">			    
 			  </div>
 			  <div class="modal-footer">
 			    <a href="#" class="btn" data-dismiss="modal">Close</a>			    
+			  </div>
+			</div>
+
+			<div class="modal hide" id="inventoryCols">
+			  <div class="modal-header">			    
+			    <h3>Select Columns</h3>
+			  </div>
+			  <div class="modal-body">
+			    	<h3>Properties</h3>
+			    	<ul id="viewProps" class="unstyled"></ul>
+			    	<div class="clearfix"></div>
+			    	<h3>Mods</h3>
+			    	<ul id="viewMods" class="unstyled"></ul>
+			    	<div class="clearfix"></div>
+			    	<h3>Calculated</h3>
+			    	<ul id="viewCalculated" class="unstyled"></ul>
+			    	<div class="clearfix"></div>
+			    	<h3>Requirements</h3>
+			    	<ul id="viewReqs" class="unstyled"></ul>
+			    	<div class="clearfix"></div>
+			  </div>
+			  <div class="modal-footer">
+			    <a href="#" class="btn" data-dismiss="modal">Close</a>
+			    <a href="#" class="btn btn-primary" data-dismiss="modal" id="applyColSelection">Apply</a>
 			  </div>
 			</div>
 
@@ -150,15 +171,11 @@
 			    <h3>Partial Refresh</h3>
 			  </div>
 			  <div class="modal-body">
-			    	
 			    	<h3>Characters</h3>
 			    	<ul id="refreshChars" class="unstyled"></ul>
-			    	
-
 			    	<div class="clearfix"></div>
 			    	<h3>Tabs</h3>
 			    	<ul id="refreshTabs" class="unstyled"></ul>
-
 			  </div>
 			  <div class="modal-footer">
 			    <a href="#" class="btn" data-dismiss="modal">Close</a>

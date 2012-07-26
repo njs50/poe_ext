@@ -1,4 +1,99 @@
+var aInventory = []
 
+function renderInventory(items) {
+
+	var deferred = new $.Deferred();
+
+	aInventory = items;
+
+	// setup available properties
+	var oPropUL = $('ul#viewProps');
+	for (var key in oProps) {
+		var id = key.replace(/[^a-zA-Z]/g,'_');
+		oPropUL.append('<li><label class="checkbox inline" for="prop_' + id + '"><input class="checkbox inline" type="checkbox" id="prop_' + id + '" name="viewProps" value="' + key + '" />' + key + '</label></li>');
+	}
+	sortUL(oPropUL);
+
+
+	// setup available mods
+	var oModUL = $('ul#viewMods');
+	for (var key in oMods) {
+		var id = key.replace(/[^a-zA-Z]/g,'_');
+		oModUL.append('<li><label class="checkbox inline" for="mod_' + id + '"><input class="checkbox inline" type="checkbox" id="mod_' + id + '" name="viewMods" value="' + key + '" />' + key + '</label></li>');
+	}
+	sortUL(oModUL);
+
+
+
+	// setup available calculated cols
+	var oCalcUL = $('ul#viewCalculated');
+	for (var key in oCalc) {
+		var id = key.replace(/[^a-zA-Z]/g,'_');
+		oCalcUL.append('<li><label class="checkbox inline" for="calc_' + id + '"><input class="checkbox inline" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
+	}
+	sortUL(oModUL);
+
+	// setup available requirements
+	var oReqUL = $('ul#viewReqs');
+	for (var key in oRequired) {
+		var id = key.replace(/[^a-zA-Z]/g,'_');
+		oReqUL.append('<li><label class="checkbox inline" for="req_' + id + '"><input class="checkbox inline" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
+	}
+	sortUL(oModUL);
+
+
+	var oPromise = getCache('inventoryCols')
+	
+		.done(function(aCols){
+
+			$(aCols.toString()).prop('checked',true);
+
+			$('#rareList')
+				.append( formatRareList(getSortedItems(items),true) )
+				.find('table')
+					.stupidtable()
+			;
+			deferred.resolve();
+		})
+	
+		.fail(function(aCols){			
+			// load inventory list			
+			$('#rareList')
+				.append( formatRareList(getSortedItems(items),true) )
+				.find('table')
+					.stupidtable()
+			;	
+			deferred.resolve();
+		})
+	;
+
+	return deferred.promise();
+
+}
+
+$('#applyColSelection').click(function(){
+
+
+	var aSelected = [];
+	
+	$('input[name=viewProps]:checked').each(function(idx,item){
+		aSelected.push('#' + $(item).attr('id'));
+	});	
+	$('input[name=viewMods]:checked').each(function(idx,item){
+		aSelected.push('#' + $(item).attr('id'));
+	});	
+	$('input[name=viewCalc]:checked').each(function(idx,item){
+		aSelected.push('#' + $(item).attr('id'));
+	});	
+	$('input[name=viewReq]:checked').each(function(idx,item){
+		aSelected.push('#' + $(item).attr('id'));
+	});
+
+	setCache('inventoryCols',aSelected);
+
+	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').stupidtable();
+
+})
 
 function processItems(items){
 
@@ -57,7 +152,7 @@ function processItems(items){
 		console.log(e);
 
 		$('#err').html('An error occured while processing matches in the stash. Please ' +
-					   'click refresh to try again. If the error persists, contact the author.');
+					   'select refresh then full to try again. If the error persists, contact the author.');
 
 		console.log('last match item processed');
 		console.log(match);
@@ -67,94 +162,104 @@ function processItems(items){
 		
 	}
 
-	try {
 
-		// load inventory list
-		$('#rareList').append( formatRareList(getSortedItems(items),true) ).find('table').stupidtable();    
+	renderInventory(items)
+		.done(function(){
 
-		// sort crafting tabs
-		sortUL('#craftingTabs');
-
-		$('div#crafting-content').show();
-
-		$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li input[type=checkbox]').click(function(){
-			$('#rareList').hide();
-			$('div#crafting-content div.crafting-block').hide();
-			$('ul.nav li,ul#craftingTabs li').removeClass('active');
-			$(this).parent().addClass('active');		
-		});
-
-		$('ul#craftingTabs li.crafting-page a').click(function(){
-			$(this).closest('.dropdown').addClass('active');		
-			$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
-		});
-
-		$('ul#rares-menu li input[type=checkbox]').click(function(e){		
+			try {
 
 
-			$(this).closest('.dropdown').addClass('active');
+				// sort crafting tabs
+				sortUL('#craftingTabs');
 
-			var aSelector = [];
-			$('ul#rares-menu input[name=item-filter]:checked').each(function(idx,item){			
-				aSelector.push('table tbody tr.' + $(item).val());
-			})
-			var selector = aSelector.join(', ');
+				$('div#crafting-content').show();
+
+				$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li input[type=checkbox]').click(function(){
+					$('#rareList').hide();
+					$('div#crafting-content div.crafting-block').hide();
+					$('ul.nav li,ul#craftingTabs li').removeClass('active');
+					$(this).parent().addClass('active');		
+				});
+
+				$('ul#craftingTabs li.crafting-page a').click(function(){
+					$(this).closest('.dropdown').addClass('active');		
+					$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
+				});
+
+				$('ul#rares-menu li input[type=checkbox]').click(function(e){		
 
 
-			var aSelectorRarity = [];
-			$('ul#rares-menu input[name=item-filter-rarity]:checked').each(function(idx,item){			
-				aSelectorRarity.push('table tbody tr.' + $(item).val());
-			})
-			var selectorRarity = aSelectorRarity.join(', ');
+					$(this).closest('.dropdown').addClass('active');
 
-			if (selector != '' || selectorRarity != '') {
+					var aSelector = [];
+					$('ul#rares-menu input[name=item-filter]:checked').each(function(idx,item){			
+						aSelector.push('table tbody tr.' + $(item).val());
+					})
+					var selector = aSelector.join(', ');
+
+
+					var aSelectorRarity = [];
+					$('ul#rares-menu input[name=item-filter-rarity]:checked').each(function(idx,item){			
+						aSelectorRarity.push('table tbody tr.' + $(item).val());
+					})
+					var selectorRarity = aSelectorRarity.join(', ');
+
+					if (selector != '' || selectorRarity != '') {
+						
+						// hide list while we refilter
+						$('#rareList').hide().find('table tbody tr').addClass('hide');
+
+						var oFiltered = $('#rareList').hide().find('table tbody tr').addClass('hide');
+
+						if (selector != '') oFiltered = oFiltered.filter(selector);
+						if (selectorRarity != '') oFiltered = oFiltered.filter(selectorRarity);
+
+						oFiltered.removeClass('hide');
+
+						$('#rareList').show();
+						
+						// prevent menu from closing	
+						e.stopPropagation();
+
+					} else {
+						$('#openRareList').trigger('click');
+					}
+
+				});
+
+				// prevent label click events from triggering menu close (the follow up checkbox click still can)
+				$('ul#rares-menu li label').click(function(e){
+					e.stopPropagation();
+				})
+
+
+				$('#openRareList')		
+					.click(function(){				
+						$(this).closest('.dropdown').addClass('active');
+						$('#rareList').find('table tbody tr.hide').removeClass('hide').end().show();
+						$('ul#rares-menu li input[type=checkbox]:checked').removeProp('checked');
+					})
+				;
+
+				$('#openColSelection').click(function(){
+					$('#inventoryCols').modal('show');
+				});
+
+				$('ul#craftingTabs li.crafting-page a:first').trigger('click');
+	
+			} catch (e) {
+
+				console.log('error occured while rendering stash');
+				errorDump(e);
+
+				$('#err').html('An error occured while rendering the stash. Please ' +
+							   'select refresh then full to try again. If the error persists, contact the author.');
 				
-				// hide list while we refilter
-				$('#rareList').hide().find('table tbody tr').addClass('hide');
-
-				var oFiltered = $('#rareList').hide().find('table tbody tr').addClass('hide');
-
-				if (selector != '') oFiltered = oFiltered.filter(selector);
-				if (selectorRarity != '') oFiltered = oFiltered.filter(selectorRarity);
-
-				oFiltered.removeClass('hide');
-
-				$('#rareList').show();
-				
-				// prevent menu from closing	
-				e.stopPropagation();
-
-			} else {
-				$('#openRareList').trigger('click');
 			}
 
-		});
-
-		// prevent label click events from triggering menu close (the follow up checkbox click still can)
-		$('ul#rares-menu li label').click(function(e){
-			e.stopPropagation();
 		})
+	;
 
-
-		$('#openRareList')		
-			.click(function(){
-				$(this).closest('.dropdown').addClass('active');
-				$('#rareList').find('table tbody tr.hide').removeClass('hide').end().show();
-				$('ul#rares-menu li input[type=checkbox]:checked').removeProp('checked');
-			})
-		;
-
-		$('ul#craftingTabs li.crafting-page a:first').trigger('click');
-
-	} catch (e) {
-
-		console.log('error occured while rendering stash');
-		errorDump(e);
-
-		$('#err').html('An error occured while rendering the stash. Please ' +
-					   'click refresh to try again. If the error persists, contact the author.');
-		
-	}
 
 }
 
@@ -252,6 +357,30 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 	var oBody = $('<tbody>');
 
+	var oView = {
+		props: [],
+		mods: [],
+		calculated: [],
+		reqs: []
+	};
+
+	$('input[name=viewProps]:checked').each(function(idx,item){
+		oView.props.push($(item).val());
+	});
+	
+	$('input[name=viewMods]:checked').each(function(idx,item){
+		oView.mods.push($(item).val());
+	});
+	
+	$('input[name=viewCalc]:checked').each(function(idx,item){
+		oView.calculated.push($(item).val());
+	});
+	
+	$('input[name=viewReq]:checked').each(function(idx,item){
+		oView.reqs.push($(item).val());
+	});
+
+
 	for (var i = 0; i < sortedRares.length; ++i) {
 
 		var item = sortedRares[i];
@@ -269,72 +398,48 @@ function formatRareList(sortedRares, bSetupDropdown) {
 			}
 		}
 
-		$('<tr>')
+		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
 			.append( $('<td>').text( item.location.page === null ? 0 : item.location.page ).attr('title',item.location.section) )			
-			// .append( $('<td>').text( item.level ) )
 			.append( $('<td>').append( getItemLink(item) ) )
-			/*.append( $('<td>').text( item.quality ) )
-			.append( $('<td>').text( item.socketCount ) )
-			.append( $('<td>').text( item.linkedSockets ) )
-
-			.append( $('<td>').text( item.speed ) )
-			.append( $('<td>').text( item.armour ) )
-			.append( $('<td>').text( item.evasionRating ) )
-			.append( $('<td>').text( item.energyShield ) )
-			.append( $('<td>').text( item.maxMana ) )
-			.append( $('<td>').text( item.maxLife ) )
-
-			.append( $('<td>').text( item.averageDamage ) )
-			.append( $('<td>').text( item.averageLightningDamage ) )
-			.append( $('<td>').text( item.averageFireDamage ) )
-			.append( $('<td>').text( item.averageColdDamage ) )
-			.append( $('<td>').text( item.averagePhysicalDamage ) )
-
-			.append( $('<td>').text( item.strength ) )
-			.append( $('<td>').text( item.dexterity ) )
-			.append( $('<td>').text( item.intelligence ) )
-
-			.append( $('<td>').text( item.itemRarity ) )
-			.append( $('<td>').text( item.itemQuantity ) )
-*/
-
-			
-			.appendTo(oBody)
 		;
+
+		for (var j = 0; j < oView.props.length; j++) {
+			tr.append( $('<td>').text( item.properties.hasOwnProperty(oView.props[j]) ? item.properties[oView.props[j]] : '' ) );
+		}
+		for (var j = 0; j < oView.mods.length; j++) {
+			tr.append( $('<td>').text( item.combinedMods.hasOwnProperty(oView.mods[j]) ? item.combinedMods[oView.mods[j]] : '' ) );
+		}
+		for (var j = 0; j < oView.calculated.length; j++) {
+			tr.append( $('<td>').text( item.calculated.hasOwnProperty(oView.calculated[j]) ? item.calculated[oView.calculated[j]] : '' ) );
+		}
+		for (var j = 0; j < oView.reqs.length; j++) {
+			tr.append( $('<td>').text( item.requirements.hasOwnProperty(oView.reqs[j]) ? item.requirements[oView.reqs[j]] : '' ) );
+		}
+		
+		tr.appendTo(oBody);
 	}
 
-	$('<tr>')
+	var th = $('<tr>')
 		.append( $('<th class="type-int">').text('Tab') )		
-//		.append( $('<th class="type-int">').text('Level') )
 		.append( $('<th class="type-string">').text('Item') )
-/*		.append( $('<th class="type-int">').text('Quality') )		
-		.append( $('<th class="type-int">').text('Sockets') )	
-		.append( $('<th class="type-int">').text('Links') )	
-
-		.append( $('<th class="type-float">').text('Speed') )
-		.append( $('<th class="type-int">').text('Armor') )
-		.append( $('<th class="type-int">').text('Evasion') )
-		.append( $('<th class="type-int">').text('E.S') )
-		.append( $('<th class="type-int">').text('Mana') )
-		.append( $('<th class="type-int">').text('Life') )
-		.append( $('<th class="type-float">').text('Av Dam') )
-		.append( $('<th class="type-float">').text('+Lght.') )
-		.append( $('<th class="type-float">').text('+Fire') )
-		.append( $('<th class="type-float">').text('+Cold') )
-		.append( $('<th class="type-float">').text('+Phys.') )
-
-		.append( $('<th class="type-int">').text('Str') )
-		.append( $('<th class="type-int">').text('Dex') )
-		.append( $('<th class="type-int">').text('Int') )
-		
-		.append( $('<th class="type-int">').text('+Rare') )
-		.append( $('<th class="type-int">').text('+Quan') )
-*/
-
-		.appendTo(oHead)
 	;
+	
+	for (var j = 0; j < oView.props.length; j++) {
+		th.append( $('<th>').text(oView.props[j]) );
+	}
+	for (var j = 0; j < oView.mods.length; j++) {
+		th.append( $('<th>').text(oView.mods[j]) );
+	}
+	for (var j = 0; j < oView.calculated.length; j++) {
+		th.append( $('<th>').text(oView.calculated[j]) );
+	}
+	for (var j = 0; j < oView.reqs.length; j++) {
+		th.append( $('<th>').text(oView.reqs[j]) );
+	}
+
+	th.appendTo(oHead);
 
 	if (bSetupDropdown) {
 		// sort inventory optionsand add all option to inventory menu
@@ -343,6 +448,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 		$('#rares-menu')
 			.append('<li><a id="openRareList">All Inventory</a></li><li class="divider"></li>')
+			.append('<li><a id="openColSelection">Select Columns</a></li><li class="divider"></li>')
 			.append(ulType.children())
 			.append('<li class="divider"></li>')
 			.append(ulRarity.children())

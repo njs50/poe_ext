@@ -94,12 +94,10 @@ function refreshData(callback) {
 			getCache('oTabs').done(function(oT){
 
 				oTabs = oT;			
-
-				getCache('numTabs').done(function(nt){
-					numTabs = nt;
-					initPage();
-					if(jQuery.isFunction(callback)) callback();					
-				});				
+				numTabs = oT.length;
+				initPage();
+				if(jQuery.isFunction(callback)) callback();					
+			
 			});
 
 		})
@@ -143,6 +141,9 @@ function refreshData(callback) {
 						// when loading all chars is complete save to cache
 						loadQueue.completed(function(){
 							
+							oLeagueChars = oLeagues;
+							setCache('league-data', oLeagueChars);
+
 							// look up how many tabs we have
 							for(var league in oLeagues) {
 							    if(oLeagues.hasOwnProperty(league)) {
@@ -151,13 +152,8 @@ function refreshData(callback) {
 							    	getStashPage(league,0)
 							    		.done(function(oStash){
 
-											numTabs = oStash.numTabs;
 											oTabs = oStash.tabs;
-											oLeagueChars = oLeagues;
-
-							    			setCache('numTabs', numTabs);
-							    			setCache('oTabs',oTabs);
-											setCache('league-data', oLeagueChars);
+											numTabs = oTabs.length;
 
 											$.unblockUI();
 
@@ -369,13 +365,14 @@ function loadLeagueData(league) {
 			try {
 			
 				oTabs = oData.tabs;
+				numTabs = oTabs.length;
 				$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n) }))
 
 			} catch (e) {
 
 				$.unblockUI();
 				$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
-							   'click refresh data to try again. If the error persists, contact the author.');
+							   'select refresh then full to try again. If the error persists, contact the author.');
 				console.log('Error while fetching from pathofexile.com - try clicking "Refresh Data"');
 				errorDump(e);
 			}				
@@ -403,7 +400,7 @@ function loadLeagueData(league) {
 
 				loadQueue.failed(function(){		
 					$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
-								   'click refresh data to try again. If the error persists, contact the author.');
+								   'select refresh then full to try again. If the error persists, contact the author.');
 					console.log('Error while fetching from pathofexile.com - try clicking "Refresh Data"');
 					$.unblockUI();
 				})
@@ -412,7 +409,7 @@ function loadLeagueData(league) {
 
 				$.unblockUI();
 				$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
-							   'click refresh data to try again. If the error persists, contact the author.');
+							   'select refresh then full to try again. If the error persists, contact the author.');
 				console.log('Error while fetching from pathofexile.com - try clicking "Refresh Data"');
 				errorDump(e);
 			}
@@ -518,6 +515,11 @@ function getStashPage(league,index) {
 							deferred.reject();
 							return;
 						}	
+
+						if (index === 0) {			    			
+			    			setCache('oTabs',stashResp.tabs);							
+						}
+
 						stashResp.tabIndex = index;
 						setCache('stash-' + league + '-' + index,stashResp);
 						deferred.resolve(stashResp);

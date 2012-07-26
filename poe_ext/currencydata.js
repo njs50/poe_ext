@@ -1,6 +1,7 @@
 CURRENCY_DATA = {
 		"Alchemy Shard" : "alchemyShard",
 		"Alteration Shard" : "alterationShard",
+		"Scroll Fragment" : "scrollFragment",
 		"Armourer's Scrap" : "armourScrap",
 		"Blacksmith's Whetstone" : "blacksmithWhetstone",
 		"Blessed Orb" : "blessedOrb",

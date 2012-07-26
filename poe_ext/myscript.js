@@ -18,6 +18,16 @@ function parseError(item,message) {
 	console.log(item);
 }
 
+
+
+var oTypes = {};
+var oRarity = {normal: '', magic: '', rare: '', unique: '', skillGem: '', currency: ''};
+var oProps = {};
+var oRequired = {};
+var oMods = {};
+var oCalc = {};
+
+
 function parseItem(rawItem, loc) {
 
 
@@ -27,14 +37,16 @@ function parseItem(rawItem, loc) {
 			location: loc,
 			rarity: '',
 			name: $.trim(rawItem.name + ' ' + rawItem.typeLine),
-			quantity: 1,
 			identified: true,
 			properties: {},
+			explicitMods: {},
+			implicitMods: {},
+			combinedMods: {},
+			requirements: {},
+			calculated: {Quantity: 1},
 			rawItem: rawItem
 
 		};
-
-		if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties);
 
 		// item rarity
 		if (rawItem.hasOwnProperty('normal') && rawItem.normal) item.rarity = 'normal';
@@ -46,21 +58,37 @@ function parseItem(rawItem, loc) {
 			item.rarity = 'currency';
 			var aMatch = item.name.match(/^\s*(\d+)x\s+(.*)$/);
 			if (aMatch) {
-				item.quantity = aMatch[1];
-				item.name = aMatch[2];
+				item.calculated.Quantity = aMatch[1];
+				item.name = aMatch[2] + ' x' + aMatch[1];
 			}			
 		} 		
 		if (item.rarity == '') parseError(item,'unknown item rarity');
 
-
 		item.baseType = itemBaseType(item);
-
 
 		item.category = itemCategory(item.baseType);
 		if(item.category == null)  parseError(item,'unknown item category');
 
 
+		// get properties/mods/requirements into usable format
+		if (rawItem.hasOwnProperty('requirements')) item.requirements = nameValueArrayToObj(rawItem.requirements,oRequired);
+
+		// flasks and skillgems have some odd properties etc we don't want in the mix
+		if (item.category !== 'skillGem' && item.rarity !== 'currency' && item.category != 'flask') {
+			
+			if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties,oProps);
+
+			if (rawItem.hasOwnProperty('explicitMods')) item.explicitMods = processMods(rawItem.explicitMods,oMods);
+			if (rawItem.hasOwnProperty('implicitMods')) item.implicitMods = processMods(rawItem.implicitMods,oMods);
+
+			// combine explicit and implicit mods
+			item.combinedMods = combineMods(item.explicitMods,item.implicitMods);
+
+		}
+
 		item.itemRealType = itemRealType(item);
+
+		if (!oTypes.hasOwnProperty(item.itemRealType) && item.itemRealType != '') oTypes[item.itemRealType] = '';
 
 		item.rareName = itemRareName(item);
 
@@ -91,49 +119,28 @@ function parseItem(rawItem, loc) {
 			item.name = item.name.replace(/^\s*(\d+)x\s*(.+?)\s*$/,'$2 ($1)');
 		}
 
-		item.requirements = itemRequirements(itemDiv);
-		item.properties = itemProperties(itemDiv);
-		item.rawExplicitMods = itemExplicitMods(itemDiv);
-		
-		item.rawImplicitMods = itemImplicitMods(itemDiv);
+		*/
 
-		item.explicitMods = processMods(item.rawExplicitMods);
-		item.implicitMods = processMods(item.rawImplicitMods);
+		// calculated properties
+		item.calculated['Average Lightning Damage'] = getAverageDamageOfType(item,'Lightning Damage');
+		item.calculated['Average Cold Damage'] = getAverageDamageOfType(item,'Cold Damage');
+		item.calculated['Average Fire Damage'] = getAverageDamageOfType(item,'Fire Damage');
+		item.calculated['Average Chaos Damage'] = getAverageDamageOfType(item,'Chaos Damage');
+		item.calculated['Average Physical Damage'] = getAverageDamageOfType(item,'Physical Damage');		
+		item.calculated['Average Damage'] = averageDamage(item);
 
-		item.itemRealType = itemRealType(item);
-
-		item.level = itemLevel(item);
-
-		item.speed = item.properties.hasOwnProperty('Attacks per Second') ? parseFloat(item.properties['Attacks per Second']) : 0;
-
-		item.armour =  getPropertyOrModsInt(item,'Armour');
-		item.evasionRating =  getPropertyOrModsInt(item,'Evasion Rating');
-		item.energyShield = getPropertyOrModsInt(item,'Energy Shield');
-
-		item.maxMana = getPropertyOrModsInt(item,'maximum Mana');
-		item.maxLife = getPropertyOrModsInt(item,'maximum Life');
-
-		item.dexterity = getPropertyOrModsInt(item,'Dexterity');
-		item.intelligence = getPropertyOrModsInt(item,'Intelligence');
-		item.strength = getPropertyOrModsInt(item,'Strength');
-		
-		item.itemQuantity = getPropertyOrModsInt(item,'increased Quantity of Items found');
-		item.itemRarity =  getPropertyOrModsInt(item,'increased Rarity of Items found');
-
-
-
-		item.averageLightningDamage = getAverageDamageOfType(item,'Lightning Damage');
-		item.averageColdDamage = getAverageDamageOfType(item,'Cold Damage');
-		item.averageFireDamage = getAverageDamageOfType(item,'Fire Damage');
-		item.averageChaosDamage = getAverageDamageOfType(item,'Chaos Damage');
-		item.averagePhysicalDamage = getAverageDamageOfType(item,'Physical Damage');		
-
-		item.averageDamage = averageDamage(item);
-
+		/*
 		item.linkedSockets = getSocketLinkage(itemDiv);
 		item.socketCount = item.sockets == null ? 0 : item.sockets.numSockets;
-
 		*/
+
+		// if the cacl'd properties cols aren't yet set, add them all
+		if (!oCalc.hasOwnProperty('Average Damage')) {
+
+			for (var key in item.calculated) {
+				oCalc[key] = '';
+			}
+		}
 
 	} catch(e) {
 
@@ -155,14 +162,16 @@ function parseItem(rawItem, loc) {
 	return item;
 }
 
-function nameValueArrayToObj(aPairs){
+function nameValueArrayToObj(aPairs,oKeys){
 	var max  = aPairs.length;	
 	var oRet = {};
 	for (var i = 0; i < max; i++){
 		var val = aPairs[i].value;
+		var key = aPairs[i].name;
 		if (val[0] == '<') val = $(val).text();
-		oRet[aPairs[i].name] = val;
-	}
+		oRet[key] = val;		
+		if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
+	}	
 	return oRet;
 }
 
@@ -284,7 +293,6 @@ function averageDamage(item) {
 		aTemp = item.properties['Physical Damage'].split(' to ');
 
 		dps += ( parseInt(aTemp[0]) + parseInt(aTemp[1]) ) / 2;
-
 		if (item.properties.hasOwnProperty('Elemental Damage')) {
 
 			aTemp = item.properties['Elemental Damage'].split(', ');
@@ -296,16 +304,15 @@ function averageDamage(item) {
 		}
 
 		// for weaps multiply av dam by dps
-		dps = Math.round(dps * item.speed * 10) / 10;
+		dps = Math.round(dps * parseFloat(item.properties['Attacks per Second']) * 10) / 10;
 
 	} else {
 		// not a weap, add up any elemental bonuses
-		dps += item.averageLightningDamage;		
-		dps += item.averageColdDamage;
-		dps += item.averageFireDamage;
-		dps += item.averageChaosDamage;
-		dps += item.averagePhysicalDamage;
-
+		dps += item.calculated['Average Lightning Damage'];
+		dps += item.calculated['Average Cold Damage'];
+		dps += item.calculated['Average Fire Damage'];
+		dps += item.calculated['Average Chaos Damage'];
+		dps += item.calculated['Average Physical Damage'];
 	}
 
 	return dps;
@@ -314,8 +321,7 @@ function averageDamage(item) {
 
 function getAverageDamageOfType(item,mod) {
 	var dps = 0;
-	dps += item.implicitMods.hasOwnProperty(mod) ? calcAvRange(item.implicitMods[mod]) : 0;
-	dps += item.explicitMods.hasOwnProperty(mod) ? calcAvRange(item.explicitMods[mod]) : 0;
+	dps += item.combinedMods.hasOwnProperty(mod) ? calcAvRange(item.combinedMods[mod]) : 0;
 	return dps;
 }
 
@@ -336,12 +342,48 @@ function getPropertyOrModsInt(item,prop) {
 	return amt;
 }
 
-function processMods(aExplicit) {
+function combineMods(explicitMods,implicitMods){
+
+	var oCombined = {};
+	for (var key in explicitMods) {
+		oCombined[key] = explicitMods[key];
+	}
+	for (var key in implicitMods) {
+		if (oCombined.hasOwnProperty(key)) {
+
+			// can be int, % or range (x-y)
+			var a = oCombined[key];
+			var b = implicitMods[key];
+
+			if (a.indexOf('-') > 0){
+				// range
+				a = a.split('-');
+				b = b.split('-');
+				oCombined[key] = (parseInt(a[0]) + parseInt(b[0])) + '-' + (parseInt(a[1]) + parseInt(b[1]));
+			} else if (a.indexOf('%') > 0) {
+				// percents
+				a = parseInt(a.replace('%',''));
+				b = parseInt(b.replace('%',''));
+				oCombined[key] = a + b + '%';
+			} else {
+				oCombined[key] = parseInt(a) + parseInt(b);
+			}
+
+		} else {
+			oCombined[key] = implicitMods[key];
+		}
+	}
+
+	return oCombined;
+
+}
+
+function processMods(aExplicit,oKeys) {
 
 	var oExplicit = {};
 
-	var bonusRegexp =   /^\+?(\d+)%? to (.*)$/;
-	var percentRegexp = /^\+?(\d+)%? (.*)$/;
+	var bonusRegexp =   /^\+?(\d+) [^A-Z]*(.*)$/;
+	var percentRegexp = /^\+?(\d+%) [^A-Z]*(.*)$/;
 	var damRegexp = /^Adds (\d+-\d+) (.* Damage)$/i;
 	
 
@@ -350,21 +392,26 @@ function processMods(aExplicit) {
 	for(var i = 0; i < aExplicit.length; i++) {
 
 		var thisMod = aExplicit[i];
+		var key = '';
 
 		aMatch = bonusRegexp.exec(thisMod);
 		if (aMatch != null) {
-			oExplicit[aMatch[2]] = aMatch[1];
+			 key = aMatch[2];			 			
 		} else {
 			aMatch = percentRegexp.exec(thisMod);
 			if (aMatch != null) { 
-				oExplicit[aMatch[2]] = aMatch[1];
+				key = '% ' + aMatch[2];
+				
 			} else {
 				aMatch = damRegexp.exec(thisMod);
-				if (aMatch != null) oExplicit[aMatch[2]] = aMatch[1];
+				if (aMatch != null) key = aMatch[2];
 			}
 		}
 
-
+		if (aMatch != null) {
+			oExplicit[key] = aMatch[1];
+			if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
+		}
 
 	}
 
@@ -420,39 +467,6 @@ function itemImplicitMods(item) {
 	return aMods;
 }
 
-function parseNameValuePairs(aPairs) {
-	
-	var idx=0;
-	var oPairs = {};
-
-	var lastKey = '';
-
-
-	while(idx < aPairs.length) {
-
-		var thisItem = $(aPairs[idx]);
-
-		if ( thisItem.hasClass('name') ) {
-
-			lastKey = thisItem.text().replace(/^[^A-Za-z]+/,'').replace(/[^A-Za-z]+$/,'');
-
-			oPairs[lastKey] = '';
-
-		} else if ( lastKey != '' && thisItem.hasClass('value') ) {
-			oPairs[lastKey] = $.trim(thisItem.text());
-		}
-
-		idx++;
-
-	}
-
-	return oPairs;
-}
-
-function itemName(itemNameDiv) {
-	return itemNameDiv.innerText.replace('\n', ' ');
-}
-
 function itemBaseType(item) {
 	if (!item.identified || item.rarity == 'normal') { 
 		return item.name; 
@@ -461,7 +475,7 @@ function itemBaseType(item) {
 		return item.name.split(' ').slice(2).join(' ');
 	}
 	if(item.rarity == 'currency') {
-		return item.name;
+		return item.name.replace(/\s+x\d+$/,'');
 	}
 	if (item.rarity == 'magic') {
 		// Split off the first word and everything after "of", these are suffix mods.
