@@ -10,3 +10,23 @@ ul#rares-menu label {
 	float: left;
 	width: 100px;
 }
+
+
+/* custom */
+.popover-inner {
+	width: auto !important;
+}
+
+.popover-inner pre {
+	/*width: 360px; */
+}
+
+/*
+.popover-content {
+	background: #333 !important;	
+}
+*/
+
+.itemPopupContainer {
+	max-width: 650px;
+}

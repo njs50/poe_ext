@@ -297,27 +297,85 @@ function getItemLink(item) {
 		var oItem = $('<a>')
 			.append(item.name)
 			.addClass('item-' + item.rarity)
-			.data('raw',item.raw)			
+			
 			.popover({
-				// title: item.name, 
-				content: function(){ 										
-					var html = $(this).data('raw') ;
-					var oData = $( html );
-					oData.find('.hidden').removeClass('hidden');
-					oData.find('.itemPopupContainer').addClass('pull-left');					
-					oData.find('.itemIconContainer').addClass('pull-left').prependTo(oData);
-					return $('<div>').append(oData).append('<div class="clearfix"></div>');
+				//title: item.name, 
+				content: function(){ 		
+
+					var html = $('<div>').append('<img src="' + item.rawItem.icon + '" class="pull-left"/>');
+
+					$('<pre class="pull-left">')
+						.append(itemToString(item))
+						.appendTo(html)
+					;
+
+
+					$('<div class="clearfix">').appendTo(html);	
+					return html;
 				},
 				placement: 'bottom',
-				delay: { show: 500, hide: 100 },				
-				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner-poe"><div class="popover-content"><p></p></div></div></div>'
+				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+				delay: { show: 500, hide: 10000 }				
 			})
 			.click(function(){
+				chrome.extension.getBackgroundPage().copy(itemToString(item));
 				console.log(item);
 			})
 		;
 
 	return oItem;
+
+}
+
+function itemToString(item) {
+	
+	var oRaw = item.rawItem;
+	var sItem = '';
+	sItem += 'Rarity: ' + capitaliseFirstLetter(item.rarity) + '\n';
+	sItem += oRaw.name + '\n';
+	sItem += oRaw.typeLine + '\n';
+	
+
+	if (oRaw.hasOwnProperty('properties')) {						
+		sItem += '--------\n';
+		for (var i = 0; i < oRaw.properties.length; i++) {
+			var oThis = oRaw.properties[i];
+			sItem += oThis.name + ': ' + oThis.value;
+			if(oThis.augmented) sItem += ' (augmented)';
+			sItem += '\n';
+		}
+	}
+
+	if (oRaw.hasOwnProperty('implicitMods')) {						
+		sItem += '--------\n';
+		for (var i = 0; i < oRaw.implicitMods.length; i++) {
+			sItem += oRaw.implicitMods[i] + '\n';
+		}
+	}
+
+	if (oRaw.hasOwnProperty('requirements')) {						
+		sItem += '--------\n';
+		for (var i = 0; i < oRaw.requirements.length; i++) {
+			var oThis = oRaw.requirements[i];
+			sItem += oThis.name + ': ' + oThis.value + '\n';
+		}
+	}
+
+	if (oRaw.hasOwnProperty('explicitMods')) {						
+		sItem += '--------\n';
+		for (var i = 0; i < oRaw.explicitMods.length; i++) {
+			sItem += oRaw.explicitMods[i] + '\n';
+		}
+	}
+
+	if (oRaw.hasOwnProperty('flavourText')) {						
+		sItem += '--------\n';
+		for (var i = 0; i < oRaw.flavourText.length; i++) {
+			sItem += oRaw.flavourText[i] + '\n';
+		}
+	}
+
+	return sItem;
 
 }
 
