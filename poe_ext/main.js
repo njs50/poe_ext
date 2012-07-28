@@ -1,13 +1,19 @@
 var aInventory = []
 
-function renderInventory(items) {
+$('#resetCols').click(function(){
+	$('#inventoryCols input[type=checkbox]:checked').prop('checked',false); 
+	return false;
+})
+
+
+function setupInventoryRendering(items) {
 
 	var deferred = new $.Deferred();
 
 	aInventory = items;
 
 	// setup available properties
-	var oPropUL = $('ul#viewProps');
+	var oPropUL = $('ul#viewProps').empty();
 	for (var key in oProps) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
 		oPropUL.append('<li><label class="checkbox inline" for="prop_' + id + '"><input class="checkbox inline" type="checkbox" id="prop_' + id + '" name="viewProps" value="' + key + '" />' + key + '</label></li>');
@@ -16,7 +22,7 @@ function renderInventory(items) {
 
 
 	// setup available mods
-	var oModUL = $('ul#viewMods');
+	var oModUL = $('ul#viewMods').empty();
 	for (var key in oMods) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
 		oModUL.append('<li><label class="checkbox inline" for="mod_' + id + '"><input class="checkbox inline" type="checkbox" id="mod_' + id + '" name="viewMods" value="' + key + '" />' + key + '</label></li>');
@@ -26,43 +32,54 @@ function renderInventory(items) {
 
 
 	// setup available calculated cols
-	var oCalcUL = $('ul#viewCalculated');
+	var oCalcUL = $('ul#viewCalculated').empty();
 	for (var key in oCalc) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
 		oCalcUL.append('<li><label class="checkbox inline" for="calc_' + id + '"><input class="checkbox inline" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
 	}
-	sortUL(oModUL);
+	sortUL(oCalcUL);
+
 
 	// setup available requirements
-	var oReqUL = $('ul#viewReqs');
+	var oReqUL = $('ul#viewReqs').empty();
 	for (var key in oRequired) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
 		oReqUL.append('<li><label class="checkbox inline" for="req_' + id + '"><input class="checkbox inline" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
 	}
-	sortUL(oModUL);
+	sortUL(oReqUL);
 
+	// setup available types
+	var oTypeUL = $('ul#viewTypes').empty();
+	for (var key in oTypes) {
+		var id = key.replace(/[^a-zA-Z]/g,'_');
+		oTypeUL.append('<li><label class="checkbox inline" for="type_' + id + '"><input class="checkbox inline" checked type="checkbox" id="type_' + id + '" name="viewType" value="' + key + '" />' + key + '</label></li>');
+	}
+	sortUL(oTypeUL);
+	$('<li><label class="checkbox inline"><input class="checkbox inline toggleCheckboxes" checked type="checkbox" data-toggling="viewType" id="toggleTypes">Select All / None</label></li>').prependTo(oTypeUL);
 
+	// setup available rarity
+	var oRarityUL = $('ul#viewRarity').empty();
+	for (var key in oRarity) {
+		var id = key.replace(/[^a-zA-Z]/g,'_');
+		oRarityUL.append('<li><label class="checkbox inline" for="rarity_' + id + '"><input class="checkbox inline" checked type="checkbox" id="rarity_' + id + '" name="viewRarity" value="' + key + '" />' + capitaliseFirstLetter(key) + '</label></li>');
+	}
+	sortUL(oRarityUL);
+	$('<li><label class="checkbox inline"><input class="checkbox inline toggleCheckboxes" checked type="checkbox" data-toggling="viewRarity" id="toggleTypes">Select All / None</label></li>').prependTo(oRarityUL);
+
+	// add select all/none checkboxes to types and rarity
+	$('input.toggleCheckboxes').click(function(){
+		$('input[name=' + $(this).data('toggling') + ']').prop('checked',$(this).prop('checked'));
+	});
+
+	// load previous settings
 	var oPromise = getCache('inventoryCols')
 	
 		.done(function(aCols){
-
-			$(aCols.toString()).prop('checked',true);
-
-			$('#rareList')
-				.append( formatRareList(getSortedItems(items),true) )
-				.find('table')
-					.stupidtable()
-			;
+			$(aCols.toString()).prop('checked',true);			
 			deferred.resolve();
 		})
 	
-		.fail(function(aCols){			
-			// load inventory list			
-			$('#rareList')
-				.append( formatRareList(getSortedItems(items),true) )
-				.find('table')
-					.stupidtable()
-			;	
+		.fail(function(aCols){							
 			deferred.resolve();
 		})
 	;
@@ -92,6 +109,15 @@ $('#applyColSelection').click(function(){
 	setCache('inventoryCols',aSelected);
 
 	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').stupidtable();
+
+	$('#openRareList').trigger('click');
+
+})
+
+$('#applyItemSelection').click(function(){
+
+	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').stupidtable();
+	$('#openRareList').trigger('click');
 
 })
 
@@ -163,11 +189,13 @@ function processItems(items){
 	}
 
 
-	renderInventory(items)
+	setupInventoryRendering(items)
 		.done(function(){
 
 			try {
 
+				// render rare list
+				$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();
 
 				// sort crafting tabs
 				sortUL('#craftingTabs');
@@ -241,10 +269,6 @@ function processItems(items){
 					})
 				;
 
-				$('#openColSelection').click(function(){
-					$('#inventoryCols').modal('show');
-				});
-
 				$('ul#craftingTabs li.crafting-page a:first').trigger('click');
 	
 			} catch (e) {
@@ -315,7 +339,7 @@ function getItemLink(item) {
 				},
 				placement: 'bottom',
 				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
-				delay: { show: 500, hide: 10000 }				
+				delay: { show: 500, hide: 100 }				
 			})
 			.click(function(){
 				chrome.extension.getBackgroundPage().copy(itemToString(item));
@@ -406,10 +430,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	
 	var oRarity = {}
 
-	var ulType = $('<ul>');
-	var ulRarity = $('<ul>');
-
-	var oTable = $('<table class="table table-condensed">');		
+	var oTable = $('<table class="table table-condensed table-striped">');		
 
 	var oHead = $('<thead>');
 
@@ -443,19 +464,6 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 		var item = sortedRares[i];
 
-		// update options in rares dropdown		
-
-		if (bSetupDropdown) {			
-			if (item.itemRealType != '' && !oTypes.hasOwnProperty(item.itemRealType)) {
-				oTypes[item.itemRealType] = item.itemRealType.replace(/\s/g,'-');
-				ulType.append('<li class="filter"><label class="checkbox inline" for="cb-' + oTypes[item.itemRealType] + '"><input class="checkbox inline" type="checkbox" id="cb-' + oTypes[item.itemRealType] + '" name="item-filter" value="' + oTypes[item.itemRealType] + '" />' + item.itemRealType + '</label></li>')
-			}
-			if (item.rarity != '' && !oRarity.hasOwnProperty(item.rarity)) {
-				oRarity[item.rarity] = item.rarity.replace(/\s/g,'-');
-				ulRarity.append('<li class="filter"><label class="checkbox inline" for="cbr-' + oRarity[item.rarity] + '"><input class="checkbox inline" type="checkbox" id="cbr-' + oRarity[item.rarity] + '" name="item-filter-rarity" value="' + oRarity[item.rarity] + '" />' + capitaliseFirstLetter(item.rarity) + '</label></li>')
-			}
-		}
-
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
@@ -485,34 +493,19 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	;
 	
 	for (var j = 0; j < oView.props.length; j++) {
-		th.append( $('<th>').text(oView.props[j]) );
+		th.append( $('<th class="type-float">').text(oView.props[j]) );
 	}
 	for (var j = 0; j < oView.mods.length; j++) {
-		th.append( $('<th>').text(oView.mods[j]) );
+		th.append( $('<th class="type-int">').text(oView.mods[j]) );
 	}
 	for (var j = 0; j < oView.calculated.length; j++) {
-		th.append( $('<th>').text(oView.calculated[j]) );
+		th.append( $('<th class="type-float">').text(oView.calculated[j]) );
 	}
 	for (var j = 0; j < oView.reqs.length; j++) {
-		th.append( $('<th>').text(oView.reqs[j]) );
+		th.append( $('<th class="type-int">').text(oView.reqs[j]) );
 	}
 
 	th.appendTo(oHead);
-
-	if (bSetupDropdown) {
-		// sort inventory optionsand add all option to inventory menu
-		sortUL(ulType);
-		sortUL(ulRarity);
-
-		$('#rares-menu')
-			.append('<li><a id="openRareList">All Inventory</a></li><li class="divider"></li>')
-			.append('<li><a id="openColSelection">Select Columns</a></li><li class="divider"></li>')
-			.append(ulType.children())
-			.append('<li class="divider"></li>')
-			.append(ulRarity.children())
-		;
-
-	}
 
 	oTable
 		.append(oHead)
@@ -524,11 +517,29 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 function getSortedItems(items) {
 	
-	var sortedRares = items.slice(0).sort(function(a,b) {
-		if(a.rareName<b.rareName) {
+	var sortedRares = [];
+	var oRarity = {};
+	var oType = {};
+
+	$('input[name=viewRarity]:checked').each(function(idx,item){
+		oRarity[$(item).val()] = true;
+	});	
+
+	$('input[name=viewType]:checked').each(function(idx,item){
+		oType[$(item).val()] = true;
+	});	
+
+	for (var i = 0; i < items.length; i++) {
+		var oThis = items[i];
+		if (oRarity[oThis.rarity] === true && oType[oThis.itemRealType] === true ) sortedRares.push(oThis);
+	}
+
+	// sort on rare name
+	 sortedRares.sort(function(a,b) {
+		if(a.rareName<b.name) {
 			return -1;
 		}
-		else if(a.rareName>b.rareName) {
+		else if(a.name>b.name) {
 			return 1;
 		}
 		return 0;

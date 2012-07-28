@@ -17,6 +17,10 @@ ul#rares-menu label {
 	width: auto !important;
 }
 
+.popover {
+	margin-left: 100px;
+}
+
 .popover-inner pre {
 	/*width: 360px; */
 }

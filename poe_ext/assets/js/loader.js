@@ -7,6 +7,16 @@ var postThrottle = null;
 
 var currentLeague = '';
 
+
+// set in parseItems
+var oTypes = {};
+var oRarity = {};
+var oProps = {};
+var oRequired = {};
+var oMods = {};
+var oCalc = {};
+
+
 $(function(){
 	
 	getVersion();
@@ -216,7 +226,7 @@ function initPage(){
 		$('#output').html('');
 		$('#rareList').html('');			
 
-		if (league != '') {
+		if (league != '') {			
 			setCache('last-league',league);
 			loadLeagueData(league, false);	
 		}
@@ -331,8 +341,14 @@ function loadLeagueData(league) {
 	$('div#crafting-content').empty();
 	
 	//clear existing inventory info
-	$('#rares-menu li').remove();	
 	$('#rareList').empty();
+
+	oTypes = {};
+	oRarity = {normal: '', magic: '', rare: '', unique: '', skillGem: '', currency: ''};
+	oProps = {};
+	oRequired = {};
+	oMods = {};
+	oCalc = {};
 
 	// clear reset lists
 	$('#refreshChars, #refreshTabs').empty();

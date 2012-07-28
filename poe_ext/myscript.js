@@ -20,12 +20,7 @@ function parseError(item,message) {
 
 
 
-var oTypes = {};
-var oRarity = {normal: '', magic: '', rare: '', unique: '', skillGem: '', currency: ''};
-var oProps = {};
-var oRequired = {};
-var oMods = {};
-var oCalc = {};
+
 
 
 function parseItem(rawItem, loc) {
@@ -87,39 +82,10 @@ function parseItem(rawItem, loc) {
 		}
 
 		item.itemRealType = itemRealType(item);
-
 		if (!oTypes.hasOwnProperty(item.itemRealType) && item.itemRealType != '') oTypes[item.itemRealType] = '';
 
 		item.rareName = itemRareName(item);
 
-		//console.log(item);
-
-		/* 
-		var itemDiv = $(rawData);
-		var itemNameDiv = $('.itemName', itemDiv)[0]
-		
-		item = {
-			name: itemName(itemNameDiv),
-			location: loc,
-			sockets: itemSockets($('.sockets', itemDiv)[0]),
-			explicitModCount: $('div .explicitMod', itemDiv).length,
-			raw: rawData
-		};
-		
-		item.identified = $(':contains(Unidentified)', itemDiv).length == 0;
-		item.rarity = itemRarity(itemNameDiv);
-		item.baseType = itemBaseType(item);
-		item.category = itemCategory(item);
-		item.rareName = itemRareName(item);
-		item.quality = itemQuality(itemDiv);
-		item.quantity = itemQuantity(item);
-
-		// rearrange the item name if there is a quantity in it (currency only?)
-		if (item.rarity == 'currency' && item.quantity > 1) {
-			item.name = item.name.replace(/^\s*(\d+)x\s*(.+?)\s*$/,'$2 ($1)');
-		}
-
-		*/
 
 		// calculated properties
 		item.calculated['Average Lightning Damage'] = getAverageDamageOfType(item,'Lightning Damage');
