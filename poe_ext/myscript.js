@@ -286,13 +286,13 @@ function averageDamage(item) {
 }
 
 function getAverageDamageOfType(item,mod) {
-	var dps = 0;
-	dps += item.combinedMods.hasOwnProperty(mod) ? calcAvRange(item.combinedMods[mod]) : 0;
-	return dps;
+	if (item.properties.hasOwnProperty(mod)) return calcAvRange(item.properties[mod]);
+	return item.combinedMods.hasOwnProperty(mod) ? calcAvRange(item.combinedMods[mod]) : 0;
 }
 
 function calcAvRange(range) {
-	var aTemp2 = range.split('-');
+	if (range.indexOf('-') > 0) var aTemp2 = range.split('-');
+	else var aTemp2 = range.split(' to ');
 	return ( parseInt(aTemp2[0]) + parseInt(aTemp2[1]) ) / 2;
 }
 
