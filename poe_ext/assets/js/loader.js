@@ -41,7 +41,7 @@ function loadPageData() {
 	refreshData(function(){
 		getCache('last-league')
 			.done(function(charName) {
-				$('#leagueSelector li a[title=' + charName + ']').trigger('click');						
+				$('#leagueSelector li a[title="' + charName + '"]').trigger('click');						
 			})
 		;
 	});	
@@ -60,7 +60,7 @@ $('#refresh').click(function () {
 
 			// reset charName and make sure it still exists					
 			setCache('last-league',charName);
-			$('#leagueSelector li a[title=' + charName + ']').trigger('click');				
+			$('#leagueSelector li a[title="' + charName + '"]').trigger('click');				
 		
 
 		});

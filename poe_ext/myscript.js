@@ -31,8 +31,9 @@ function parseItem(rawItem, loc) {
 		var item = {
 			location: loc,
 			rarity: '',
+			quality: 0,
 			name: $.trim(rawItem.name + ' ' + rawItem.typeLine),
-			identified: true,
+			identified: rawItem.hasOwnProperty('explicitMods') || rawItem.hasOwnProperty('normal')  ? true : false,
 			properties: {},
 			explicitMods: {},
 			implicitMods: {},
@@ -57,7 +58,7 @@ function parseItem(rawItem, loc) {
 				item.name = aMatch[2] + ' x' + aMatch[1];
 			}			
 		} 		
-		if (item.rarity == '') parseError(item,'unknown item rarity');
+		if (item.rarity == '') parseError(item,'unknown item rarity');		
 
 		item.baseType = itemBaseType(item);
 
@@ -80,6 +81,9 @@ function parseItem(rawItem, loc) {
 			item.combinedMods = combineMods(item.explicitMods,item.implicitMods);
 
 		}
+
+		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
+		item.quality = itemQuality(item);
 
 		item.itemRealType = itemRealType(item);
 		if (!oTypes.hasOwnProperty(item.itemRealType) && item.itemRealType != '') oTypes[item.itemRealType] = '';
@@ -568,10 +572,25 @@ function itemSockets(sdiv) {
 	};
 }
 
-function itemQuality(itemDiv) {
-	var quality = $('.displayProperty', itemDiv).filter(':contains(Quality)');
-	if (quality.length == 0) { return 0.0; }
-	return Number(quality[0].innerText.split(' ')[1].trim().match(/\+(\d+)\%/i)[1]);
+function itemQuality(item) {
+
+	if (item.properties.hasOwnProperty('Quality')) return parseInt(item.properties.Quality);
+
+	if (item.category === 'skillGem' || item.category === 'flask') {
+
+		if (item.rawItem.hasOwnProperty('properties')) {
+			for(var i = 0; i< item.rawItem.properties.length;i++) {
+				var oProp = item.rawItem.properties[i];
+				if (oProp.name === 'Quality') {
+					item.properties.Quality = oProp.value;
+					return parseInt(oProp.value);
+				} 
+			}
+		}
+
+	}
+
+	return 0;
 }
 
 function itemByName(items, name) {
