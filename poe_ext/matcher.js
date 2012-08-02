@@ -186,13 +186,12 @@ function TricolorMatch() {
 function SocketMatch(reqcount, linked) {
 	return new PredicateMatcher(
 		function (i) { 
-			return i.sockets && ((reqcount <= linked) ? 
-				                 i.sockets.maxConnected : i.sockets.numSockets) > reqcount; 
+			return i.sockets && ((reqcount <= linked) ? i.sockets.maxConnected : i.sockets.numSockets) > reqcount; 
 		});
 }
 function RareModMatch(modcount) {
 	return new PredicateMatcher(
-		function (i) { return i.rarity == 'rare' && i.explicitModCount > modcount; });
+		function (i) { return i.rarity == 'rare' && i.rawItem.explicitMods.length > modcount; });
 }
 
 var BaseTypeMatch = Match.extend({
@@ -219,15 +218,18 @@ var BaseTypeMatch = Match.extend({
 
 	take: function(i) {
 		// Don't keep anything without a 
-		if (i.baseType == null || $.inArray(i.rarity, this.rarities) == -1 ||
-			(i.quality < 20 && this.maxQuality)) { return; }
+		if (i.baseType == null || $.inArray(i.rarity, this.rarities) == -1 || (i.quality < 20 && this.maxQuality)) { return; }
+		
 		if(!this.allowedToBePartlyIdentified && i.identified) { return false;}
 		
 		var baseTypeMap = this.matches[i.baseType]
+		
 		if (baseTypeMap == null) {
 			this.matches[i.baseType] = baseTypeMap = {}
 		}
+
 		baseTypeMap[i.rarity] = i;  // It's fine to replace what's already here.
+
 	},
 
 	credit: function(i) {
@@ -238,6 +240,7 @@ var BaseTypeMatch = Match.extend({
 	getMatches: function() {
 		var maxCredit = this.credit(this.rarities.length);
 		var th = this;
+			
 		return $.map(this.matches, function (v, k) {
 			var itemcredit = 0;
 			var missing = $.map(th.rarities, function(rarity, idx) {
@@ -246,15 +249,26 @@ var BaseTypeMatch = Match.extend({
 				}
 			})
 
-			return {items: v, 
-				    missing: $.merge([sprintf('%s%s with rarities:', 
-				    	                      k, 
-				    	                      th.maxQuality ? ' with %20 quality' : '')], 
-				                     [missing.join(', ')]), 
-				    complete: 1 - (1.0 * th.scoreRarities(missing) / th.completeScore)};
+			return {
+					items: objToArray(v), 
+				    missing: $.merge([sprintf('%s%s with rarities:', k, th.maxQuality ? ' with %20 quality' : '')], [missing.join(', ')]), 
+				    complete: 1 - (1.0 * th.scoreRarities(missing) / th.completeScore)
+				};
 		});
 	}
 });
+
+function objToArray(v) {
+
+	var a = [];
+	for (var k in v){
+		a.push(v[k]);
+	}
+	
+	return a;
+
+}
+
 
 function mapMax(maps) {
 	var out = {};
@@ -433,8 +447,8 @@ function allMatches(items) {
 	                		{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},
 	                		{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
 	                		{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},
-	                		{result: "Chromatic Orb", matcher: TricolorMatch()},
-	                		{result: "Divine Orb", matcher: SocketMatch(6, true)},
+	                		//{result: "Chromatic Orb", matcher: TricolorMatch()},
+	                		//{result: "Divine Orb", matcher: SocketMatch(6, true)},
 
 	                		{result: "Gemcutter's Prism", matcher: new QualityMatch('skillGem'), display:0.3},
 	                		{result: "Glassblower's Bauble", matcher: new QualityMatch('flask')},
@@ -443,15 +457,15 @@ function allMatches(items) {
 	                		{result: "7 Jeweler's Orbs", matcher: SocketMatch(6, false)},
 
 	                		{result: "Orb of Alchemy", matcher: new RarenameMatch(2), display:0.51},
-	                		//{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), display:0.51},
-	                		//{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), display:0.51}, //This rule is unverified.
+	                		{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), display:0.51},
+	                		{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), display:0.51}, //This rule is unverified.
 	                		
-	                		//{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), display:0.51},
-	                		//{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), display:0.51},
+	                		{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), display:0.51},
+	                		{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), display:0.51},
 	                		{result: "Orb of Augmentation", matcher: RareModMatch(6)}, //This rule is flawed. It is impossible to reliably determine if a rare has 6 mods.
 
-	                		//{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magical', 'normal'], false, true), display: 0.5},
-	                		{result: "Regal Orb", matcher: new RarenameMatch(3), display:0.34},
+	                		{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magical', 'normal'], false, true), display: 0.5},
+	                		{result: "Regal Orb", matcher: new RarenameMatch(3), display:0.94},
 	                		
 	                		{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},
 	                		{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, true), display:0.3},
@@ -499,8 +513,4 @@ function locationFormat(i) {
 function itemSpan(i) {
 	return sprintf('%s&nbsp;&nbsp;&nbsp;&nbsp<span class="location">%s</span>', i.name, locationFormat(i));
 }
-
-//function rareSpan(i) {
-//	return sprintf('%s&nbsp;&nbsp;&nbsp;&nbsp<span class="location">%s</span>', i.rareName, locationFormat(i));
-//}
 
