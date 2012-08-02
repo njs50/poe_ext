@@ -375,7 +375,7 @@
 					}
 				};
 			}, function(error, e){
-				//console.logerror, e);
+				//console.log(error, e);
 				// Nothing much to do if an error occurs
 			}, function(db, e){
 				if (e && e.type === "upgradeneeded") {

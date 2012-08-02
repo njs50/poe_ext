@@ -256,13 +256,14 @@ var BaseTypeMatch = Match.extend({
 				};
 		});
 	}
+
 });
 
 function objToArray(v) {
 
 	var a = [];
 	for (var k in v){
-		a.push(v[k]);
+		if (v.hasOwnProperty(k)) a.push(v[k]);
 	}
 	
 	return a;
@@ -434,14 +435,9 @@ var FullsetMatch = Match.extend({
 	},
 })
 
-function allMatches(items) {
-	// take a copy of the inventory items so we don't modify the original
-	var available = items.slice(0);
-	var results = {
-	};
-	// reordered these so they match
-	// the recipe order found here:
-	// http://www.pathofexile.com/forum/view-thread/15223
+function allMatches(available) {
+	var results = {};
+
 	var matchRules = $.map([
 	                        {result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.98},
 	                		{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},

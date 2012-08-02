@@ -199,23 +199,20 @@ function renderCrafting(items) {
 				match.distance = distance;
 			}
 
-			// sort on distance
+			// sort on distance			
 			match_group.sort(function(a,b) {
 				return a.distance - b.distance;
 			});			
 
 
 			for (var i = 0; i < match_group.length; i++) {	
-
 				match = match_group[i];
-
 				$('<tr>')
 					.append('<td>' + parseInt(match.complete * 10000) / 100 + '%</td>')
 					.append($('<td>').append(getItemsUL(match.items)))
 					.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')			
 					.appendTo(oTBody)
 				;
-
 			}
 
 			oDiv.append(oTable);
@@ -241,7 +238,7 @@ function renderCrafting(items) {
 	} catch (e) {
 
 		console.log('error occured while processing/rendering crafting matches');
-		console.log(e);
+		errorDump(e);
 
 		$('#err').html('An error occured while processing matches in the stash. Please ' +
 					   'select refresh then full to try again. If the error persists, contact the author.');

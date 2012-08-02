@@ -644,5 +644,13 @@ ITEM_TYPE_DATA = {
 	"Sapphire Ring": "ring",
 	"Gold Ring": "ring",
 	"Ruby Ring": "ring",
-	"Topaz Ring": "ring"
+	"Topaz Ring": "ring",
+	"Crypt Map": "map",
+	"Overgrown Ruin Map": "map",
+	"Dunes Map": "map",
+	"Sewer Map": "map",
+	"Tomb Map": "map",
+	"Arachnid Nest Map": "map",
+	"Crematorium Map": "map",
+	"Vaal Pyramid Map": "map"
 };
