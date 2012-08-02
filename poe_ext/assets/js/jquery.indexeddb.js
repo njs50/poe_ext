@@ -272,10 +272,10 @@
 					copyReq();
 					var db = dbOpenReq.result;
 					if (typeof db.setVersion === "function") {
-						var oldVersion = parseInt(db.version || 1, 10);
-						var newVersion = typeof version === "undefined" ? oldVersion : parseInt(version, 10);
+						var oldVersion = parseInt(db.version || 0, 10);
+						var newVersion = typeof version === "undefined" ? (oldVersion === 0 ? 1 : oldVersion) : parseInt(version, 10);
 						if (oldVersion < newVersion) {
-							var versionReq = db.setVersion(version);
+							var versionReq = db.setVersion(newVersion);
 							versionReq.onsuccess = function(upgradeEvent){
 								result.transaction = versionReq.result;
 								var event = new Event("upgradeneeded");
@@ -473,7 +473,7 @@
 									dfd.rejectWith(trans, [e, e]);
 								}
 							}
-							me.transaction(storeName, typeof mode === "number" ? mode : IDBTransaction.READ_WRITE).then(function(){
+							me.transaction(storeName, mode || IDBTransaction.READ_WRITE).then(function(){
 								//console.log"Transaction completed");
 								// Nothing to do when transaction is complete
 							}, function(err, e){
@@ -494,7 +494,7 @@
 												db.close();
 											}
 										};
-										me.transaction(storeName, typeof mode === "number" ? mode : IDBTransaction.READ_WRITE).then(function(){
+										me.transaction(storeName,  mode || IDBTransaction.READ_WRITE).then(function(){
 											//console.log"Transaction completed when trying to create object store");
 											// Nothing much to do
 										}, function(err, e){
@@ -554,11 +554,11 @@
 					
 					result.index = function(indexName){
 						return {
-							"each": function(callback, range){
-								return indexOp("each", indexName, [callback, range]);
+							"each": function(callback, range, direction){
+								return indexOp("each", indexName, [callback, range, direction]);
 							},
-							"eachKey": function(callback, range){
-								return indexOp("eachKey", indexName, [callback, range]);
+							"eachKey": function(callback, range, direction){
+								return indexOp("eachKey", indexName, [callback, range, direction]);
 							}
 						};
 					}

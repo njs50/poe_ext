@@ -172,6 +172,7 @@ ITEM_TYPE_DATA = {
 	"Maelström Staff": "weapon2h",
 	"Imperial Staff": "weapon2h",
 	"Damnation Staff": "weapon2h",
+	"Ezomyte Staff": "weapon2h",
 	"Rusted Spike": "weapon1h",
 	"Whalebone Rapier": "weapon1h",
 	"Battered Foil": "weapon1h",

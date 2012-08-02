@@ -7,7 +7,7 @@ function initCache(){
 
 function resetCache(callback) {
 
-	var objectStore = $.indexedDB("poe_plus").objectStore("cache", true);
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", "readwrite");
 
 	var promise = objectStore.clear();
 
@@ -28,7 +28,7 @@ function getCache(cacheName) {
 
 	var deferred = new $.Deferred();
 
-	var objectStore = $.indexedDB("poe_plus").objectStore("cache", 0);
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", "readonly");
 	var promise = objectStore.get(cacheName);
 
 	promise.done(function(result, event){
@@ -51,7 +51,7 @@ function getCache(cacheName) {
 
 function removeFromCache(cacheName) {
 
-	var objectStore = $.indexedDB("poe_plus").objectStore("cache", 0);
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", "readwrite");
 	var promise = objectStore.delete(cacheName);		
 
 	return promise;
@@ -59,7 +59,7 @@ function removeFromCache(cacheName) {
 }
 
 function setCache(cacheName,value) {
-	var objectStore = $.indexedDB("poe_plus").objectStore("cache", true);
+	var objectStore = $.indexedDB("poe_plus").objectStore("cache", "readwrite");
 	var promise = objectStore.put(value,cacheName);
 
 	promise.fail(function(error, event){

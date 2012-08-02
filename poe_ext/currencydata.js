@@ -24,5 +24,6 @@ CURRENCY_DATA = {
 		"Portal Scroll" : "portalScroll",
 		"Regal Orb" : "regalOrb",
 		"Scroll of Wisdom" : "wisdomScroll",
-		"Transmutation Shard" : "transmutationShard"
+		"Transmutation Shard" : "transmutationShard",
+		"Combined Amulet": 'questItem'
 }

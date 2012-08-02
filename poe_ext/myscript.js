@@ -56,6 +56,9 @@ function parseItem(rawItem, loc) {
 			if (aMatch) {
 				item.calculated.Quantity = aMatch[1];
 				item.name = aMatch[2] + ' x' + aMatch[1];
+				item.baseType = aMatch[2];					
+			} else {
+				item.baseType = item.name;
 			}			
 		} 		
 		if (item.rarity == '') parseError(item,'unknown item rarity');		
@@ -438,15 +441,18 @@ function itemImplicitMods(item) {
 }
 
 function itemBaseType(item) {
+	if(item.rarity == 'currency') {
+		return item.baseType;
+	}
+
 	if (!item.identified || item.rarity == 'normal') { 
 		return item.name; 
 	}
+
 	if (item.rarity == 'rare') {
 		return item.name.split(' ').slice(2).join(' ');
 	}
-	if(item.rarity == 'currency') {
-		return item.name.replace(/\s+x\d+$/,'');
-	}
+
 	if (item.rarity == 'magic') {
 		// Split off the first word and everything after "of", these are suffix mods.
 		var baseType = item.name.split(' ');
@@ -520,6 +526,10 @@ function itemBaseType(item) {
 	}
 
 	// TODO(jaguilar): handle uniques.
+	if (item.rarity == 'unique') {		
+		if (item.rawItem.typeLine.length > 0) return item.rawItem.typeLine;
+	}
+
 	return item.name;
 }
 
