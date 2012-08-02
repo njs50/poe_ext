@@ -210,7 +210,7 @@ function renderCrafting(items) {
 				match = match_group[i];
 
 				$('<tr>')
-					.append('<td>' + parseInt(match.complete * 10000) / 100 + '% ' + match.distance + '</td>')
+					.append('<td>' + parseInt(match.complete * 10000) / 100 + '%</td>')
 					.append($('<td>').append(getItemsUL(match.items)))
 					.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')			
 					.appendTo(oTBody)
