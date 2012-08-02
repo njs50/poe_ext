@@ -25,5 +25,6 @@ CURRENCY_DATA = {
 		"Regal Orb" : "regalOrb",
 		"Scroll of Wisdom" : "wisdomScroll",
 		"Transmutation Shard" : "transmutationShard",
-		"Combined Amulet": 'questItem'
+		"Combined Amulet": 'questItem',
+		"Cartographer's Chisel": 'cartographerChisel'
 }
