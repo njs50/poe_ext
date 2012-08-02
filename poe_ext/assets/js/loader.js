@@ -351,7 +351,7 @@ function loadLeagueData(league) {
 	oCalc = {};
 
 	// clear reset lists
-	$('#refreshChars, #refreshTabs').empty();
+	$('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').empty();
 	
 	currentItems = null;
 
@@ -368,10 +368,11 @@ function loadLeagueData(league) {
 		for (var i=0; i< aChars.length; i++) {		
 			loadQueue.addPromise(
 				getCharItems(aChars[i]).done(function(oChar){					
-					$.merge(items, responseToItems(oChar, {section: oChar.charName, page: null}))
+					$.merge(items, responseToItems(oChar, {section: oChar.charName, page: null, index: 0}))
 				})
 			);
 			$('#refreshChars').append('<li><label class="checkbox"><input type="checkbox" name="refreshChars" value="char-' + aChars[i] + '">' + aChars[i] + '</label></li>');
+			$('#craftingIgnoreChars').append('<li><label class="checkbox"><input type="checkbox" name="ignoreChars" value="' + aChars[i] + '">' + aChars[i] + '</label></li>');
 		}
 
 
@@ -382,7 +383,7 @@ function loadLeagueData(league) {
 			
 				oTabs = oData.tabs;
 				numTabs = oTabs.length;
-				$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n) }))
+				$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n), index:oData.tabIndex }))
 
 			} catch (e) {
 
@@ -399,12 +400,13 @@ function loadLeagueData(league) {
 
 				for (var i=0; i < numTabs; i++ ) {
 					$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" value="stash-' + league + '-' + i + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
+					$('#craftingIgnoreTabs').append('<li><label class="checkbox"><input type="checkbox" name="ignoreTabs" value="' + parseInt(oTabs[i].n) + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
 				}
 
 				for (var i=1; i < numTabs; i++ ) {		
 					loadQueue.addPromise(
 						getStashPage(league,i).done(function(oData){													
-							$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n) }))
+							$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n), index:oData.tabIndex }))
 						})
 					);
 				}
@@ -453,11 +455,25 @@ function loadLeagueData(league) {
 function responseToItems(response, location) {
 	var items = []
 	$.map(response.items, function (v) {
-		// We filter out any items that are in a character response but aren't in the
-		// main inventory. I.e. we don't include what you're wearing.
-		if (location.section === 'stash' || v.inventoryId == 'MainInventory') {
-			items.push(parseItem(v, location))
+
+		// get the correct location for things outside stash
+		var loc = location.page;	
+
+		if (location.section !== 'stash') {
+			loc = v.inventoryId === 'MainInventory' ? 'Inventory' : 'Equiped';
 		}
+
+		// add this item
+		items.push(parseItem(v, {section: location.section, page: loc, tabIndex: location.index}));
+
+		loc += '*';
+
+		// get any socketed items and add them
+		if (v.hasOwnProperty('socketedItems') && v.socketedItems.length) {			
+			for (var i = 0; i < v.socketedItems.length; i++ ) {
+				items.push(parseItem(v.socketedItems[i], {section: location.section, page: loc, tabIndex: location.index}));
+			}
+		} 
 	})
 	return items;
 }

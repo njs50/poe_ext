@@ -6,9 +6,9 @@ ul#rares-menu label {
 	padding-left: 26px;
 }
 
-#refreshChars li, #refreshTabs li {
+#refreshChars li, #refreshTabs li, #craftingIgnoreChars li, #craftingIgnoreTabs li {
 	float: left;
-	width: 100px;
+	width: 125px;
 }
 
 

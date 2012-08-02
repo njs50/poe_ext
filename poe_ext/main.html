@@ -119,22 +119,17 @@
 
 	    	<div id="err"></div>
 
-			<div id="crafting-content" class="hide">
+			<div id="crafting-content">
 
 			</div>
 
-
 			<p><p>
-
-			<div id="pleaseSelect" class="hide">Please select a character from the dropdown.</div>
-
-			
 
 			<div id="output"></div>
 
 			<p>
 
-			<div class="hide" id="rareList"></div>
+			<div id="rareList"></div>
 			
 			<div class="modal hide" id="clipboardMatch">
 			  <div class="modal-header">			    
@@ -195,7 +190,7 @@
 			    <h3>Partial Refresh</h3>
 			  </div>
 			  <div class="modal-body">
-			    	<h3>Characters</h3>
+			    	<h4>Characters</h3>
 			    	<ul id="refreshChars" class="unstyled"></ul>
 			    	<div class="clearfix"></div>
 			    	<h3>Tabs</h3>
@@ -204,6 +199,23 @@
 			  <div class="modal-footer">
 			    <a href="#" class="btn" data-dismiss="modal">Close</a>
 			    <a href="#" class="btn btn-primary" data-dismiss="modal" id="applyPartialRefresh">Apply</a>
+			  </div>
+			</div>
+
+			<div class="modal hide" id="craftingFilters">
+			  <div class="modal-header">			    
+			    <h3>Ignore Locations</h3>
+			  </div>
+			  <div class="modal-body">
+			    	<h3>Characters</h3>
+			    	<ul id="craftingIgnoreChars" class="unstyled"></ul>
+			    	<div class="clearfix"></div>
+			    	<h3>Tabs</h3>
+			    	<ul id="craftingIgnoreTabs" class="unstyled"></ul>
+			  </div>
+			  <div class="modal-footer">
+			    <a href="#" class="btn" data-dismiss="modal">Close</a>
+			    <a href="#" class="btn btn-primary" data-dismiss="modal" id="applyIgnoreLocations">Apply</a>
 			  </div>
 			</div>
 

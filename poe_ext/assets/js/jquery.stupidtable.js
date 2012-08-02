@@ -12,8 +12,8 @@
 
     // Merge sort functions with some default sort functions.
     sortFns = $.extend({}, {
-      "int":function(a,b){ if (a === '') a = 0; if (b === '') b = 0; return parseInt(b, 10) - parseInt(a,10); },
-      "float":function(a,b){ if (a === '') a = 0; if (b === '') b = 0; return parseFloat(b) - parseFloat(a); },
+      "int":function(a,b){ a = parseInt(a,10); if (isNaN(a)) a = 0; b = parseInt(b,10); if (isNaN(b)) b = 0; return b - a; },
+      "float":function(a,b){ a = parseFloat(a); if (isNaN(a)) a = 0; b = parseFloat(b); if (isNaN(b)) b = 0; return b - a; },
       "string":function(a,b){ if (a<b) return -1; if (a>b) return +1; return 0;}
     }, sortFns);
 

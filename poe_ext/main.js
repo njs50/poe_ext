@@ -10,8 +10,6 @@ function setupInventoryRendering(items) {
 
 	var deferred = new $.Deferred();
 
-	aInventory = items;
-
 	// setup available properties
 	var oPropUL = $('ul#viewProps').empty();
 	for (var key in oProps) {
@@ -121,19 +119,54 @@ $('#applyItemSelection').click(function(){
 
 })
 
-function processItems(items){
+$('#applyIgnoreLocations').click(function(){
+
+	renderCrafting(aInventory)
+	// currentLeague
+
+});
+
+function getCraftingIgnores(){
+	var aIgnoreTabs =[];
+	var aIgnoreChars =[];
+
+	$('input[name=ignoreTabs]:checked').each(function(idx,item){
+		aIgnoreTabs.push(parseInt($(item).val()));
+	});
+
+	$('input[name=ignoreChars]:checked').each(function(idx,item){
+		aIgnoreChars.push($(item).val());
+	});
+
+	return {chars: aIgnoreChars, tabs:aIgnoreTabs };	
+}
+
+
+function renderCrafting(items) {
 
 	try {
+	
+		var craftItems = [];
 
-		currentItems = items;
-		var matches = allMatches(items);
+		var oIgnore = getCraftingIgnores();
+
+		$.map(items,function(item){
+			if(item.location.section === 'stash' && oIgnore.tabs.indexOf(item.location.page) === -1) {
+				craftItems.push(item);
+			} else if (item.location.page === 'Inventory' && oIgnore.chars.indexOf(item.location.section) === -1) {
+				craftItems.push(item);
+			}
+		});
+
+		var matches = allMatches(craftItems);
+
 		var idx = 0;
-
 		var item = {};
-
 		var match = {};
 
-		for (item in matches) {
+		$('ul#craftingTabs,div#crafting-content').empty();
+
+		for (var item in matches) {
 			idx++;
 
 			// add navigation entry
@@ -145,36 +178,69 @@ function processItems(items){
 			// add title
 			oDiv.append('<h2>' + item + '</h2>');
 
-			var oTable = $('<table class="table table-striped table-condensed"><thead><tr><th>%<th>Matched</th><th>Missing</th><thead></table>');
+			var oTable = $('<table class="table table-striped table-condensed"><thead><tr><th class="type-int">%<th>Matched</th><th>Missing</th><thead></table>');
 
 			var oTBody = $('<tbody>').appendTo(oTable);
 
 			var match_group = matches[item];
 
 			for (var i = 0; i < match_group.length; i++) {
+				match = match_group[i];				
+				// calculate the distance between each item (in tabs, 0 for inventory)
+				var distance = 0;
+				var last_node = 0;
+				for (var j = 0; j < match.items.length; j++) {
+					if (last_node === 0) last_node = match.items[j].location.tabIndex;
+					if(match.items[j].location.tabIndex !== 0) {
+						distance += Math.abs(match.items[j].location.tabIndex - last_node);
+						last_node = match.items[j].location.tabIndex
+					}
+				}
+				match.distance = distance;
+			}
+
+			// sort on distance
+			match_group.sort(function(a,b) {
+				return a.distance - b.distance;
+			});			
+
+
+			for (var i = 0; i < match_group.length; i++) {	
 
 				match = match_group[i];
 
 				$('<tr>')
-					.append('<td>' + parseInt(match.complete * 10000) / 100 + '%</td>')
+					.append('<td>' + parseInt(match.complete * 10000) / 100 + '% ' + match.distance + '</td>')
 					.append($('<td>').append(getItemsUL(match.items)))
 					.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')			
 					.appendTo(oTBody)
 				;
-				
 
 			}
 
 			oDiv.append(oTable);
 
+			// sort crafting tabs
 			$('div#crafting-content').append(oDiv);
 
 		}
 
+		sortUL('#craftingTabs');
+
+		$('ul#craftingTabs').append('<li class="divider"></li><li><a id="openCraftingFilters" data-toggle="modal" href="#craftingFilters">Configure Crafting</a></li>')
+
+		$('ul#craftingTabs li.crafting-page a').click(function(){
+			$('#rareList').hide();
+			$('div#crafting-content div.crafting-block').hide();
+			$('ul.nav li,ul#craftingTabs li').removeClass('active');
+			$(this).parent().addClass('active');		
+			$(this).closest('.dropdown').addClass('active');		
+			$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
+		});
 
 	} catch (e) {
 
-		console.log('error occured while processing items for stash');
+		console.log('error occured while processing/rendering crafting matches');
 		console.log(e);
 
 		$('#err').html('An error occured while processing matches in the stash. Please ' +
@@ -189,87 +255,37 @@ function processItems(items){
 	}
 
 
+
+}
+
+function processItems(items){
+
+	// used to rerender the page
+	aInventory = items;
+
+	// seems to be used by the clipboard
+	currentItems = items;
+
+	renderCrafting(items);
+
 	setupInventoryRendering(items)
 		.done(function(){
 
 			try {
 
 				// render rare list
-				$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();
-
-				// sort crafting tabs
-				sortUL('#craftingTabs');
-
-				$('div#crafting-content').show();
-
-				$('ul#craftingTabs li.crafting-page a, #openRareList, ul#rares-menu li input[type=checkbox]').click(function(){
-					$('#rareList').hide();
-					$('div#crafting-content div.crafting-block').hide();
-					$('ul.nav li,ul#craftingTabs li').removeClass('active');
-					$(this).parent().addClass('active');		
-				});
-
-				$('ul#craftingTabs li.crafting-page a').click(function(){
-					$(this).closest('.dropdown').addClass('active');		
-					$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
-				});
-
-				$('ul#rares-menu li input[type=checkbox]').click(function(e){		
-
-
-					$(this).closest('.dropdown').addClass('active');
-
-					var aSelector = [];
-					$('ul#rares-menu input[name=item-filter]:checked').each(function(idx,item){			
-						aSelector.push('table tbody tr.' + $(item).val());
-					})
-					var selector = aSelector.join(', ');
-
-
-					var aSelectorRarity = [];
-					$('ul#rares-menu input[name=item-filter-rarity]:checked').each(function(idx,item){			
-						aSelectorRarity.push('table tbody tr.' + $(item).val());
-					})
-					var selectorRarity = aSelectorRarity.join(', ');
-
-					if (selector != '' || selectorRarity != '') {
-						
-						// hide list while we refilter
-						$('#rareList').hide().find('table tbody tr').addClass('hide');
-
-						var oFiltered = $('#rareList').hide().find('table tbody tr').addClass('hide');
-
-						if (selector != '') oFiltered = oFiltered.filter(selector);
-						if (selectorRarity != '') oFiltered = oFiltered.filter(selectorRarity);
-
-						oFiltered.removeClass('hide');
-
-						$('#rareList').show();
-						
-						// prevent menu from closing	
-						e.stopPropagation();
-
-					} else {
-						$('#openRareList').trigger('click');
-					}
-
-				});
-
-				// prevent label click events from triggering menu close (the follow up checkbox click still can)
-				$('ul#rares-menu li label').click(function(e){
-					e.stopPropagation();
-				})
-
+				$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();				
 
 				$('#openRareList')		
 					.click(function(){				
 						$(this).closest('.dropdown').addClass('active');
-						$('#rareList').find('table tbody tr.hide').removeClass('hide').end().show();
-						$('ul#rares-menu li input[type=checkbox]:checked').removeProp('checked');
+						$('div#crafting-content div.crafting-block').hide();
+						$('#rareList').show();						
+						$('ul.nav li,ul#craftingTabs li').removeClass('active');
+						$(this).parent().addClass('active');
 					})
+					.trigger('click')
 				;
-
-				$('ul#craftingTabs li.crafting-page a:first').trigger('click');
 	
 			} catch (e) {
 
@@ -306,7 +322,7 @@ function getItemsUL(aItems) {
 
 		$('<li>')
 			.append(oItem)
-			.append(' (' + (item.location.page === null ? item.location.section : 'tab:' + item.location.page )  + ')' )
+			.append(' (' + item.location.section + ':' + item.location.page  + ')' )
 			.appendTo(oUL)
 		;
 
