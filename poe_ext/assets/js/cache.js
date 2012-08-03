@@ -1,22 +1,30 @@
 var cache_enabled = true;
 
+window.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
+
+var db;
+
+const db_name = "poe_plus";
+const store_name = "cache";
+
 
 function initCache(){
 	
 	var deferred = new $.Deferred();
 
-	$.indexedDB("poe_plus")
+	var request = window.indexedDB.open(db_name); 
 
-		.done(function(){
-			deferred.resolve();
-		})
+	request.onsuccess = function(e) {	 	
+		//console.log('indexed db opened');
+		db = request.result;
+		deferred.resolve();
+	};
 
-		.fail(function(){
-			console.log('Failed to open indexed DB, disabling caching...');
-			cache_enabled = false;
-			deferred.resolve();		
-		})
-	;
+	request.onerror = function(e){
+		console.log("Failed to open indexed DB, disabling caching... : " + e);
+		cache_enabled = false;
+		deferred.resolve();
+	};	 
 
 	return deferred.promise();
 }
@@ -24,21 +32,21 @@ function initCache(){
 
 function resetCache(callback) {
 
-	var objectStore = $.indexedDB("poe_plus").objectStore("cache", $.indexedDB.IDBTransaction.READ_WRITE);
+	var request = db.transaction([store_name], "readwrite").objectStore(store_name).clear();
 
-	var promise = objectStore.clear();
+	request.onsuccess = function(e) {
+		//console.log('db reset');
+		if(jQuery.isFunction(callback)) callback();
+	};
 
-	promise.done(function(result, event){
-	    if(jQuery.isFunction(callback)) callback();
-	});
-
-	promise.fail(function(error, event){
+	request.onerror = function(e){
 		console.log('Error clearing cache DB');
 		cache_enabled = false;
-		console.log(error);
+		console.log(e);
 		// continue on with cache disabled....
 		if(jQuery.isFunction(callback)) callback();
-	});	
+	};
+
 	
 }
 
@@ -48,30 +56,26 @@ function getCache(cacheName) {
 
 	var deferred = new $.Deferred();
 
+	if (cache_enabled){
 
-	if (cache_enabled) {
+		var request = db.transaction([store_name], "readonly").objectStore(store_name).get(cacheName);		
 
-		var objectStore = $.indexedDB("poe_plus").objectStore("cache", $.indexedDB.IDBTransaction.READ_ONLY);
-		var promise = objectStore.get(cacheName);
-
-		promise.done(function(result, event){
-		    if (typeof result == 'undefined'){
+		request.onsuccess = function(e) {			
+		    if (typeof request.result == 'undefined'){
 		    	deferred.reject();
 		    } else {
-		    	deferred.resolve(result);
-		    }
-		});
+		    	deferred.resolve(request.result);
+		    }			
+		};
 
-		promise.fail(function(error, event){
+		request.onerror = function(e){
 			console.log('Error getting object from cache');
 			cache_enabled = false;
-			console.log(error);
+			console.log(e);
 			deferred.reject();
-		});		
+		};
 
-	} else {
-		deferred.reject();
-	}
+	} else deferred.reject();
 
 	return deferred.promise();
 
@@ -79,29 +83,50 @@ function getCache(cacheName) {
 
 function removeFromCache(cacheName) {
 
-	if (cache_enabled) {
+	var deferred = new $.Deferred();
 
-		var objectStore = $.indexedDB("poe_plus").objectStore("cache", $.indexedDB.IDBTransaction.READ_WRITE);
-		var promise = objectStore.delete(cacheName);		
+	if (cache_enabled){
 
-		return promise;
-	}
+		var request = db.transaction([store_name], "readwrite").objectStore(store_name).delete(cacheName);		
+
+		request.onsuccess = function(e) {				
+		    deferred.resolve();	
+		};
+
+		request.onerror = function(e){
+			console.log('Error removing object from cache');
+			cache_enabled = false;
+			console.log(e);
+			deferred.resolve();
+		};
+
+	} else deferred.resolve();
+
+	return deferred.promise();
 
 }
 
 function setCache(cacheName,value) {
 
-	if (cache_enabled) {
+	var deferred = new $.Deferred();
 
-		var objectStore = $.indexedDB("poe_plus").objectStore("cache", $.indexedDB.IDBTransaction.READ_WRITE);
-		var promise = objectStore.put(value,cacheName);
+	if (cache_enabled){
 
-		promise.fail(function(error, event){
-			console.log('Error putting object into cache');
+		var request = db.transaction([store_name], "readwrite").objectStore(store_name).put(value,cacheName);		
+
+		request.onsuccess = function(e) {				
+		    deferred.resolve();	
+		};
+
+		request.onerror = function(e){
+			console.log('Error adding object to cache');
 			cache_enabled = false;
-			console.log(error);		
-		});
+			console.log(e);
+			deferred.resolve();
+		};
 
-	}
-	
+	} else deferred.resolve();
+
+	return deferred.promise();
+
 }

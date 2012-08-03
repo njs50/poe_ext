@@ -1,16 +1,36 @@
+
+function copy_cb(str) {
+
+	var oTemp = $('<textarea>').appendTo('body').val(str).select();
+	var foo = document.execCommand('copy');	
+	oTemp.remove();
+
+}
+
+function paste_cb() {
+	var oTemp = $('<textarea>').val('').appendTo('body').select();
+	document.execCommand('paste');
+	var sRet = oTemp.val();
+	oTemp.remove();
+	return sRet;
+}
+
+
 $(function(){
 
 	$('#copyToClipboard,#copyFromClipboard').attr('disabled',true);
 		
 	$('#copyToClipboard').click(function () {
 		if(currentItems!=null) {
-			chrome.extension.getBackgroundPage().copy(formatRareListPlain(getSortedRares(currentItems),true));
+			copy_cb(formatRareListPlain(getSortedRares(currentItems),true));
 		}
 	});
 
 	$('#copyFromClipboard').click(function () {
+		
 		if(currentItems!=null) {
-			var theirData = chrome.extension.getBackgroundPage().paste();
+
+			var theirData = paste_cb();
 			// split by line
 			var theirLines = theirData.split('\n');
 	
@@ -77,7 +97,7 @@ $(function(){
 				html = "<h4>No matches found</h4>";
 			} else {
 				
-				chrome.extension.getBackgroundPage().copy(formatRareListPlain(matches),false);
+				copy_cb(formatRareListPlain(matches),false);
 				// output the matches here
 				html = formatRareList(matches,false);
 			

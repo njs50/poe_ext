@@ -142,23 +142,29 @@ function getCraftingIgnores(){
 }
 
 
+function getCraftingItems(items){
+	var craftItems = [];
+
+	var oIgnore = getCraftingIgnores();
+
+	$.map(items,function(item){
+		if(item.location.section === 'stash' && oIgnore.tabs.indexOf(item.location.page) === -1) {
+			craftItems.push(item);
+		} else if (item.location.page === 'Inventory' && oIgnore.chars.indexOf(item.location.section) === -1) {
+			craftItems.push(item);
+		}
+	});
+
+	return craftItems;
+}
+
 function renderCrafting(items) {
 
 	try {
 	
-		var craftItems = [];
+		
 
-		var oIgnore = getCraftingIgnores();
-
-		$.map(items,function(item){
-			if(item.location.section === 'stash' && oIgnore.tabs.indexOf(item.location.page) === -1) {
-				craftItems.push(item);
-			} else if (item.location.page === 'Inventory' && oIgnore.chars.indexOf(item.location.section) === -1) {
-				craftItems.push(item);
-			}
-		});
-
-		var matches = allMatches(craftItems);
+		var matches = allMatches(getCraftingItems(items));
 
 		var idx = 0;
 		var item = {};
@@ -564,7 +570,7 @@ function getSortedItems(items) {
 
 
 function getSortedRares(items) {
-	var available = items.slice(0);
+	var available = getCraftingItems(items);
 	
 	var rares = available.filter(function(i) {
 		return (i.rarity == 'rare') && i.identified;

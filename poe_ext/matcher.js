@@ -191,7 +191,7 @@ function SocketMatch(reqcount, linked) {
 }
 function RareModMatch(modcount) {
 	return new PredicateMatcher(
-		function (i) { return i.rarity == 'rare' && i.rawItem.explicitMods.length > modcount; });
+		function (i) { return i.rarity == 'rare' && i.rawItem.hasOwnProperty('explicitMods') && i.rawItem.explicitMods.length > modcount; });
 }
 
 var BaseTypeMatch = Match.extend({
