@@ -8,23 +8,26 @@ const db_name = "poe_plus";
 const store_name = "cache";
 const db_version = 3;
 
+var tx_readonly = 0;
+var tx_readwrite = 1;
+
 function initCache(){
 	
+	// if we have a recent version of chrome us the strings instead of identifiers for transactions state
+	var aMatch = navigator.userAgent.match(/Chrome\/(\d+)/);
+	if (aMatch.length == 2 && parseInt(aMatch[1]) >= 21) {
+		tx_readonly = 'readonly';
+		tx_readwrite = 'readwrite';
+	}
+
 	var deferred = new $.Deferred();
 
 
 	var request = window.indexedDB.open(db_name,db_version); 
 
-
 	request.onupgradeneeded = function(e) {
-		console.log('upgrade needed...');
-	    db = request.result;
-		if(db.objectStoreNames.contains(store_name)) {
-			db.deleteObjectStore(store_name);
-		}
-
-		db.createObjectStore(store_name).transaction;
-	}	
+		console.log('ruh roh, looks like chrome finally supports db upgrades but nobody has written the script...');
+	};
 
 	request.onsuccess = function(e) {	 	
 		
@@ -81,7 +84,7 @@ function initCache(){
 
 function resetCache(callback) {
 
-	var request = db.transaction([store_name], "readwrite").objectStore(store_name).clear();
+	var request = db.transaction([store_name], tx_readwrite).objectStore(store_name).clear();
 
 	request.onsuccess = function(e) {
 		//console.log('db reset');
@@ -107,7 +110,7 @@ function getCache(cacheName) {
 
 	if (cache_enabled){
 
-		var request = db.transaction([store_name], "readwrite").objectStore(store_name).get(cacheName);		
+		var request = db.transaction([store_name], tx_readonly).objectStore(store_name).get(cacheName);		
 
 		request.onsuccess = function(e) {			
 		    if (typeof request.result == 'undefined'){
@@ -136,7 +139,7 @@ function removeFromCache(cacheName) {
 
 	if (cache_enabled){
 
-		var request = db.transaction([store_name], "readwrite").objectStore(store_name).delete(cacheName);		
+		var request = db.transaction([store_name], tx_readwrite).objectStore(store_name).delete(cacheName);		
 
 		request.onsuccess = function(e) {				
 		    deferred.resolve();	
@@ -161,7 +164,7 @@ function setCache(cacheName,value) {
 
 	if (cache_enabled){
 
-		var request = db.transaction([store_name], "readwrite").objectStore(store_name).put(value,cacheName);		
+		var request = db.transaction([store_name], tx_readwrite).objectStore(store_name).put(value,cacheName);		
 
 		request.onsuccess = function(e) {				
 		    deferred.resolve();	

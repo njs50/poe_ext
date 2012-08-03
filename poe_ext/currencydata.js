@@ -26,5 +26,7 @@ CURRENCY_DATA = {
 		"Scroll of Wisdom" : "wisdomScroll",
 		"Transmutation Shard" : "transmutationShard",
 		"Combined Amulet": 'questItem',
+		"Baelful Gem": 'questItem',
+		"Wicked Spear": 'questItem',
 		"Cartographer's Chisel": 'cartographerChisel'
 }
