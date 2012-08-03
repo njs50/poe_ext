@@ -6,18 +6,67 @@ var db;
 
 const db_name = "poe_plus";
 const store_name = "cache";
-
+const db_version = 1;
 
 function initCache(){
 	
 	var deferred = new $.Deferred();
 
-	var request = window.indexedDB.open(db_name); 
+
+	var request = window.indexedDB.open(db_name,db_version); 
+
+
+	request.onupgradeneeded = function(e) {
+		console.log('upgrade needed...');
+	    db = request.result;
+		if(db.objectStoreNames.contains(store_name)) {
+			db.deleteObjectStore(store_name);
+		}
+
+		db.createObjectStore(store_name).transaction;
+	}	
 
 	request.onsuccess = function(e) {	 	
-		//console.log('indexed db opened');
+		
+		console.log('indexed db opened');
+
 		db = request.result;
-		deferred.resolve();
+
+		if (db.version != db_version) {
+
+			console.log('indexed db version incorrect');
+
+			var setVrequest = db.setVersion(db_version);
+
+            // onsuccess is the only place we can create Object Stores
+            setVrequest.onfailure = function(e){
+            	console.log('error setting version');
+            };
+
+            setVrequest.onsuccess = function(e) {
+
+				var txn = e.target.result;
+
+				if(db.objectStoreNames.contains(store_name)) {
+					db.deleteObjectStore(store_name);
+				}
+
+				db.createObjectStore(store_name);
+
+				txn.oncomplete = function () {
+					console.log('new store created');					
+					deferred.resolve();
+                           
+                }
+
+            };
+
+			
+
+		} else {
+			deferred.resolve();
+		}
+
 	};
 
 	request.onerror = function(e){
