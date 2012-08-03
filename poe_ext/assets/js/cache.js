@@ -6,7 +6,7 @@ var db;
 
 const db_name = "poe_plus";
 const store_name = "cache";
-const db_version = 1;
+const db_version = 3;
 
 function initCache(){
 	
@@ -107,7 +107,7 @@ function getCache(cacheName) {
 
 	if (cache_enabled){
 
-		var request = db.transaction([store_name], "readonly").objectStore(store_name).get(cacheName);		
+		var request = db.transaction([store_name], "readwrite").objectStore(store_name).get(cacheName);		
 
 		request.onsuccess = function(e) {			
 		    if (typeof request.result == 'undefined'){
