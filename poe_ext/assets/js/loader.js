@@ -336,6 +336,11 @@ function showCharError() {
 
 function loadLeagueData(league) {
 
+	// get state data to reset after load
+	var currentSection = $('#craftingTabs li.active, #rares_menu li.active');
+
+	var oChecked = $('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').find('input[type=checkbox]:checked');
+	
 	// clear existing crafting info
 	$('ul#craftingTabs li').remove();
 	$('div#crafting-content').empty();
@@ -349,6 +354,9 @@ function loadLeagueData(league) {
 	oRequired = {};
 	oMods = {};
 	oCalc = {};
+
+	
+
 
 	// clear reset lists
 	$('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').empty();
@@ -371,8 +379,8 @@ function loadLeagueData(league) {
 					$.merge(items, responseToItems(oChar, {section: oChar.charName, page: null, index: 0}))
 				})
 			);
-			$('#refreshChars').append('<li><label class="checkbox"><input type="checkbox" name="refreshChars" value="char-' + aChars[i] + '">' + aChars[i] + '</label></li>');
-			$('#craftingIgnoreChars').append('<li><label class="checkbox"><input type="checkbox" name="ignoreChars" value="' + aChars[i] + '">' + aChars[i] + '</label></li>');
+			$('#refreshChars').append('<li><label class="checkbox"><input type="checkbox" name="refreshChars" id="char_' + aChars[i] + '" value="char-' + aChars[i] + '">' + aChars[i] + '</label></li>');
+			$('#craftingIgnoreChars').append('<li><label class="checkbox"><input type="checkbox" id="ignoreChars_' + aChars[i] + '" name="ignoreChars" value="' + aChars[i] + '">' + aChars[i] + '</label></li>');
 		}
 
 
@@ -399,9 +407,14 @@ function loadLeagueData(league) {
 			try {
 
 				for (var i=0; i < numTabs; i++ ) {
-					$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" value="stash-' + league + '-' + i + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
-					$('#craftingIgnoreTabs').append('<li><label class="checkbox"><input type="checkbox" name="ignoreTabs" value="' + parseInt(oTabs[i].n) + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
+					$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" id="stash_' + oTabs[i].n + '" value="stash-' + league + '-' + i + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
+					$('#craftingIgnoreTabs').append('<li><label class="checkbox"><input type="checkbox" name="ignoreTabs" id="ignoreTabs_' + oTabs[i].n + '" value="' + parseInt(oTabs[i].n) + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
 				}
+
+				// recheck anything that was checked before the load
+				oChecked.each(function(idx,item){
+					$('#' + $(item).attr('id')).prop('checked',true);
+				})
 
 				for (var i=1; i < numTabs; i++ ) {		
 					loadQueue.addPromise(
@@ -412,7 +425,17 @@ function loadLeagueData(league) {
 				}
 
 				loadQueue.completed(function(){
-					processItems(items);
+					processItems(items)
+						.done(function(){
+							console.log('loaded...')
+							if (currentSection.length){
+								var selected = currentSection.text();								
+								$('#craftingTabs li, #rares_menu').find('a:contains("' + selected + '")').trigger('click');
+							}
+						})
+					;
+
+
 					$.unblockUI();
 				})
 

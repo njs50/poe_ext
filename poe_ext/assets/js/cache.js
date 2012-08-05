@@ -31,13 +31,13 @@ function initCache(){
 
 	request.onsuccess = function(e) {	 	
 		
-		console.log('indexed db opened');
+		// console.log('indexed db opened');
 
 		db = request.result;
 
 		if (db.version != db_version) {
 
-			console.log('indexed db version incorrect');
+			// console.log('indexed db version incorrect');
 
 			var setVrequest = db.setVersion(db_version);
 
@@ -57,7 +57,7 @@ function initCache(){
 				db.createObjectStore(store_name);
 
 				txn.oncomplete = function () {
-					console.log('new store created');					
+					// console.log('new store created');					
 					deferred.resolve();
                            
                 }

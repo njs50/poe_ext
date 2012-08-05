@@ -162,7 +162,7 @@ function renderCrafting(items) {
 
 	try {
 	
-		
+
 
 		var matches = allMatches(getCraftingItems(items));
 
@@ -263,6 +263,8 @@ function renderCrafting(items) {
 
 function processItems(items){
 
+	var deferred = new $.Deferred();
+
 	// used to rerender the page
 	aInventory = items;
 
@@ -286,9 +288,10 @@ function processItems(items){
 						$('#rareList').show();						
 						$('ul.nav li,ul#craftingTabs li').removeClass('active');
 						$(this).parent().addClass('active');
-					})
-					.trigger('click')
+					});					
 				;
+
+				deferred.resolve();
 	
 			} catch (e) {
 
@@ -303,6 +306,7 @@ function processItems(items){
 		})
 	;
 
+	return deferred.promise();
 
 }
 
@@ -361,7 +365,7 @@ function getItemLink(item) {
 				delay: { show: 500, hide: 100 }				
 			})
 			.click(function(){
-				chrome.extension.getBackgroundPage().copy(itemToString(item));
+				copy_cb(itemToString(item));
 				console.log(item);
 			})
 		;
