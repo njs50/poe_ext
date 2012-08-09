@@ -151,9 +151,11 @@ function refreshData(callback) {
 						
 						loadQueue.addPromise(
 							getCharItems(item.name)
-								.done(function(oData){
-									if (!oLeagues.hasOwnProperty(oData.character.league)) oLeagues[oData.character.league] = [];
-									oLeagues[oData.character.league].push(item.name);
+								.done(function(oData){									
+									if (oData.hasOwnProperty('character') && oData.character.hasOwnProperty('league')) {
+										if (!oLeagues.hasOwnProperty(oData.character.league)) oLeagues[oData.character.league] = [];
+										 oLeagues[oData.character.league].push(item.name);
+									 }
 								})
 						);
 						
