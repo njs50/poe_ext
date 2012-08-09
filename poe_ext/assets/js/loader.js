@@ -43,6 +43,19 @@ function loadPageData() {
 			.done(function(charName) {
 				$('#leagueSelector li a[title="' + charName + '"]').trigger('click');						
 			})
+			.fail(function(){
+				// load league with the most chars
+				var league = '';
+				var charCount = 0;
+				for (var l in oLeagueChars) {
+					if (oLeagueChars[l].length > charCount) {
+						charCount = oLeagueChars[l].length;
+						league = l;
+					}
+				}
+				if (league != '') $('#leagueSelector li a[title="' + league + '"]').trigger('click');
+
+			})
 		;
 	});	
 }

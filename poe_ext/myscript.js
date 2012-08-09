@@ -39,6 +39,7 @@ function parseItem(rawItem, loc) {
 			implicitMods: {},
 			combinedMods: {},
 			requirements: {},
+			sockets: {},
 			calculated: {Quantity: 1},
 			rawItem: rawItem
 
@@ -93,6 +94,7 @@ function parseItem(rawItem, loc) {
 
 		item.rareName = itemRareName(item);
 
+		item.sockets = itemSockets(rawItem);
 
 		// calculated properties
 		item.calculated['Average Lightning Damage'] = getAverageDamageOfType(item,'Lightning Damage');
@@ -101,6 +103,8 @@ function parseItem(rawItem, loc) {
 		item.calculated['Average Chaos Damage'] = getAverageDamageOfType(item,'Chaos Damage');
 		item.calculated['Average Physical Damage'] = getAverageDamageOfType(item,'Physical Damage');		
 		item.calculated['Average Damage'] = averageDamage(item);
+		item.calculated['Max Linked Sockets'] = item.sockets.maxConnected;
+		item.calculated['Sockets'] = item.sockets.numSockets;
 
 		/*
 		item.linkedSockets = getSocketLinkage(itemDiv);
@@ -540,41 +544,47 @@ function itemRareName(item) {
 	return item.name.split(' ').slice(0, 2).join(' ');
 }
 
-function itemSockets(sdiv) {
-	if (sdiv == null) { return null; }
-	var children = sdiv.children;
+function itemSockets(rawItem) {
+
 	var numSockets = 0;
-	var maxConnected = 0;  // Max # in a connected seq.
-	var numConnected = 0;  // Number of sockets in current connected seq.
-	var colors = {red:false, green:false, blue:false};
-	var connectionsLeft = 1;
 	var tricolor = false;  // Any connected seqs with all three colors?
-	for (var i = 0; i < children.length; ++i) {
-		var child = children[i];
-		if (connectionsLeft <= 0) {
-			connectionsLeft = 1;
-			numConnected = 0;
-			colors.red = colors.green = colors.blue = false;
+	var maxConnected = 0;  // Max # in a connected seq.
+
+
+	if (rawItem.hasOwnProperty('sockets')) {
+
+		var aSockets = rawItem.sockets;
+		var oSockets = {};
+
+		// convert array into a struct of socket groups + number of each socket type
+		$.each(aSockets,function(idx,item){
+			if (!oSockets.hasOwnProperty(item.group)) oSockets[item.group] = {};
+			if (!oSockets[item.group].hasOwnProperty(item.attr)){
+				oSockets[item.group][item.attr] = 1;
+			} else {
+				++oSockets[item.group][item.attr];
+			}
+		});
+
+		for (var idx in oSockets){
+			var oGroup = oSockets[idx];
+
+			var connectsInGroup = 0;
+			var types = 0;
+			for (var type in oGroup) {
+				connectsInGroup += oGroup[type];
+				types++;
+			}
+			numSockets += connectsInGroup;
+			if (connectsInGroup > maxConnected) maxConnected = connectsInGroup;
+			if (types == 3) tricolor = true;
+
+			if (oGroup.hasOwnProperty('D') && oGroup.hasOwnProperty('S') && oGroup.hasOwnProperty('I')) tricolor = true;
+			
 		}
 
-		// If this is a connector, add a connection, otherwise remove one.
-		if (child.className == '') {
-			connectionsLeft += 1;
-		} else if (child.className == 'clear') {
-			break;
-		} else {
-			connectionsLeft -= 1;
-			colors[socketColor($('img', child)[0])] = true;
-			++numConnected;
-			++numSockets;
-			if (numConnected > maxConnected) { 
-				maxConnected = numConnected; 
-			}
-			if (colors.red && colors.green && colors.blue) {
-				tricolor = true;
-			}
-		}	
 	}
+
 	return {
 		tricolor: tricolor,
 		maxConnected: maxConnected,

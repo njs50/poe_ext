@@ -186,7 +186,7 @@ function TricolorMatch() {
 function SocketMatch(reqcount, linked) {
 	return new PredicateMatcher(
 		function (i) { 
-			return i.sockets && ((reqcount <= linked) ? i.sockets.maxConnected : i.sockets.numSockets) > reqcount; 
+			return i.sockets && ((linked ? i.sockets.maxConnected : i.sockets.numSockets) >= reqcount); 
 		});
 }
 function RareModMatch(modcount) {
@@ -443,8 +443,8 @@ function allMatches(available) {
 	                		{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},
 	                		{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
 	                		{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},
-	                		//{result: "Chromatic Orb", matcher: TricolorMatch()},
-	                		//{result: "Divine Orb", matcher: SocketMatch(6, true)},
+	                		{result: "Chromatic Orb", matcher: TricolorMatch()},
+	                		{result: "Divine Orb", matcher: SocketMatch(6, true)},
 
 	                		{result: "Gemcutter's Prism", matcher: new QualityMatch('skillGem'), display:0.3},
 	                		{result: "Glassblower's Bauble", matcher: new QualityMatch('flask')},
