@@ -458,75 +458,38 @@ function itemBaseType(item) {
 	}
 
 	if (item.rarity == 'magic') {
-		// Split off the first word and everything after "of", these are suffix mods.
-		var baseType = item.name.split(' ');
-		var ofLocation = baseType.lastIndexOf('of');
-		if (ofLocation > 0) {
-			var suffixMod = baseType.slice(ofLocation).join(' ');
-			if(suffixMod in MOD_SUFFIX_DATA) {
-				// fine
-			}
-			else {
-				console.log("Unrecognised suffixMod: " + suffixMod);
-				console.log(item);
-			}
-			
-			// remove the suffix mod
-			baseType = baseType.slice(0,ofLocation);
-			
-		}
-		else if(ofLocation==0) {
-			console.log("Unexpected position of 'of' keyword");
-			console.log(item);
+
+		// get rid of any suffix mods.
+		var baseType = item.name.replace(/\s+of.*$/,'');
+		var aWords = baseType.split(' ');
+
+		// we need to check each combination of the words to see if it's in item data. 
+		// max length of basetype is 3 words (that i've found so far...)
+		//i.e
+		// Ample Sacred Hybrid Flask. check Sacred Hybrid Flask then Hybrid Flask then Flask
+		for (var i = Math.max(0, aWords.length-3); i<aWords.length; i++ ) {
+			var baseName = aWords.slice(i).join(' ');
+			if (baseName in ITEM_TYPE_DATA) return baseName;
 		}
 
-		// We first test if we've already got a base type.
-		// this has to be done to prevent erroneous behaviour
-		// when a prefix modifier begins with the same word as an item type. 
-		// e.g. "Lacquered Lacquered Garb", "Studded Studded Round Shield", etc.
-		var baseName = baseType.join(' ');
-		if (baseName in ITEM_TYPE_DATA) {
-			return baseName;
-		}
-
-		// now we test the first word against the known prefix list
-		if(baseType[0] in MOD_PREFIX_DATA) {
-			// if present, we strip it off
-			baseType = baseType.slice(1);
-		}
-
-
+		// at this point we SHOULD have a potion.
+		// but we might also have an unrecognised prefix
+		// or an unrecognised item basetype
 		
-		// and retest against the known base type list.
-		baseName = baseType.join(' ');
-		if (baseName in ITEM_TYPE_DATA) {
-			return baseName;
-		}
-		else {
-			// at this point we SHOULD have a potion.
-			// but we might also have an unrecognised prefix
-			// or an unrecognised item basetype
-			
-			// we can reliably recognise a potion
-			if(baseName.match(/\b(?:flask|vial)\b/i)) {
-				// though if it's both a potion AND an unrecognised prefix we've got a problem. 
-				return baseName;
-			}
-			
-			// we can also test for unrecognised prefix by removing the first word and testing it against the known items
-			var shorterName = baseType.slice(1).join(' ');
-			if(shorterName in ITEM_TYPE_DATA) {
-				console.log("Unrecognised prefixMod: " + baseType[0]);
-				console.log(item);
-				return shorterName;
-			}
+		// we can reliably recognise a potion
 
-			// we must have an unrecognised  item type
-			console.log("Unrecognised item type: " + baseName);
-			console.log(item);
-
-			return baseName;
+		// njs: not sure why these aren't in item data?
+		if(baseType.match(/\b(?:flask|vial)\b/i)) {
+			// though if it's both a potion AND an unrecognised prefix we've got a problem. 
+			return baseType;
 		}
+		
+		// we must have an unrecognised  item type
+		console.log("Unrecognised item type: " + baseType);
+		console.log(item);
+
+		return baseType;
+	
 	}
 
 	// TODO(jaguilar): handle uniques.
