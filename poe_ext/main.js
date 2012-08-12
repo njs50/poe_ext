@@ -350,6 +350,10 @@ function getItemLink(item) {
 				content: function(){ 		
 
 					var html = $('<div>').append('<img src="' + item.rawItem.icon + '" class="pull-left"/>');
+					
+					if (item.sockets.numSockets > 0) {
+						html.append(displaySockets(item));
+					}
 
 					$('<pre class="pull-left">')
 						.append(itemToString(item))
@@ -372,6 +376,77 @@ function getItemLink(item) {
 
 	return oItem;
 
+}
+
+function displaySockets(item) {
+	
+	// Simulate vertical alignment depending on the item type and number of sockets
+	var adjustRatio = item.rawItem.h - Math.ceil(item.sockets.numSockets / item.rawItem.w);
+	var globalOffsetY = '';
+	if (adjustRatio > 0) {
+		globalOffsetY = '; margin-top: ' + (adjustRatio * 25) + 'px';
+	}
+	
+	var sockets = $('<div class="sockets" style="width: ' + parseInt(48 * item.rawItem.w) + 'px; height: ' + $('.itemIcon').height() + 'px' + globalOffsetY + '">');
+	var icon = {};
+	icon['S'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJTIjt9/aToxO2k6NTt9/cba0412822/Socket.png';
+	icon['D'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJEIjt9/aToxO2k6NTt9/24adcb67af/Socket.png';
+	icon['I'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJJIjt9/aToxO2k6NTt9/b39c59da99/Socket.png';
+	var link = {};
+	link['H'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjA7fWk6MTtpOjU7/fQ,,/ba11e10fa2/Socket_Link_Horizontal.png';
+	link['V'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjE7fWk6MTtpOjU7/fQ,,/3b93f7f851/Socket_Link_Vertical.png';
+	var cssPosition = new Array("pull-left", "pull-right", "pull-right", "pull-left", "pull-left", "pull-right");
+	
+	// Adjust horizontal alignment for the unique socket on a 2-square width item case
+	var globalOffsetX = '';
+	if (item.rawItem.w > 1 && item.sockets.numSockets == 1) {
+		globalOffsetX = ' style="margin-left: 24px"';
+	}
+	
+	var activeGroup = 0;
+	for (var i = 0; i < item.sockets.numSockets; i++) {
+		// Socket
+		sockets.append('<img src="' + icon[item.rawItem.sockets[i].attr] + '" alt="" class="' + cssPosition[i] + '"' + globalOffsetX + ' />');
+		
+		// Link
+		if (item.rawItem.w == 1) {
+			// Item width is 1
+			if (i == 1 && item.rawItem.sockets[i].group == activeGroup) {
+				// 1st vertical link
+				sockets.append('<img src="' + link['V'] + '" class="link" style="top: 35px; left: 15px" />');
+			}
+			if (i == 2 && item.rawItem.sockets[i].group == activeGroup) {
+				// 2nd vertical link
+				sockets.append('<img src="' + link['V'] + '" class="link" style="top: 83px; left: 15px" />');
+			}
+		} else {
+			// Item width is 2
+			if (i == 1 && item.rawItem.sockets[i].group == activeGroup) {
+				// 1st horizontal link
+				sockets.append('<img src="' + link['H'] + '" class="link" style="top: 15px; left: 35px" />');
+			}
+			if (i == 2 && item.rawItem.sockets[i].group == activeGroup) {
+				// 1st vertical link (right)
+				sockets.append('<img src="' + link['V'] + '" class="link" style="top: 35px; left: 63px" />');
+			}
+			if (i == 3 && item.rawItem.sockets[i].group == activeGroup) {
+				// 2nd horizontal link
+				sockets.append('<img src="' + link['H'] + '" class="link" style="top: 63px; left: 35px" />');
+			}
+			if (i == 4 && item.rawItem.sockets[i].group == activeGroup) {
+				// 2nd vertical link (left)
+				sockets.append('<img src="' + link['V'] + '" class="link" style="top: 83px; left: 15px" />');
+			}
+			if (i == 5 && item.rawItem.sockets[i].group == activeGroup) {
+				// 3nd horizontal link
+				sockets.append('<img src="' + link['H'] + '" class="link" style="top: 111px; left: 35px" />');
+			}
+		}
+		
+		activeGroup = item.rawItem.sockets[i].group;
+	}
+	
+	return sockets;
 }
 
 function itemToString(item) {
