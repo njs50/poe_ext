@@ -580,21 +580,3 @@ function itemByName(items, name) {
 	return $(items.filter(function(i){return $(':contains(' + name + ')', $(i.html)).length > 0})[0].html)
 }
 
-function socketColor(simg) {
-	var ctx = $('#tmpCanvas')[0].getContext('2d');
-	ctx.clearRect(0, 0, 100, 100);
-	ctx.drawImage(simg, 0, 0);
-	var imageData = ctx.getImageData(0, 0, 100, 100);
-	var sr = 0; var sg = 0; var sb = 0;
-	for (var i = 0; i < imageData.width * imageData.height; i += 4) {
-  		var r = imageData.data[i+0]; var g = imageData.data[i+1]; var b = imageData.data[i+2];
-  		if (r == 0 && g == 0 && b == 0) { continue; }
-  		else if (r > g && r > b) { sr += 1; }
-  		else if (g > b) { sg += 1; }
-  		else { sb += 1; }
-	}
-	if (sr > sg && sr > sb) { return 'red'; }
-	else if (sg > sb) { return 'green'; }
-	else { return 'blue'; }
-}
-

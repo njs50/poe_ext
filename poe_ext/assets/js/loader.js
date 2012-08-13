@@ -107,6 +107,10 @@ $('#partRefresh').click(function () {
 });
 
 function refreshData(callback) {	
+
+	$('#rareList').hide();
+	$('div#crafting-content div.crafting-block').hide();
+	$('ul.nav li,ul#craftingTabs li').removeClass('active');
 	
 	getCache('league-data')
 
@@ -129,12 +133,13 @@ function refreshData(callback) {
 
 			$.blockUI({message: '<h3>Loading...</h3><h4 id="waitOnQueue"></h4>', baseZ: 10000});
 
-			$.post(getEndpoint('get-characters'))
+			getChars()
 
 				.done(function (charResp) {
 					
 					if (charResp == null || charResp.error != undefined) {
 						showCharError();
+						$.unblockUI();
 						return;
 					}
 
@@ -203,10 +208,38 @@ function refreshData(callback) {
 				// failed to load character info
 				.fail(function () {
 					showCharError();
+					$.unblockUI();
 				})
 			;
 		})
 	;
+
+}
+
+function getChars() {
+
+	var deferred = new $.Deferred();
+
+	$.get('http://www.pathofexile.com/')
+		.done(function(data) {
+
+			var regexp = new RegExp(/CHARACTERS_DATA=(\{.+?\});/g);
+			var aMatch = regexp.exec(data);
+			
+			if (aMatch) {
+				var cdata = JSON.parse(aMatch[1]);
+				deferred.resolve(cdata);			
+			} else {
+				deferred.reject();
+			}
+
+		})
+		.fail(function(){
+			deferred.reject();
+		})
+	;
+
+	return deferred.promise();
 
 }
 
