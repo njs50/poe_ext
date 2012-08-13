@@ -1,6 +1,6 @@
 {
   "name": "PoE Helper",
-  "version": "0.62",
+  "version": "0.63",
   "manifest_version": 2,
 
   "description": "Inventory and Crafting Helper for Path of Exile",
@@ -17,7 +17,7 @@
       "128" : "/assets/images/icon_128.png"
     },
   
-  "update_url": "https://github.com/njs50/poe_ext/blob/master/poe_updates.xml",
+  "update_url": "https://raw.github.com/njs50/poe_ext/master/poe_updates.xml",
 
   "permissions": ["http://www.pathofexile.com/*","http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead", "unlimitedStorage"]
 }
