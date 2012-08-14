@@ -5,7 +5,10 @@ var oLeagueChars = {};
 var currentItems = null;
 var postThrottle = null;
 
+// some defaults...
 var currentLeague = '';
+var lastView = '#openRareList';
+var aVisibleCols = [];
 
 
 // set in parseItems
@@ -21,7 +24,7 @@ $(function(){
 	
 	getVersion();
 	
-	postThrottle = new Throttle(15, 60000);
+	postThrottle = new Throttle(30000);
 
 	// initialise the local browser db, once going, start loading data...
 	var dbOpenPromise = initCache()
@@ -64,6 +67,8 @@ $('#refresh').click(function () {
 
 	// store charname before we reset list of chars
 	var charName = currentLeague;
+	var currentView = lastView;
+	var aCols = aVisibleCols;
 
 	// clear all stored data
 	resetCache(function(){
@@ -73,6 +78,9 @@ $('#refresh').click(function () {
 
 			// reset charName and make sure it still exists					
 			setCache('last-league',charName);
+			setCache('last-view', currentView);
+			setCache('inventoryCols',aCols);
+
 			$('#leagueSelector li a[title="' + charName + '"]').trigger('click');				
 		
 
@@ -253,6 +261,8 @@ function initPage(){
 		oDD.append('<li><a title="' + league + '">' + league + '</a></li>');
 	}
 
+	sortUL(oDD);
+
 	oDD.find('a').click(function(){
 
 		var oThis = $(this);
@@ -317,61 +327,115 @@ function PromiseGroup() {
 
 
 //constructor for a new throttle instance
-function Throttle(callsPerPeriod, periodDuration) {
+function Throttle(periodDuration) {
 	
 	var self = this;
 
-	this.maxCalls = callsPerPeriod;
 	this.period = periodDuration;
 	
-	this.callCount = 0;
-	
 	this.delayQueue = [];
+	this.currentRequest = null;
+	this.completedRequests = 0;
+	this.avTime = 0;
+	this.countDown = null;
+	this.ticks = 0;
+
 	
-	this.updateStatus = function() {
-		$('#waitOnQueue').html("Queued Requests: " + self.delayQueue.length + " | Available Requests: " + (self.maxCalls-self.callCount));
+	this.updateStatus = function(delay,undefined) {
+		if (delay == undefined) delay = 0;
+		var estRemaining = Math.round(((self.avTime * self.delayQueue.length) + delay) / 1000);
+		if (estRemaining > 0) {
+			$('#waitOnQueue').html("Estimated time remaining: " + estRemaining + ' seconds');
+		} else {
+			$('#waitOnQueue').empty();
+		}
 	};
 
-	//function polled by the delay timer
-	this.delayPoll = function() {
-		if(self.delayQueue.length>0) {
-			var deferred = self.delayQueue.shift();
-			deferred.resolve();
-			setTimeout(self.delayPoll, self.period);
-		}
-		else {
-			self.callCount--;
-		}
-		
-		self.updateStatus();
+	this.runRequest = function() {
 
-	};
+		clearInterval(self.countDown);
+		self.ticks = 0;
+
+		if (!self.currentRequest) {
+		 	if (self.delayQueue.length) {
+
+				self.currentRequest = self.delayQueue.shift();
+
+				var request = self.currentRequest.action;
+				var deferred = self.currentRequest.deferred;
+				var startTime = new Date().getTime();
+
+				request()
+
+					.done(function(result){
+
+						if ( result.hasOwnProperty('error') ) {
+
+							if (result.error.message.indexOf('too frequently') > -1) {
+								self.delayQueue.push(self.currentRequest);	
+								self.currentRequest = null;						
+								self.updateStatus(self.period);								
+								setTimeout(self.runRequest, self.period);
+								self.countDown = setInterval(function(){
+									self.updateStatus(self.period - (1000 * ++self.ticks));
+								},1000);
+
+							} else {
+								console.log(typeof result.error.message);
+								console.log('PoE website returned error:');
+								console.log(result.error.message);
+								deferred.reject();
+								self.currentRequest = null;
+								self.runRequest();
+								self.updateStatus();							
+							}
+
+
+						} else {
+
+							var endTime = new Date().getTime();
+							self.avTime = ((self.avTime * self.completedRequests) + (endTime - startTime)) / ++self.completedRequests;
+
+							deferred.resolve(result);
+							self.currentRequest = null;
+							self.runRequest();
+							self.updateStatus();
+
+						}
+
+					})
+
+					.fail(function(){
+						deferred.reject();
+						self.currentRequest = null;
+						self.runRequest();
+						self.updateStatus();
+					})
+				;
+
+			} else {
+			// reset stats as there are no active requests			
+				this.completedRequests = 0;
+				this.avTime = 0;			
+			}
+		}
+	}
 	
 	// queues future calls to delay until the specified timeout (in milliseconds) has passed.
 	// used to prevent flooding GGG's servers with too many stash requests in a short time.  
-	this.queue = function() {
+	this.queue = function(queued_action) {
 
 		var deferred = $.Deferred();
+
+		self.delayQueue.push({action: queued_action, deferred: deferred});
 		
-		if( this.callCount < this.maxCalls ) {
-			// no need to queue, we have not hit the throttle yet.
-			deferred.resolve();
-			this.callCount++;
-			setTimeout(this.delayPoll, this.period);
-		} else {
-			// too many calls.
-			// queue up the deferred so it can be processed when a slot becomes available
-			// and simply return.
-			this.delayQueue.push(deferred);
-		}
-		
-		self.updateStatus();
+		if (!self.currentRequest) self.runRequest();
 
 		return deferred.promise();
 
 	};
 
-	self.updateStatus();
+	// self.updateStatus();
 
 }
 
@@ -383,9 +447,6 @@ function showCharError() {
 }
 
 function loadLeagueData(league) {
-
-	// get state data to reset after load
-	var currentSection = $('#craftingTabs li.active, #rares_menu li.active');
 
 	var oChecked = $('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').find('input[type=checkbox]:checked');
 	
@@ -475,11 +536,15 @@ function loadLeagueData(league) {
 				loadQueue.completed(function(){
 					processItems(items)
 						.done(function(){
-							console.log('loaded...')
-							if (currentSection.length){
-								var selected = currentSection.text();								
-								$('#craftingTabs li, #rares_menu').find('a:contains("' + selected + '")').trigger('click');
-							}
+							getCache('last-view')
+								.done(function(selector){
+									lastView = selector;
+									$(selector).trigger('click');									
+								})
+								.fail(function(){
+									$(lastView).trigger('click');									
+								})
+							;
 						})
 					;
 
@@ -571,21 +636,22 @@ function getCharItems(charName) {
 		// cache miss
 		.fail(function(){
 
-			postThrottle.queue().done(function() {
+			var thisChar = charName;
 
-				$.post(getEndpoint('get-items'), {character: charName})
-					.done(function(oData){
-						// add char data to cache
-						oData.charName = charName;
-						setCache('char-' + charName , oData);
-						deferred.resolve(oData);
-					})
-					.fail(function(){
-						deferred.reject();
-						return;
-					})
-				;
-			});			
+			postThrottle.queue( function() { return $.post(getEndpoint('get-items'), {character: thisChar}) } )
+				.done(function(oData){
+					// add char data to cache
+					oData.charName = thisChar;
+					setCache('char-' + thisChar , oData);
+					deferred.resolve(oData);
+				})
+				.fail(function(){
+					deferred.reject();
+					return;
+				})
+			;
+
+					
 		})
 	;
 
@@ -608,8 +674,7 @@ function getStashPage(league,index) {
 		// cache miss
 		.fail(function(){
 
-			postThrottle.queue().done(function() {
-				$.post(getEndpoint('get-stash-items'), {league: league, tabIndex: index, tabs: index === 0 ? 1 : 0})
+			postThrottle.queue(function() { return $.post(getEndpoint('get-stash-items'), {league: league, tabIndex: index, tabs: index === 0 ? 1 : 0}) })
 					
 					.done(function (stashResp) {
 						
@@ -633,7 +698,7 @@ function getStashPage(league,index) {
 						return;
 					})
 				;
-			});
+			
 
 		})
 	;

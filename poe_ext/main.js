@@ -73,6 +73,7 @@ function setupInventoryRendering(items) {
 	var oPromise = getCache('inventoryCols')
 	
 		.done(function(aCols){
+			aVisibleCols = aCols;
 			$(aCols.toString()).prop('checked',true);			
 			deferred.resolve();
 		})
@@ -104,6 +105,7 @@ $('#applyColSelection').click(function(){
 		aSelected.push('#' + $(item).attr('id'));
 	});
 
+	aVisibleCols = aSelected;
 	setCache('inventoryCols',aSelected);
 
 	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').stupidtable();
@@ -162,8 +164,6 @@ function renderCrafting(items) {
 
 	try {
 	
-
-
 		var matches = allMatches(getCraftingItems(items));
 
 		var idx = 0;
@@ -234,11 +234,13 @@ function renderCrafting(items) {
 
 		$('ul#craftingTabs li.crafting-page a').click(function(){
 			$('#rareList').hide();
-			$('div#crafting-content div.crafting-block').hide();
-			$('ul.nav li,ul#craftingTabs li').removeClass('active');
+			$('div#crafting-content div.crafting-block').hide();			
+			$('#menu2, #menu3, ul#craftingTabs li').removeClass('active');
 			$(this).parent().addClass('active');		
 			$(this).closest('.dropdown').addClass('active');		
 			$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
+			lastView = 'ul#craftingTabs li.crafting-page a[data-index=' + $(this).data('index') + ']';
+			setCache('last-view', lastView);
 		});
 
 	} catch (e) {
@@ -282,11 +284,15 @@ function processItems(items){
 				$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();				
 
 				$('#openRareList')		
-					.click(function(){				
-						$(this).closest('.dropdown').addClass('active');
+					.click(function(){
+						lastView = '#openRareList';
+						setCache('last-view', lastView);
+
+						$('#menu2, #menu3, ul#craftingTabs li').removeClass('active');
+
+						$(this).closest('li.dropdown').addClass('active');
 						$('div#crafting-content div.crafting-block').hide();
 						$('#rareList').show();						
-						$('ul.nav li,ul#craftingTabs li').removeClass('active');
 						$(this).parent().addClass('active');
 					});					
 				;
