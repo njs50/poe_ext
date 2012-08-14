@@ -123,8 +123,8 @@ $('#applyItemSelection').click(function(){
 
 $('#applyIgnoreLocations').click(function(){
 
-	renderCrafting(aInventory)
-	// currentLeague
+	renderCrafting(aInventory);
+	$(lastView).trigger('click');
 
 });
 
