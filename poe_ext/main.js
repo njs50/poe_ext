@@ -207,7 +207,14 @@ function renderCrafting(items) {
 
 			// sort on distance			
 			match_group.sort(function(a,b) {
-				return a.distance - b.distance;
+				// % - distance - closest first item to start 
+				if (b.complete == a.complete){ 
+					if (a.distance == b.distance) {
+						return a.items[0].location.tabIndex - b.items[0].location.tabIndex;
+					}
+					return a.distance - b.distance;
+				}
+				return b.complete - a.complete;				
 			});			
 
 

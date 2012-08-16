@@ -49,6 +49,33 @@ var RarenameMatch = Match.extend({
 	}
 });
 
+
+var BaseNameAndTypeMatch = Match.extend({
+	init: function(type,count) {
+		this.count = count;
+		this.type = type;
+		this.matches = {}
+	},
+
+	take: function(i) {
+		if (i.category != this.type) return;
+		var matchArray = this.matches[i.baseType];
+		if (matchArray == null) {
+			matchArray = this.matches[i.baseType] = []
+		}
+		matchArray.push(i);
+	},
+
+	getMatches: function() {
+		var th = this;
+		return $.map(this.matches, function (v, k) {
+			return {complete: v.length * 1.0 / th.count, 
+				    items:v,
+					missing: [sprintf('%d %s of type:', th.count - v.length, th.type), k]}
+		});
+	}
+});
+
 var CurrencyMatch = Match.extend({
 	// currencyRequirements; an array of objects with name:<shortCurrencyName>, [quantity:numberNeededForMatch] (optional)
 	init: function(currencyRequirements) {
@@ -447,6 +474,9 @@ function allMatches(available) {
 	                		{result: "Divine Orb", matcher: SocketMatch(6, true)},
 
 	                		{result: "Gemcutter's Prism", matcher: new QualityMatch('skillGem'), display:0.3},
+
+	                		{result: "Cartographer's Chisel", matcher: new QualityMatch('map'), display:0.3},
+
 	                		{result: "Glassblower's Bauble", matcher: new QualityMatch('flask')},
 	                		
 	                		{result: "Jeweler's Orb", matcher: new CurrencyMatch([{name:'chromaticOrb'},{name:'fusingOrb'}])},
@@ -455,7 +485,9 @@ function allMatches(available) {
 	                		{result: "Orb of Alchemy", matcher: new RarenameMatch(2), display:0.51},
 	                		{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), display:0.51},
 	                		{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), display:0.51}, //This rule is unverified.
-	                		
+	                			                		
+	                		{result: "Map one level higher", matcher: new BaseNameAndTypeMatch('map',3), display:0.51}, //This rule is unverified.	                		
+
 	                		{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), display:0.51},
 	                		{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), display:0.51},
 	                		{result: "Orb of Augmentation", matcher: RareModMatch(6)}, //This rule is flawed. It is impossible to reliably determine if a rare has 6 mods.

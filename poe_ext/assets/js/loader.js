@@ -596,7 +596,7 @@ function responseToItems(response, location) {
 		var loc = location.page;	
 
 		if (location.section !== 'stash') {
-			loc = v.inventoryId === 'MainInventory' ? 'Inventory' : 'Equiped';
+			loc = v.inventoryId === 'MainInventory' ? 'Inventory' : 'Equipped';
 		}
 
 		// add this item
