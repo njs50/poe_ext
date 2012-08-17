@@ -1,7 +1,14 @@
 
 
 function saveItems(fn, items) {
-    var oBlob = new Blob([JSON.stringify(items)]);
+
+    var aItems = [];
+
+    $.each(items,function(idx,item){
+        aItems.push({rawItem: item.rawItem, location:item.location});
+    });    
+
+    var oBlob = new Blob([JSON.stringify(aItems)]);
     location.href = window.webkitURL.createObjectURL(oBlob);
 }
 
