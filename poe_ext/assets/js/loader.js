@@ -446,10 +446,9 @@ function showCharError() {
 				   'Path of Exile</a>.<p>Please sign in and refresh this page.');
 }
 
-function loadLeagueData(league) {
 
-	var oChecked = $('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').find('input[type=checkbox]:checked');
-	
+function resetView() {
+
 	// clear existing crafting info
 	$('ul#craftingTabs li').remove();
 	$('div#crafting-content').empty();
@@ -464,13 +463,18 @@ function loadLeagueData(league) {
 	oMods = {};
 	oCalc = {};
 
-	
-
-
 	// clear reset lists
 	$('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').empty();
 	
 	currentItems = null;
+
+}
+
+function loadLeagueData(league) {
+
+	var oChecked = $('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').find('input[type=checkbox]:checked');
+	
+	resetView();
 
 	var items = [];
 

@@ -1,4 +1,5 @@
 var aInventory = []
+var craftItems = [];
 
 $('#resetCols').click(function(){
 	$('#inventoryCols input[type=checkbox]:checked').prop('checked',false); 
@@ -144,8 +145,9 @@ function getCraftingIgnores(){
 }
 
 
-function getCraftingItems(items){
-	var craftItems = [];
+function getCraftingItems(items){	
+
+	craftItems = [];
 
 	var oIgnore = getCraftingIgnores();
 
@@ -237,7 +239,9 @@ function renderCrafting(items) {
 
 		sortUL('#craftingTabs');
 
-		$('ul#craftingTabs').append('<li class="divider"></li><li><a id="openCraftingFilters" data-toggle="modal" href="#craftingFilters">Configure Crafting</a></li>')
+		$('ul#craftingTabs')
+			.append('<li class="divider"></li><li><a id="openCraftingFilters" data-toggle="modal" href="#craftingFilters">Configure Crafting</a></li>')
+			.append('<li class="divider"></li><li><a id="saveCraftItems">Export to File</a></li>')
 
 		$('ul#craftingTabs li.crafting-page a').click(function(){
 			$('#rareList').hide();
@@ -578,7 +582,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
-			.append( $('<td>').text( item.location.page === null ? 0 : item.location.page ).attr('title',item.location.section) )			
+			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page ) ) )			
 			.append( $('<td>').append( getItemLink(item) ) )
 		;
 

@@ -18,7 +18,12 @@ function paste_cb() {
 
 $(function(){
 
-	$('#copyToClipboard,#copyFromClipboard').attr('disabled',true);
+
+	$('#copyItemCSV').click(function(){
+		copy_cb($('#rareList').tableExport({output:'csv'}));
+	});
+
+
 		
 	$('#copyToClipboard').click(function () {
 		if(currentItems!=null) {
