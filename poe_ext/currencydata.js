@@ -11,7 +11,7 @@ CURRENCY_DATA = {
 		"Exalted Orb" : "exaltedOrb",
 		"Gemcutter's Prism" : "GCP",
 		"Glassblower's Bauble" : "bauble",
-		"Jeweler's Orb" : "jewelersOrb",
+		"Jeweller's Orb" : "jewelersOrb",
 		"Mirror of Kalandra" : "mirrorOfKalandra",
 		"Orb of Alchemy" : "alchemyOrb",
 		"Orb of Alteration" : "alterationOrb",
@@ -25,10 +25,11 @@ CURRENCY_DATA = {
 		"Regal Orb" : "regalOrb",
 		"Scroll of Wisdom" : "wisdomScroll",
 		"Transmutation Shard" : "transmutationShard",
-		"Combined Amulet": 'questItem',
+		"Apex": 'questItem',
 		"Baleful Gem": 'questItem',
 		"Glyph": 'questItem',
 		"Medicine Chest": 'questItem',
-		"Wicked Spear": 'questItem',
+		"Maligaro's Spike": 'questItem',
 		"Cartographer's Chisel": 'cartographerChisel'
 }
+
