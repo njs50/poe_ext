@@ -26,7 +26,19 @@ function initCache(){
 	var request = window.indexedDB.open(db_name,db_version); 
 
 	request.onupgradeneeded = function(e) {
-		console.log('ruh roh, looks like chrome finally supports db upgrades but nobody has written the script...');
+		var txn = e.target.result;
+
+		if(db.objectStoreNames.contains(store_name)) {
+			db.deleteObjectStore(store_name);
+		}
+
+		db.createObjectStore(store_name);
+
+		txn.oncomplete = function () {
+			// console.log('new store created');					
+			deferred.resolve();
+                   
+        }		
 	};
 
 	request.onsuccess = function(e) {	 	
