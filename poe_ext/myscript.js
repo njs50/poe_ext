@@ -33,7 +33,7 @@ function parseItem(rawItem, loc) {
 			rarity: '',
 			quality: 0,
 			name: $.trim(rawItem.name + ' ' + rawItem.typeLine),
-			identified: rawItem.hasOwnProperty('explicitMods') || rawItem.hasOwnProperty('normal')  ? true : false,
+			identified: rawItem.identified, 
 			properties: {},
 			explicitMods: {},
 			implicitMods: {},
@@ -45,6 +45,7 @@ function parseItem(rawItem, loc) {
 
 		};
 
+		/*
 		// item rarity
 		if (rawItem.hasOwnProperty('normal') && rawItem.normal) item.rarity = 'normal';
 		else if (rawItem.hasOwnProperty('magic') && rawItem.magic) item.rarity = 'magic';
@@ -62,13 +63,38 @@ function parseItem(rawItem, loc) {
 				item.baseType = item.name;
 			}			
 		} 		
-		if (item.rarity == '') parseError(item,'unknown item rarity');		
+		//if (item.rarity == '') parseError(item,'unknown item rarity');		
+		*/
+
+		// item rarity
+		switch(rawItem.frameType) {
+			case 0: item.rarity = 'normal'; break;
+			case 1: item.rarity = 'magic'; break;
+			case 2: item.rarity = 'rare'; ; break;
+			case 3: item.rarity = 'unique'; break;
+			case 4: 
+							item.rarity = 'skillGem'; 
+							break;
+			case 5: 
+							item.rarity = 'currency';
+							item.baseType = item.name;
+							item.calculated.Quantity = rawItem.properties[0].values[0]; //TODO: regex the actualy quantity 
+							break;
+			case 6: item.rarity = 'quest'; break;
+			default:
+							parseError(item, 'unknown item rarity');
+		}
 
 		item.baseType = itemBaseType(item);
 
-		item.category = itemCategory(item.baseType);
-		if(item.category == null)  parseError(item,'unknown item category');
-
+		// get the item category if it's not a skill gem
+		if (item.rarity !== 'skillGem') {
+			item.category = itemCategory(item.baseType);
+			if(item.category == null)  parseError(item,'unknown item category');
+		}
+		else {
+			item.category = 'skillGem';
+		}
 
 		// get properties/mods/requirements into usable format
 		if (rawItem.hasOwnProperty('requirements')) item.requirements = nameValueArrayToObj(rawItem.requirements,oRequired);
@@ -76,7 +102,7 @@ function parseItem(rawItem, loc) {
 		// flasks and skillgems have some odd properties etc we don't want in the mix
 		if (item.category !== 'skillGem' && item.rarity !== 'currency' && item.category != 'flask') {
 			
-			if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties,oProps);
+			if (rawItem.hasOwnProperty('properties')) item.properties = rawItem.properties; //nameValueArrayToObj(rawItem.properties,oProps);
 
 			if (rawItem.hasOwnProperty('explicitMods')) item.explicitMods = processMods(rawItem.explicitMods,oMods);
 			if (rawItem.hasOwnProperty('implicitMods')) item.implicitMods = processMods(rawItem.implicitMods,oMods);
@@ -88,8 +114,9 @@ function parseItem(rawItem, loc) {
 
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
 		item.quality = itemQuality(item);
+		item.quality = 0;
 
-		item.itemRealType = itemRealType(item);
+		//item.itemRealType = itemRealType(item);
 		if (!oTypes.hasOwnProperty(item.itemRealType) && item.itemRealType != '') oTypes[item.itemRealType] = '';
 
 		item.rareName = itemRareName(item);
@@ -139,14 +166,14 @@ function parseItem(rawItem, loc) {
 	return item;
 }
 
-function nameValueArrayToObj(aPairs,oKeys){
+function nameValueArrayToObj(aPairs, oKeys){
 	var max  = aPairs.length;	
 	var oRet = {};
 	for (var i = 0; i < max; i++){
-		var val = aPairs[i].value;
+		var val = aPairs[i].values;
 		var key = aPairs[i].name;
 		if (val[0] == '<') val = $(val).text();
-		oRet[key] = val;		
+		oRet[key] = val[0][0];		
 		if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
 	}	
 	return oRet;
@@ -156,7 +183,10 @@ function nameValueArrayToObj(aPairs,oKeys){
 function itemCategory(baseType) {
 	if (baseType in ITEM_TYPE_DATA) { return ITEM_TYPE_DATA[baseType]; }
 	if (baseType in CURRENCY_DATA) { return CURRENCY_DATA[baseType]; }
-	if (baseType.match(/\(Level \d+\)/i)) { return 'skillGem'; }
+
+	// got changed in 0.9.12
+	//if (baseType.match(/\(Level \d+\)/i)) { return 'skillGem'; }
+
 	if (baseType.match(/\b(?:flask|vial)\b/i)) { return 'flask'; }
 	if (baseType.match(/\bquiver\b/i)) { return 'quiver'; }
 	return null;
@@ -450,7 +480,8 @@ function itemBaseType(item) {
 	}
 
 	if (!item.identified || item.rarity == 'normal') { 
-		return item.name; 
+		// get rid off the "Superior"
+		return item.name.replace(/^Superior /, ''); 
 	}
 
 	if (item.rarity == 'rare') {

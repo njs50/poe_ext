@@ -346,7 +346,7 @@ function getItemsUL(aItems) {
 
 		$('<li>')
 			.append(oItem)
-			.append(' (' + item.location.section + ':' + item.location.page  + ')' )
+			.append(' (' + item.location.section + ':' + item.location.page + ")"  + " [X:" + item.rawItem.x + ", Y:" + item.rawItem.y + ']' )
 			.appendTo(oUL)
 		;
 
@@ -479,7 +479,33 @@ function itemToString(item) {
 		sItem += '--------\n';
 		for (var i = 0; i < oRaw.properties.length; i++) {
 			var oThis = oRaw.properties[i];
-			sItem += oThis.name + ': ' + oThis.value;
+			sItem += oThis.name;
+			if (oThis.values.length > 0) {
+
+				// find out if the prop is elemental damage, because then there could be more values
+				if (oThis.name == "Elemental Damage") {
+					sItem += ": ";
+					for (var j = 0; j < oThis.values.length; j++) {
+						sItem += "<span style=\"font-weight:bold; color:";
+
+						// highlight the elemental damage in a fitting color
+						switch (oThis.values[j][1]) {
+							case 4: sItem += "red"; break;
+							case 5: sItem += "blue"; break;
+							case 6: sItem += "orange"; break;
+							default: sItem += "grey"; break;
+						}
+
+						sItem += "\">" + oThis.values[j][0] + "</span>";
+
+						// skip the last comma
+						if (j < oThis.values.length - 1) sItem += ", ";
+					}
+				}
+				else {
+					sItem += ": " + oThis.values[0][0];
+				}
+			}
 			if(oThis.augmented) sItem += ' (augmented)';
 			sItem += '\n';
 		}
@@ -496,7 +522,7 @@ function itemToString(item) {
 		sItem += '--------\n';
 		for (var i = 0; i < oRaw.requirements.length; i++) {
 			var oThis = oRaw.requirements[i];
-			sItem += oThis.name + ': ' + oThis.value + '\n';
+			sItem += oThis.name + ': ' + oThis.values[0][0] + '\n';
 		}
 	}
 
@@ -582,7 +608,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
-			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page ) ) )			
+			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page ) + " (" + item.rawItem.x + ", " + item.rawItem.y +")") )			
 			.append( $('<td>').append( getItemLink(item) ) )
 		;
 
@@ -685,3 +711,4 @@ function getSortedRares(items) {
 	return sortedRares;
 	
 }
+
