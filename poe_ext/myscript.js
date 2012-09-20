@@ -115,8 +115,15 @@ function parseItem(rawItem, loc) {
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
 		item.quality = itemQuality(item);
 
-		//item.itemRealType = itemRealType(item);
-		if (!oTypes.hasOwnProperty(item.itemRealType) && item.itemRealType != '') oTypes[item.itemRealType] = '';
+		item.itemRealType = item.baseType;
+		if (item.rarity == 'currency') {
+			var tmpCat = "Currency";
+		}
+		else {
+			var tmpCat =  item.category.charAt(0).toUpperCase() + item.category.slice(1);
+		}
+		if (!oTypes.hasOwnProperty(tmpCat)) oTypes[tmpCat] = {};
+		if (!oTypes[tmpCat].hasOwnProperty(item.itemRealType)) oTypes[tmpCat][item.itemRealType] = '';
 
 		item.rareName = itemRareName(item);
 

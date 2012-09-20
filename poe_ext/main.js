@@ -48,13 +48,16 @@ function setupInventoryRendering(items) {
 	sortUL(oReqUL);
 
 	// setup available types
-	var oTypeUL = $('ul#viewTypes').empty();
+	var oTypeUL = $('ul#viewCategories').empty();
 	for (var key in oTypes) {
-		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oTypeUL.append('<li><label class="checkbox inline" for="type_' + id + '"><input class="checkbox inline" checked type="checkbox" id="type_' + id + '" name="viewType" value="' + key + '" />' + key + '</label></li>');
+		var list = $('<li><label class="checkbox inline"><input type="checkbox" class="checkboxBoss" checked data-target="#view'+key+'"/>'+key+'</label><a class="btn-small" href="#" data-toggle="collapse" data-target="#view'+key+'"><i class="icon-chevron-down"></i></a></li>').appendTo(oTypeUL)
+		var inner =  $('<ul id="view'+key+'" class="collapse" style="list-style: none;"/>').appendTo(list)
+		for (var type in oTypes[key]) {
+			var id = type.replace(/[^a-zA-Z]/g,'_');
+			inner.append('<li><label class="checkbox inline" ><input checked type="checkbox" value="' + type + '" name="viewType"/>' + type + '</label></li>');
+		}
 	}
 	sortUL(oTypeUL);
-	$('<li><label class="checkbox inline"><input class="checkbox inline toggleCheckboxes" checked type="checkbox" data-toggling="viewType" id="toggleTypes">Select All / None</label></li>').prependTo(oTypeUL);
 
 	// setup available rarity
 	var oRarityUL = $('ul#viewRarity').empty();
@@ -63,11 +66,14 @@ function setupInventoryRendering(items) {
 		oRarityUL.append('<li><label class="checkbox inline" for="rarity_' + id + '"><input class="checkbox inline" checked type="checkbox" id="rarity_' + id + '" name="viewRarity" value="' + key + '" />' + capitaliseFirstLetter(key) + '</label></li>');
 	}
 	sortUL(oRarityUL);
-	$('<li><label class="checkbox inline"><input class="checkbox inline toggleCheckboxes" checked type="checkbox" data-toggling="viewRarity" id="toggleTypes">Select All / None</label></li>').prependTo(oRarityUL);
 
 	// add select all/none checkboxes to types and rarity
 	$('input.toggleCheckboxes').click(function(){
 		$('input[name=' + $(this).data('toggling') + ']').prop('checked',$(this).prop('checked'));
+	});
+
+	$('input.checkboxBoss').click(function() {
+		$($(this).data('target')).find('input[type=checkbox]').prop('checked',$(this).prop('checked'));
 	});
 
 	// load previous settings
