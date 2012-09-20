@@ -185,11 +185,18 @@
 			    <h3>Select Items</h3>
 			  </div>
 			  <div class="modal-body">
-			    	<h3>Types</h3>
-			    	<ul id="viewTypes" class="unstyled"></ul>
+			    	<h3>
+			    		<label class="checkbox inline"><input type="checkbox" class="checkboxBoss" data-target="#viewCategories" checked id="toggleCategories">Types</input></label>
+         			<a class="btn-small" href="#" data-toggle="collapse" data-target="#viewCategories"><i class="icon-chevron-down"></i></a>
+         		</h3>
+			    	<ul id="viewCategories" class="collapse" style="list-style:none;"></ul>
 			    	<div class="clearfix"></div>
-			    	<h3>Rarity</h3>
-			    	<ul id="viewRarity" class="unstyled"></ul>
+			    	
+			    	<h3>
+			    		<label class="checkbox inline"><input type="checkbox" class="toggleCheckboxes" checked data-toggling="viewRarity" id="toggleRarity">Rarity</input></label>
+         			<a class="btn-small" href="#" data-toggle="collapse" data-target="#viewRarity"><i class="icon-chevron-down"></i></a>
+         		</h3>
+			    	<ul id="viewRarity" class="unstyled collapse"></ul>
 			    	<div class="clearfix"></div>
 			  </div>
 			  <div class="modal-footer">
