@@ -178,7 +178,7 @@ function renderCrafting(items) {
 			idx++;
 
 			// add navigation entry
-			$('ul#craftingTabs').append('<li class="crafting-page"><a data-index="' + idx + '">' + item + '</a></li>');
+			$('ul#craftingTabs').append('<li class="crafting-page"><a data-index="' + idx + '">' + item + ' (' + matches[item].length + ')</a></li>');
 
 			// add content div
 			var oDiv = $('<div class="hide crafting-block" data-index="' + idx + '">');
