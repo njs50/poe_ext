@@ -114,7 +114,6 @@ function parseItem(rawItem, loc) {
 
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
 		item.quality = itemQuality(item);
-		item.quality = 0;
 
 		//item.itemRealType = itemRealType(item);
 		if (!oTypes.hasOwnProperty(item.itemRealType) && item.itemRealType != '') oTypes[item.itemRealType] = '';
@@ -485,7 +484,8 @@ function itemBaseType(item) {
 	}
 
 	if (item.rarity == 'rare') {
-		return item.name.split(' ').slice(2).join(' ');
+		// some rares have an additional space that needs to be trimmed
+		return item.name.split(' ').slice(2).join(' ').replace(/^ /, ''); 
 	}
 
 	if (item.rarity == 'magic') {
@@ -534,8 +534,21 @@ function itemBaseType(item) {
 
 
 function itemRareName(item) {
+	var splitName;
+	var combinedName;
+
 	if (item.rarity != 'rare' || !item.identified) { return null; }
-	return item.name.split(' ').slice(0, 2).join(' ');
+
+	splitName = item.name.split(' '); 
+	combinedName = splitName[0] + ' ' + splitName[1]; 
+
+	// some rares have an additional space and wont give an alch 
+	// if sold to a vendor with a matching rare
+	if (splitName[2] == '') {
+		combinedName += ' ';
+	}
+
+	return combinedName;
 }
 
 function itemSockets(rawItem) {
@@ -588,7 +601,6 @@ function itemSockets(rawItem) {
 
 function itemQuality(item) {
 
-	if (item.properties.hasOwnProperty('Quality')) return parseInt(item.properties.Quality);
 
 	if (item.category === 'skillGem' || item.category === 'flask') {
 
@@ -596,12 +608,19 @@ function itemQuality(item) {
 			for(var i = 0; i< item.rawItem.properties.length;i++) {
 				var oProp = item.rawItem.properties[i];
 				if (oProp.name === 'Quality') {
-					item.properties.Quality = oProp.value;
-					return parseInt(oProp.value);
+					item.properties.Quality = oProp.values[0];
+					return parseInt(oProp.values[0]);
 				} 
 			}
 		}
 
+	}
+	else {
+		for (var i = 0; i < item.properties.length; i++) {
+			if (item.properties[i].name == "Quality") {
+				return parseInt(item.properties[i].values[0]);
+			}
+		}
 	}
 
 	return 0;
