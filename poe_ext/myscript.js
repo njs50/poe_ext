@@ -160,9 +160,6 @@ function parseItem(rawItem, loc) {
 
 	}	
 
-	if (item.name == "Superior Conjurer's Vestment") 
-		console.log(item);
-
 //	item.prefixes = itemPrefixes(item);
 //	item.suffixes = itemSuffixes(item);
 	return item;
@@ -487,7 +484,8 @@ function itemBaseType(item) {
 	}
 
 	if (item.rarity == 'rare') {
-		return item.name.split(' ').slice(2).join(' ');
+		// some rares have an additional space that needs to be trimmed
+		return item.name.split(' ').slice(2).join(' ').replace(/^ /, ''); 
 	}
 
 	if (item.rarity == 'magic') {
@@ -536,8 +534,21 @@ function itemBaseType(item) {
 
 
 function itemRareName(item) {
+	var splitName;
+	var combinedName;
+
 	if (item.rarity != 'rare' || !item.identified) { return null; }
-	return item.name.split(' ').slice(0, 2).join(' ');
+
+	splitName = item.name.split(' '); 
+	combinedName = splitName[0] + ' ' + splitName[1]; 
+
+	// some rares have an additional space and wont give an alch 
+	// if sold to a vendor with a matching rare
+	if (splitName[2] == '') {
+		combinedName += ' ';
+	}
+
+	return combinedName;
 }
 
 function itemSockets(rawItem) {

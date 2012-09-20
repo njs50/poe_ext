@@ -32,7 +32,6 @@ function setupInventoryRendering(items) {
 
 	// setup available calculated cols
 	var oCalcUL = $('ul#viewCalculated').empty();
-	console.log(oCalc);
 	for (var key in oCalc) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
 		oCalcUL.append('<li><label class="checkbox inline" for="calc_' + id + '"><input class="checkbox inline" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
@@ -42,7 +41,6 @@ function setupInventoryRendering(items) {
 
 	// setup available requirements
 	var oReqUL = $('ul#viewReqs').empty();
-	console.log(oRequired);
 	for (var key in oRequired) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
 		oReqUL.append('<li><label class="checkbox inline" for="req_' + id + '"><input class="checkbox inline" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
@@ -51,7 +49,6 @@ function setupInventoryRendering(items) {
 
 	// setup available types
 	var oTypeUL = $('ul#viewTypes').empty();
-	console.log(oTypes);
 	for (var key in oTypes) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
 		oTypeUL.append('<li><label class="checkbox inline" for="type_' + id + '"><input class="checkbox inline" checked type="checkbox" id="type_' + id + '" name="viewType" value="' + key + '" />' + key + '</label></li>');
