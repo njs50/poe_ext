@@ -25,7 +25,7 @@ CURRENCY_DATA = {
 		"Regal Orb" : "regalOrb",
 		"Scroll of Wisdom" : "wisdomScroll",
 		"Transmutation Shard" : "transmutationShard",
-		"Apex": 'questItem',
+		"The Apex": 'questItem',
 		"Baleful Gem": 'questItem',
 		"Glyph": 'questItem',
 		"Medicine Chest": 'questItem',
