@@ -15,10 +15,13 @@ _gaq.push(['_trackPageview']);
 	  	var action = $.trim(oThis.text());
 	  	var category = "primaryNav";
 	  	var oDD = oThis.closest('.dropdown').find('a.dropdown-toggle');
+	  	// only push click events for things in dropdown menus
 	  	if(oDD.length) {
 	  		category = $.trim(oDD.text());
+	  		action = action.replace(/\s*\(\d*\)\s*$/,'')
+			// console.log('track: ' + category + ' : '  + action );
+	  	 	_gaq.push(['_trackEvent', category, action]);	
 	  	}
-	  	 _gaq.push(['_trackEvent', category, action]);	  	
 	  });
 
 	});
