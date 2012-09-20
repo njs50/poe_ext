@@ -102,8 +102,7 @@ function parseItem(rawItem, loc) {
 		// flasks and skillgems have some odd properties etc we don't want in the mix
 		if (item.category !== 'skillGem' && item.rarity !== 'currency' && item.category != 'flask') {
 			
-			if (rawItem.hasOwnProperty('properties')) item.properties = rawItem.properties; //nameValueArrayToObj(rawItem.properties,oProps);
-
+			if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties,oProps);
 			if (rawItem.hasOwnProperty('explicitMods')) item.explicitMods = processMods(rawItem.explicitMods,oMods);
 			if (rawItem.hasOwnProperty('implicitMods')) item.implicitMods = processMods(rawItem.implicitMods,oMods);
 
@@ -176,10 +175,18 @@ function nameValueArrayToObj(aPairs, oKeys){
 	var max  = aPairs.length;	
 	var oRet = {};
 	for (var i = 0; i < max; i++){
-		var val = aPairs[i].values;
+		// some properties dont have a value
+		if (aPairs[i].values.length == 0) {
+			var key = aPairs[i].name;
+			oRet[key] = 'X';
+			if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
+			continue;
+		}
+
+		var val = aPairs[i].values[0][0];
 		var key = aPairs[i].name;
 		if (val[0] == '<') val = $(val).text();
-		oRet[key] = val[0][0];		
+		oRet[key] = val;		
 		if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
 	}	
 	return oRet;
@@ -409,7 +416,7 @@ function processMods(aExplicit,oKeys) {
 
 		aMatch = bonusRegexp.exec(thisMod);
 		if (aMatch != null) {
-			 key = aMatch[2];			 			
+			 key = '+ ' + aMatch[2];			 			
 		} else {
 			aMatch = percentRegexp.exec(thisMod);
 			if (aMatch != null) { 

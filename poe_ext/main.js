@@ -352,7 +352,7 @@ function getItemsUL(aItems) {
 
 		$('<li>')
 			.append(oItem)
-			.append(' (' + item.location.section + ':' + item.location.page + ")"  + " [X:" + item.rawItem.x + ", Y:" + item.rawItem.y + ']' )
+			.append(' (' + item.location.section + ':' + item.location.page + ")")
 			.appendTo(oUL)
 		;
 
@@ -546,6 +546,47 @@ function itemToString(item) {
 		}
 	}
 
+	// draw the position of the item
+	// TODO (spacke): separate code and design
+	var left = oRaw.x;
+	var right = left + oRaw.w - 1;
+	var top = oRaw.y;
+	var bottom = top + oRaw.h - 1;
+
+	// if the item is in the stash, draw a 12*12 table
+	if (item.location.section == 'stash') {
+		height = 12;
+	}
+	//if it is in the inventory draw a 5*12 table
+	else if (item.location.page == 'Inventory') {
+		height = 5;
+	}
+
+	if (item.location.section == 'stash' || item.location.page == 'Inventory') {
+		sItem += '--------\nLocation:\n';
+
+		sItem += '<table style="border:1px solid #353535; margin:0px; border-collapse:collapse;">';
+
+		for (var i = 0; i < height; i++) {
+			sItem += '<tr>';
+
+			for (var j = 0; j < 12; j++) {
+				sItem += '<td style="border:1px solid #353535;padding:2px;';
+				
+				if ((j >= left && j <= right) && (i >= top && i <= bottom)) {
+					sItem += 'background-color:red;';
+				}
+
+				sItem += '"></td>';
+			}
+
+			sItem += '</tr>';
+		}
+
+		sItem += '<table>';
+
+	}
+
 	return sItem;
 
 }
@@ -614,7 +655,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
-			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page ) + " (" + item.rawItem.x + ", " + item.rawItem.y +")") )			
+			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))			
 			.append( $('<td>').append( getItemLink(item) ) )
 		;
 
