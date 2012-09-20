@@ -114,7 +114,6 @@ function parseItem(rawItem, loc) {
 
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
 		item.quality = itemQuality(item);
-		item.quality = 0;
 
 		//item.itemRealType = itemRealType(item);
 		if (!oTypes.hasOwnProperty(item.itemRealType) && item.itemRealType != '') oTypes[item.itemRealType] = '';
@@ -160,6 +159,9 @@ function parseItem(rawItem, loc) {
 					   'click refresh to try again. If the error persists, contact the author.');		
 
 	}	
+
+	if (item.name == "Superior Conjurer's Vestment") 
+		console.log(item);
 
 //	item.prefixes = itemPrefixes(item);
 //	item.suffixes = itemSuffixes(item);
@@ -588,7 +590,6 @@ function itemSockets(rawItem) {
 
 function itemQuality(item) {
 
-	if (item.properties.hasOwnProperty('Quality')) return parseInt(item.properties.Quality);
 
 	if (item.category === 'skillGem' || item.category === 'flask') {
 
@@ -596,12 +597,19 @@ function itemQuality(item) {
 			for(var i = 0; i< item.rawItem.properties.length;i++) {
 				var oProp = item.rawItem.properties[i];
 				if (oProp.name === 'Quality') {
-					item.properties.Quality = oProp.value;
-					return parseInt(oProp.value);
+					item.properties.Quality = oProp.values[0];
+					return parseInt(oProp.values[0]);
 				} 
 			}
 		}
 
+	}
+	else {
+		for (var i = 0; i < item.properties.length; i++) {
+			if (item.properties[i].name == "Quality") {
+				return parseInt(item.properties[i].values[0]);
+			}
+		}
 	}
 
 	return 0;
