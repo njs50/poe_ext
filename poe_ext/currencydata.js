@@ -30,6 +30,11 @@ CURRENCY_DATA = {
 		"Glyph": 'questItem',
 		"Medicine Chest": 'questItem',
 		"Maligaro's Spike": 'questItem',
+		"Golden Hand": 'questItem',
+		"Alira's Amulet": 'questItem',
+		"Kraityn's Amulet": 'questItem',
+		"Oak's Amulet": 'questItem',
+		"Allflame": 'questItem',
 		"Cartographer's Chisel": 'cartographerChisel'
 }
 
