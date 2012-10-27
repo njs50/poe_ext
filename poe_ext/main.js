@@ -94,6 +94,15 @@ function setupInventoryRendering(items) {
 
 }
 
+$('#applyDisplaySelection').click(function () {
+	if ($('#inventoryLocation').find('input[type=checkbox]:checked').prop('id') == 'showInventoryLocationTable') {
+		$('#rareList').find('.locationLink').text('(hide)').parent().children('.locationTable').show();
+	}
+	else {
+		$('#rareList').find('.locationLink').text('(show)').parent().children('.locationTable').hide();
+	}
+})
+
 $('#applyColSelection').click(function(){
 
 
@@ -339,6 +348,77 @@ function errorDump(e) {
 	if (e.hasOwnProperty('stack')) console.log(e.stack);
 }
 
+function getLocationLink (item, category) {
+	var locationLink = '';
+	if (item.location.section == 'stash' || item.location.page == 'Inventory') {
+		locationLink = $('<a>')
+			.append('(show)')
+			.addClass('locationLink')
+			.on('click', function(){
+				$(this).parent().children('.locationTable').toggle();
+				if ($(this).text() == '(show)') {
+					$(this).text('(hide)');
+				}
+				else {
+					$(this).text('(show)');
+				}
+			})
+			;
+
+		// check if the table shall be initially displayed
+		if ($('#' + category.toLowerCase() + 'Location').find('input[type=checkbox]:checked').prop('id') == 'show' + category + 'LocationTable') {
+			locationLink.text('(hide)');
+		}
+	}
+	return locationLink;
+}
+
+function getLocationTable (item, category) {
+	var locationTable = '';
+
+	if (item.location.section == 'stash' || item.location.page == 'Inventory') {
+		var locationTable = $('<table>').addClass('locationTable');
+		var oRaw = item.rawItem;
+
+		var left = oRaw.x;
+		var right = left + oRaw.w - 1;
+		var top = oRaw.y;
+		var bottom = top + oRaw.h - 1;
+
+		// check if the table shall be initially displayed
+		if ($('#' + category.toLowerCase() + 'Location').find('input[type=checkbox]:checked').prop('id') == 'show' + category + 'LocationTable') {
+			locationTable.css('display','table');
+		}
+
+		// if the item is in the stash, draw a 12*12 table
+		if (item.location.section == 'stash') {
+			height = 12;
+		}
+		//if it is in the inventory draw a 5*12 table
+		else if (item.location.page == 'Inventory') {
+			height = 5;
+		}
+
+		for (var i = 0; i < height; i++) {
+			var row = $('<tr>');
+
+			for (var j = 0; j < 12; j++) {
+				var cell = $('<td>');
+				
+				if ((j >= left && j <= right) && (i >= top && i <= bottom)) {
+					cell.addClass('containsItem');
+				}
+
+				row.append(cell);
+			}
+
+			locationTable.append(row);
+		}
+	}
+
+	return locationTable;
+}
+
 function getItemsUL(aItems) {
 	
 	var oUL = $('<ul class="unstyled">');
@@ -348,14 +428,16 @@ function getItemsUL(aItems) {
 		var item = aItems[i];
 
 		var oItem = getItemLink(item);
-		;
+		var plainLocation = $('<span>').append('(' + item.location.section + ':' + item.location.page + ') '); 
+
 
 		$('<li>')
 			.append(oItem)
-			.append(' (' + item.location.section + ':' + item.location.page + ")")
+			.append(plainLocation)
+			.append(getLocationLink(item, 'Crafting'))
+			.append(getLocationTable(item, 'Crafting'))
 			.appendTo(oUL)
 		;
-
 	}
 
 	return oUL;
@@ -401,6 +483,7 @@ function getItemLink(item) {
 
 }
 
+// TODO (Spacke): adjust this to the new socket/link icons
 function displaySockets(item) {
 	
 	// Simulate vertical alignment depending on the item type and number of sockets
@@ -492,17 +575,17 @@ function itemToString(item) {
 				if (oThis.name == "Elemental Damage") {
 					sItem += ": ";
 					for (var j = 0; j < oThis.values.length; j++) {
-						sItem += "<span style=\"font-weight:bold; color:";
 
-						// highlight the elemental damage in a fitting color
+						// add the value of the damage
+						sItem += oThis.values[j][0];
+
+						// add the type of the elemental damage
 						switch (oThis.values[j][1]) {
-							case 4: sItem += "red"; break;
-							case 5: sItem += "blue"; break;
-							case 6: sItem += "orange"; break;
-							default: sItem += "grey"; break;
+							case 4: sItem += ' (fire)'; break;
+							case 5: sItem += ' (cold)'; break;
+							case 6: sItem += ' (lightning)'; break;
+							default: sItem += ''; break;
 						}
-
-						sItem += "\">" + oThis.values[j][0] + "</span>";
 
 						// skip the last comma
 						if (j < oThis.values.length - 1) sItem += ", ";
@@ -546,47 +629,6 @@ function itemToString(item) {
 		}
 	}
 
-	// draw the position of the item
-	// TODO (spacke): separate code and design
-	var left = oRaw.x;
-	var right = left + oRaw.w - 1;
-	var top = oRaw.y;
-	var bottom = top + oRaw.h - 1;
-
-	// if the item is in the stash, draw a 12*12 table
-	if (item.location.section == 'stash') {
-		height = 12;
-	}
-	//if it is in the inventory draw a 5*12 table
-	else if (item.location.page == 'Inventory') {
-		height = 5;
-	}
-
-	if (item.location.section == 'stash' || item.location.page == 'Inventory') {
-		sItem += '--------\nLocation:\n';
-
-		sItem += '<table style="border:1px solid #353535; margin:0px; border-collapse:collapse;">';
-
-		for (var i = 0; i < height; i++) {
-			sItem += '<tr>';
-
-			for (var j = 0; j < 12; j++) {
-				sItem += '<td style="border:1px solid #353535;padding:2px;';
-				
-				if ((j >= left && j <= right) && (i >= top && i <= bottom)) {
-					sItem += 'background-color:red;';
-				}
-
-				sItem += '"></td>';
-			}
-
-			sItem += '</tr>';
-		}
-
-		sItem += '<table>';
-
-	}
-
 	return sItem;
 
 }
@@ -609,7 +651,6 @@ function formatRareListPlain(sortedRares, separators) {
 	}
 	return out;	
 }
-
 
 function formatRareList(sortedRares, bSetupDropdown) {
 	
@@ -652,11 +693,16 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 		var item = sortedRares[i];
 
+		var oRaw = item.rawItem;
+
+		var oItem = getItemLink(item);
+		var plainLocation = $('<span>').append('(' + item.location.section + ':' + item.location.page + ') '); 
+				
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
 			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))			
-			.append( $('<td>').append( getItemLink(item) ) )
+			.append( $('<td>').append( getItemLink(item) ).append(' ').append(getLocationLink(item, 'Inventory')).append(getLocationTable(item, 'Inventory')) )
 		;
 
 		for (var j = 0; j < oView.props.length; j++) {
