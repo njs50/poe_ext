@@ -98,6 +98,7 @@
 				    <ul class="dropdown-menu" id="rares_menu">
 						<li><a id="openRareList">View</a></li>
 						<li class="divider"></li>
+						<li><a id="openDisplaySelection" data-toggle="modal" href="#inventoryDisplay">Configure Display</a></li>						
 						<li><a id="openColSelection" data-toggle="modal" href="#inventoryCols">Configure Columns</a></li>						
 						<li><a id="openItemSelection" data-toggle="modal" href="#inventoryItems">Configure Items</a></li>
 						<li class="divider"></li>						
@@ -152,6 +153,22 @@
 			  </div>
 			  <div class="modal-footer">
 			    <a href="#" class="btn" data-dismiss="modal">Close</a>			    
+			  </div>
+			</div>
+
+			<div class="modal hide" id="inventoryDisplay">
+			  <div class="modal-header">			    
+			    <h3>Configure Display</h3>
+			  </div>
+			  <div class="modal-header">
+			    	<h3>Location</h3>
+					<ul id="inventoryLocation" class="unstyled">
+						<label class="checkbox inline"><input type="checkbox" class="checkboxBoss" data-target="#hideLocationTable" id="showInventoryLocationTable">Show Location Table</input></label>
+					</ul>
+			  </div>
+			  <div class="modal-footer">
+			    <a href="#" class="btn" data-dismiss="modal">Close</a>
+			    <a href="#" class="btn btn-primary" data-dismiss="modal" id="applyDisplaySelection">Apply</a>
 			  </div>
 			</div>
 
@@ -223,6 +240,15 @@
 			</div>
 
 			<div class="modal hide" id="craftingFilters">
+			  <div class="modal-header">			    
+			    <h3>Display Settings</h3>
+			  </div>
+			  <div class="modal-body">
+			    	<h3>Location</h3>
+					<ul id="craftingLocation" class="unstyled">
+						<label class="checkbox inline"><input type="checkbox" class="checkboxBoss" data-target="#hideLocationTable" checked id="showCraftingLocationTable">Show Location Table</input></label>
+					</ul>
+			  </div>
 			  <div class="modal-header">			    
 			    <h3>Ignore Locations</h3>
 			  </div>

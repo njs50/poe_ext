@@ -34,3 +34,20 @@ ul#rares-menu label {
 .itemPopupContainer {
 	max-width: 650px;
 }
+
+.locationTable {
+	display:none;
+	border:1px solid #353535; 
+	margin:0px; 
+	border-collapse:collapse;
+}
+
+.locationTable td {
+	border:1px solid #353535;
+	padding:2px;
+}
+
+.containsItem {
+	background-color:red !important;
+}
+
