@@ -377,7 +377,7 @@ function getLocationTable (item, category) {
 	var locationTable = '';
 
 	if (item.location.section == 'stash' || item.location.page == 'Inventory') {
-		var locationTable = $('<table>').addClass('locationTable');
+		var locationTable = $('<div>').addClass('locationTable');
 		var oRaw = item.rawItem;
 
 		var left = oRaw.x;
@@ -388,6 +388,9 @@ function getLocationTable (item, category) {
 		// check if the table shall be initially displayed
 		if ($('#' + category.toLowerCase() + 'Location').find('input[type=checkbox]:checked').prop('id') == 'show' + category + 'LocationTable') {
 			locationTable.css('display','table');
+		}
+		else {
+			locationTable.css('display', 'none');
 		}
 
 		// if the item is in the stash, draw a 12*12 table
@@ -400,10 +403,10 @@ function getLocationTable (item, category) {
 		}
 
 		for (var i = 0; i < height; i++) {
-			var row = $('<tr>');
+			var row = $('<div>').addClass('locationTableRow');
 
 			for (var j = 0; j < 12; j++) {
-				var cell = $('<td>');
+				var cell = $('<div>').addClass('locationTableCell');
 				
 				if ((j >= left && j <= right) && (i >= top && i <= bottom)) {
 					cell.addClass('containsItem');
@@ -428,7 +431,7 @@ function getItemsUL(aItems) {
 		var item = aItems[i];
 
 		var oItem = getItemLink(item);
-		var plainLocation = $('<span>').append('(' + item.location.section + ':' + item.location.page + ') '); 
+		var plainLocation = $('<span>').append(' (' + item.location.section + ':' + item.location.page + ') '); 
 
 
 		$('<li>')
