@@ -36,14 +36,19 @@ ul#rares-menu label {
 }
 
 .locationTable {
-	display:none;
-	border:1px solid #353535; 
-	margin:0px; 
-	border-collapse:collapse;
+	border-top:1px solid #353535;
+	border-left:1px solid #353535;
+	display:table;
 }
 
-.locationTable td {
-	border:1px solid #353535;
+.locationTableRow {
+	display:table-row;
+}
+
+.locationTableCell {
+	display:table-cell;
+	border-bottom:1px solid #353535;
+	border-right:1px solid #353535;
 	padding:2px;
 }
 
