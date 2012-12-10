@@ -591,6 +591,7 @@ ITEM_TYPE_DATA = {
 	"Crimson Round Shield": "shield",
 	"Laminated Kite Shield": "shield",
 	"Battle Buckler": "shield",
+	"Salvaged Buckler": "shield",
 	"Girded Tower Shield": "shield",
 	"Thorium Spirit Shield": "shield",
 	"Sovereign Spiked Shield": "shield",

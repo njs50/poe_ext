@@ -33,7 +33,7 @@ function parseItem(rawItem, loc) {
 			rarity: '',
 			quality: 0,
 			name: $.trim(rawItem.name + ' ' + rawItem.typeLine),
-			identified: rawItem.identified, 
+			identified: rawItem.identified,
 			properties: {},
 			explicitMods: {},
 			implicitMods: {},
@@ -58,12 +58,12 @@ function parseItem(rawItem, loc) {
 			if (aMatch) {
 				item.calculated.Quantity = aMatch[1];
 				item.name = aMatch[2] + ' x' + aMatch[1];
-				item.baseType = aMatch[2];					
+				item.baseType = aMatch[2];
 			} else {
 				item.baseType = item.name;
-			}			
-		} 		
-		//if (item.rarity == '') parseError(item,'unknown item rarity');		
+			}
+		}
+		//if (item.rarity == '') parseError(item,'unknown item rarity');
 		*/
 
 		// item rarity
@@ -72,13 +72,13 @@ function parseItem(rawItem, loc) {
 			case 1: item.rarity = 'magic'; break;
 			case 2: item.rarity = 'rare'; ; break;
 			case 3: item.rarity = 'unique'; break;
-			case 4: 
-							item.rarity = 'skillGem'; 
+			case 4:
+							item.rarity = 'skillGem';
 							break;
-			case 5: 
+			case 5:
 							item.rarity = 'currency';
 							item.baseType = item.name;
-							item.calculated.Quantity = rawItem.properties[0].values[0]; //TODO: regex the actualy quantity 
+							item.calculated.Quantity = rawItem.properties[0].values[0]; //TODO: regex the actualy quantity
 							break;
 			case 6: item.rarity = 'quest'; break;
 			default:
@@ -101,7 +101,7 @@ function parseItem(rawItem, loc) {
 
 		// flasks and skillgems have some odd properties etc we don't want in the mix
 		if (item.category !== 'skillGem' && item.rarity !== 'currency' && item.category != 'flask') {
-			
+
 			if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties,oProps);
 			if (rawItem.hasOwnProperty('explicitMods')) item.explicitMods = processMods(rawItem.explicitMods,oMods);
 			if (rawItem.hasOwnProperty('implicitMods')) item.implicitMods = processMods(rawItem.implicitMods,oMods);
@@ -118,7 +118,7 @@ function parseItem(rawItem, loc) {
 		if (item.rarity == 'currency') {
 			var tmpCat = "Currency";
 		}
-		else {
+		else if (item.category) {
 			var tmpCat =  item.category.charAt(0).toUpperCase() + item.category.slice(1);
 		}
 		if (!oTypes.hasOwnProperty(tmpCat)) oTypes[tmpCat] = {};
@@ -133,7 +133,7 @@ function parseItem(rawItem, loc) {
 		item.calculated['Average Cold Damage'] = getAverageDamageOfType(item,'Cold Damage');
 		item.calculated['Average Fire Damage'] = getAverageDamageOfType(item,'Fire Damage');
 		item.calculated['Average Chaos Damage'] = getAverageDamageOfType(item,'Chaos Damage');
-		item.calculated['Average Physical Damage'] = getAverageDamageOfType(item,'Physical Damage');		
+		item.calculated['Average Physical Damage'] = getAverageDamageOfType(item,'Physical Damage');
 		item.calculated['Average Damage'] = averageDamage(item);
 		item.calculated['Max Linked Sockets'] = item.sockets.maxConnected;
 		item.calculated['Sockets'] = item.sockets.numSockets;
@@ -162,9 +162,9 @@ function parseItem(rawItem, loc) {
 		errorDump(e);
 
 		$('#err').html('An error occured while parsing an item in the stash. Please ' +
-					   'click refresh to try again. If the error persists, contact the author.');		
+					   'click refresh to try again. If the error persists, contact the author.');
 
-	}	
+	}
 
 //	item.prefixes = itemPrefixes(item);
 //	item.suffixes = itemSuffixes(item);
@@ -172,7 +172,7 @@ function parseItem(rawItem, loc) {
 }
 
 function nameValueArrayToObj(aPairs, oKeys){
-	var max  = aPairs.length;	
+	var max  = aPairs.length;
 	var oRet = {};
 	for (var i = 0; i < max; i++){
 		// some properties dont have a value
@@ -186,9 +186,9 @@ function nameValueArrayToObj(aPairs, oKeys){
 		var val = aPairs[i].values[0][0];
 		var key = aPairs[i].name;
 		if (val[0] == '<') val = $(val).text();
-		oRet[key] = val;		
+		oRet[key] = val;
 		if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
-	}	
+	}
 	return oRet;
 }
 
@@ -223,17 +223,17 @@ function getSocketLinkage(itemDiv) {
 			nodes[i] = [i];
 		}
 	}
-	
+
 	var addLink = function(nodeSource,nodeTarget) {
-		
+
 		//console.log('joining ' + nodeSource + ' to ' + nodeTarget );
-		
+
 		var aMerged = union_arrays(nodes[nodeSource],nodes[nodeTarget]);
-		
+
 		for (var i= 0; i < aMerged.length; i++) {
 			nodes[aMerged[i]] = aMerged;
-		}			
-		
+		}
+
 	}
 
 	setMaxLink(6);
@@ -241,7 +241,7 @@ function getSocketLinkage(itemDiv) {
 	aSockets.each(function(index, item){
 
 		item = $(item)
-		
+
 		var oLink = item.parent();
 		var coords = oLink.attr('style').replace(/^.*top:(\d+).*left:(\d+).*$/,'($1,$2)')
 
@@ -291,7 +291,7 @@ function union_arrays (x, y) {
   var obj = {};
   for (var i = x.length-1; i >= 0; -- i) obj[x[i]] = x[i];
   for (var i = y.length-1; i >= 0; -- i) obj[y[i]] = y[i];
-  
+
   var res = []
   for (var k in obj) {
     res.push(obj[k]);
@@ -317,7 +317,7 @@ function averageDamage(item) {
 
 			aTemp = item.properties['Elemental Damage'].split(', ');
 
-			aTemp2 = $.map(aTemp,function(range){				
+			aTemp2 = $.map(aTemp,function(range){
 				dps += calcAvRange(range);
 			})
 
@@ -405,7 +405,7 @@ function processMods(aExplicit,oKeys) {
 	var bonusRegexp =   /^\+?(\d+) [^A-Z]*(.*)$/;
 	var percentRegexp = /^\+?(\d+%) [^A-Z]*(.*)$/;
 	var damRegexp = /^Adds (\d+-\d+) (.* Damage)$/i;
-	
+
 
 	var aMatch = [];
 
@@ -416,12 +416,12 @@ function processMods(aExplicit,oKeys) {
 
 		aMatch = bonusRegexp.exec(thisMod);
 		if (aMatch != null) {
-			 key = '+ ' + aMatch[2];			 			
+			 key = '+ ' + aMatch[2];
 		} else {
 			aMatch = percentRegexp.exec(thisMod);
-			if (aMatch != null) { 
+			if (aMatch != null) {
 				key = '% ' + aMatch[2];
-				
+
 			} else {
 				aMatch = damRegexp.exec(thisMod);
 				if (aMatch != null) key = aMatch[2];
@@ -456,7 +456,7 @@ function itemRealType(item){
 	}
 
 	if (item.rarity == 'currency') return 'Currency';
-	
+
 	if (item.category != null) return capitaliseFirstLetter(item.category);
 
 	return '';
@@ -492,14 +492,14 @@ function itemBaseType(item) {
 		return item.baseType;
 	}
 
-	if (!item.identified || item.rarity == 'normal') { 
+	if (!item.identified || item.rarity == 'normal') {
 		// get rid off the "Superior"
-		return item.name.replace(/^Superior /, ''); 
+		return item.name.replace(/^Superior /, '');
 	}
 
 	if (item.rarity == 'rare') {
 		// some rares have an additional space that needs to be trimmed
-		return item.name.split(' ').slice(2).join(' ').replace(/^ /, ''); 
+		return item.name.split(' ').slice(2).join(' ').replace(/^ /, '');
 	}
 
 	if (item.rarity == 'magic') {
@@ -508,7 +508,7 @@ function itemBaseType(item) {
 		var baseType = item.name.replace(/\s+of.*$/,'');
 		var aWords = baseType.split(' ');
 
-		// we need to check each combination of the words to see if it's in item data. 
+		// we need to check each combination of the words to see if it's in item data.
 		// max length of basetype is 3 words (that i've found so far...)
 		//i.e
 		// Ample Sacred Hybrid Flask. check Sacred Hybrid Flask then Hybrid Flask then Flask
@@ -520,25 +520,25 @@ function itemBaseType(item) {
 		// at this point we SHOULD have a potion.
 		// but we might also have an unrecognised prefix
 		// or an unrecognised item basetype
-		
+
 		// we can reliably recognise a potion
 
 		// njs: not sure why these aren't in item data?
 		if(baseType.match(/\b(?:flask|vial)\b/i)) {
-			// though if it's both a potion AND an unrecognised prefix we've got a problem. 
+			// though if it's both a potion AND an unrecognised prefix we've got a problem.
 			return baseType;
 		}
-		
+
 		// we must have an unrecognised  item type
 		console.log("Unrecognised item type: " + baseType);
 		console.log(item);
 
 		return baseType;
-	
+
 	}
 
 	// TODO(jaguilar): handle uniques.
-	if (item.rarity == 'unique') {		
+	if (item.rarity == 'unique') {
 		if (item.rawItem.typeLine.length > 0) return item.rawItem.typeLine;
 	}
 
@@ -553,10 +553,10 @@ function itemRareName(item) {
 
 	if (item.rarity != 'rare' || !item.identified) { return null; }
 
-	splitName = item.name.split(' '); 
-	combinedName = splitName[0] + ' ' + splitName[1]; 
+	splitName = item.name.split(' ');
+	combinedName = splitName[0] + ' ' + splitName[1];
 
-	// some rares have an additional space and wont give an alch 
+	// some rares have an additional space and wont give an alch
 	// if sold to a vendor with a matching rare
 	if (splitName[2] == '') {
 		combinedName += ' ';
@@ -601,7 +601,7 @@ function itemSockets(rawItem) {
 			if (types == 3) tricolor = true;
 
 			if (oGroup.hasOwnProperty('D') && oGroup.hasOwnProperty('S') && oGroup.hasOwnProperty('I')) tricolor = true;
-			
+
 		}
 
 	}
@@ -624,7 +624,7 @@ function itemQuality(item) {
 				if (oProp.name === 'Quality') {
 					item.properties.Quality = oProp.values[0];
 					return parseInt(oProp.values[0]);
-				} 
+				}
 			}
 		}
 

@@ -21,9 +21,9 @@ var oCalc = {};
 
 
 $(function(){
-	
+
 	getVersion();
-	
+
 	postThrottle = new Throttle(30000);
 
 	// initialise the local browser db, once going, start loading data...
@@ -37,14 +37,14 @@ $(function(){
 	;
 
 
-	
+
 });
 
 function loadPageData() {
 	refreshData(function(){
 		getCache('last-league')
 			.done(function(charName) {
-				$('#leagueSelector li a[title="' + charName + '"]').trigger('click');						
+				$('#leagueSelector li a[title="' + charName + '"]').trigger('click');
 			})
 			.fail(function(){
 				// load league with the most chars
@@ -56,11 +56,11 @@ function loadPageData() {
 						league = l;
 					}
 				}
-				if (league != '') $('#leagueSelector li a[title="' + league + '"]').trigger('click');
+				if (league !== '') $('#leagueSelector li a[title="' + league + '"]').trigger('click');
 
 			})
 		;
-	});	
+	});
 }
 
 $('#refresh').click(function () {
@@ -76,13 +76,13 @@ $('#refresh').click(function () {
 		// reload characters from server
 		refreshData(function(){
 
-			// reset charName and make sure it still exists					
+			// reset charName and make sure it still exists
 			setCache('last-league',charName);
 			setCache('last-view', currentView);
 			setCache('inventoryCols',aCols);
 
-			$('#leagueSelector li a[title="' + charName + '"]').trigger('click');				
-		
+			$('#leagueSelector li a[title="' + charName + '"]').trigger('click');
+
 
 		});
 
@@ -114,25 +114,25 @@ $('#partRefresh').click(function () {
 
 });
 
-function refreshData(callback) {	
+function refreshData(callback) {
 
 	$('#rareList').hide();
 	$('div#crafting-content div.crafting-block').hide();
 	$('ul.nav li,ul#craftingTabs li').removeClass('active');
-	
+
 	getCache('league-data')
 
-		.done(function(oLeague) {			
+		.done(function(oLeague) {
 
 			oLeagueChars = oLeague;
 
 			getCache('oTabs').done(function(oT){
 
-				oTabs = oT;			
+				oTabs = oT;
 				numTabs = oT.length;
 				initPage();
-				if(jQuery.isFunction(callback)) callback();					
-			
+				if(jQuery.isFunction(callback)) callback();
+
 			});
 
 		})
@@ -144,8 +144,8 @@ function refreshData(callback) {
 			getChars()
 
 				.done(function (charResp) {
-					
-					if (charResp == null || charResp.error != undefined) {
+
+					if (charResp === null || charResp.error !== undefined) {
 						showCharError();
 						$.unblockUI();
 						return;
@@ -154,31 +154,31 @@ function refreshData(callback) {
 					// setCache('chars',charResp);
 
 					var oLeagues = {};
-					
+
 					var loadQueue = new PromiseGroup();
 
-					var throttleQueue = new PromiseGroup();					
+					var throttleQueue = new PromiseGroup();
 
 					// we have to request each characters items to find out what league they are in
-					$.each(charResp.characters,function(idx,item){
-						
+					$.each(charResp,function(idx,item){
+
 						loadQueue.addPromise(
 							getCharItems(item.name)
-								.done(function(oData){									
+								.done(function(oData){
 									if (oData.hasOwnProperty('character') && oData.character.hasOwnProperty('league')) {
 										if (!oLeagues.hasOwnProperty(oData.character.league)) oLeagues[oData.character.league] = [];
-										 oLeagues[oData.character.league].push(item.name);
-									 }
+										oLeagues[oData.character.league].push(item.name);
+									}
 								})
 						);
-						
+
 					});
 
 					// all items have been requested (ie not sitting in queue)
 					throttleQueue.completed(function(){
 						// when loading all chars is complete save to cache
 						loadQueue.completed(function(){
-							
+
 							oLeagueChars = oLeagues;
 							setCache('league-data', oLeagueChars);
 
@@ -212,7 +212,7 @@ function refreshData(callback) {
 					})
 
 				})
-				
+
 				// failed to load character info
 				.fail(function () {
 					showCharError();
@@ -228,15 +228,39 @@ function getChars() {
 
 	var deferred = new $.Deferred();
 
+	$.post(getEndpoint('get-characters'))
+		.done(function(data) {
+			if (data) {
+
+				deferred.resolve(data);
+			} else {
+				deferred.reject();
+			}
+
+		})
+		.fail(function(){
+			deferred.reject();
+		})
+	;
+
+	return deferred.promise();
+
+
+}
+/*
+function getChars() {
+
+	var deferred = new $.Deferred();
+
 	$.get('http://www.pathofexile.com/')
 		.done(function(data) {
 
 			var regexp = new RegExp(/CHARACTERS_DATA=(\{.+?\});/g);
 			var aMatch = regexp.exec(data);
-			
+
 			if (aMatch) {
 				var cdata = JSON.parse(aMatch[1]);
-				deferred.resolve(cdata);			
+				deferred.resolve(cdata);
 			} else {
 				deferred.reject();
 			}
@@ -250,11 +274,12 @@ function getChars() {
 	return deferred.promise();
 
 }
+*/
 
 function initPage(){
 
 	var oDD = $('#leagueSelector')
-		.empty()		
+		.empty()
 	;
 
 	for (var league in oLeagueChars) {
@@ -282,11 +307,11 @@ function initPage(){
 		oThis.parent().addClass('active');
 
 		$('#output').html('');
-		$('#rareList').html('');			
+		$('#rareList').html('');
 
-		if (league != '') {			
+		if (league != '') {
 			setCache('last-league',league);
-			loadLeagueData(league, false);	
+			loadLeagueData(league, false);
 		}
 
 	});
@@ -297,7 +322,7 @@ function initPage(){
 function getVersion() {
 
 	$.getJSON('manifest.json',function(manifest){
- 		$('#version').html("Version: " + manifest.version);        
+ 		$('#version').html("Version: " + manifest.version);
 	});
 
 }
@@ -328,11 +353,11 @@ function PromiseGroup() {
 
 //constructor for a new throttle instance
 function Throttle(periodDuration) {
-	
+
 	var self = this;
 
 	this.period = periodDuration;
-	
+
 	this.delayQueue = [];
 	this.currentRequest = null;
 	this.completedRequests = 0;
@@ -340,7 +365,7 @@ function Throttle(periodDuration) {
 	this.countDown = null;
 	this.ticks = 0;
 
-	
+
 	this.updateStatus = function(delay,undefined) {
 		if (delay == undefined) delay = 0;
 		var estRemaining = Math.round(((self.avTime * self.delayQueue.length) + delay) / 1000);
@@ -372,9 +397,9 @@ function Throttle(periodDuration) {
 						if ( result.hasOwnProperty('error') ) {
 
 							if (result.error.message.indexOf('too frequently') > -1) {
-								self.delayQueue.push(self.currentRequest);	
-								self.currentRequest = null;						
-								self.updateStatus(self.period);								
+								self.delayQueue.push(self.currentRequest);
+								self.currentRequest = null;
+								self.updateStatus(self.period);
 								setTimeout(self.runRequest, self.period);
 								self.countDown = setInterval(function(){
 									self.updateStatus(self.period - (1000 * ++self.ticks));
@@ -387,7 +412,7 @@ function Throttle(periodDuration) {
 								deferred.reject();
 								self.currentRequest = null;
 								self.runRequest();
-								self.updateStatus();							
+								self.updateStatus();
 							}
 
 
@@ -414,21 +439,21 @@ function Throttle(periodDuration) {
 				;
 
 			} else {
-			// reset stats as there are no active requests			
+			// reset stats as there are no active requests
 				this.completedRequests = 0;
-				this.avTime = 0;			
+				this.avTime = 0;
 			}
 		}
 	}
-	
+
 	// queues future calls to delay until the specified timeout (in milliseconds) has passed.
-	// used to prevent flooding GGG's servers with too many stash requests in a short time.  
+	// used to prevent flooding GGG's servers with too many stash requests in a short time.
 	this.queue = function(queued_action) {
 
 		var deferred = $.Deferred();
 
 		self.delayQueue.push({action: queued_action, deferred: deferred});
-		
+
 		if (!self.currentRequest) self.runRequest();
 
 		return deferred.promise();
@@ -452,7 +477,7 @@ function resetView() {
 	// clear existing crafting info
 	$('ul#craftingTabs li').remove();
 	$('div#crafting-content').empty();
-	
+
 	//clear existing inventory info
 	$('#rareList').empty();
 
@@ -465,7 +490,7 @@ function resetView() {
 
 	// clear reset lists
 	$('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').empty();
-	
+
 	currentItems = null;
 
 }
@@ -473,7 +498,7 @@ function resetView() {
 function loadLeagueData(league) {
 
 	var oChecked = $('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').find('input[type=checkbox]:checked');
-	
+
 	resetView();
 
 	var items = [];
@@ -486,9 +511,9 @@ function loadLeagueData(league) {
 
 		var loadQueue = new PromiseGroup();
 
-		for (var i=0; i< aChars.length; i++) {		
+		for (var i=0; i< aChars.length; i++) {
 			loadQueue.addPromise(
-				getCharItems(aChars[i]).done(function(oChar){					
+				getCharItems(aChars[i]).done(function(oChar){
 					$.merge(items, responseToItems(oChar, {section: oChar.charName, page: null, index: 0}))
 				})
 			);
@@ -497,11 +522,11 @@ function loadLeagueData(league) {
 		}
 
 
-		// get the first tab (and tab labels) first...		
+		// get the first tab (and tab labels) first...
 		getStashPage(league,0).done(function(oData){
 
 			try {
-			
+
 				oTabs = oData.tabs;
 				numTabs = oTabs.length;
 				$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n), index:oData.tabIndex }))
@@ -513,7 +538,7 @@ function loadLeagueData(league) {
 							   'select refresh then full to try again. If the error persists, contact the author.');
 				console.log('Error while fetching from pathofexile.com - try clicking "Refresh Data"');
 				errorDump(e);
-			}				
+			}
 
 		}).done(function(){
 
@@ -529,9 +554,9 @@ function loadLeagueData(league) {
 					$('#' + $(item).attr('id')).prop('checked',true);
 				})
 
-				for (var i=1; i < numTabs; i++ ) {		
+				for (var i=1; i < numTabs; i++ ) {
 					loadQueue.addPromise(
-						getStashPage(league,i).done(function(oData){													
+						getStashPage(league,i).done(function(oData){
 							$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n), index:oData.tabIndex }))
 						})
 					);
@@ -543,10 +568,10 @@ function loadLeagueData(league) {
 							getCache('last-view')
 								.done(function(selector){
 									lastView = selector;
-									$(selector).trigger('click');									
+									$(selector).trigger('click');
 								})
 								.fail(function(){
-									$(lastView).trigger('click');									
+									$(lastView).trigger('click');
 								})
 							;
 						})
@@ -556,7 +581,7 @@ function loadLeagueData(league) {
 					$.unblockUI();
 				})
 
-				loadQueue.failed(function(){		
+				loadQueue.failed(function(){
 					$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
 								   'select refresh then full to try again. If the error persists, contact the author.');
 					console.log('Error while fetching from pathofexile.com - try clicking "Refresh Data"');
@@ -573,8 +598,8 @@ function loadLeagueData(league) {
 			}
 
 		})
-	
-			
+
+
 	} catch (e) {
 
 		$.unblockUI();
@@ -588,7 +613,7 @@ function loadLeagueData(league) {
 	}
 
 
-	
+
 }
 
 
@@ -597,7 +622,7 @@ function responseToItems(response, location) {
 	$.map(response.items, function (v) {
 
 		// get the correct location for things outside stash
-		var loc = location.page;	
+		var loc = location.page;
 
 		if (location.section !== 'stash') {
 			loc = v.inventoryId === 'MainInventory' ? 'Inventory' : 'Equipped';
@@ -609,11 +634,11 @@ function responseToItems(response, location) {
 		loc += '*';
 
 		// get any socketed items and add them
-		if (v.hasOwnProperty('socketedItems') && v.socketedItems.length) {			
+		if (v.hasOwnProperty('socketedItems') && v.socketedItems.length) {
 			for (var i = 0; i < v.socketedItems.length; i++ ) {
 				items.push(parseItem(v.socketedItems[i], {section: location.section, page: loc, tabIndex: location.index}));
 			}
-		} 
+		}
 	})
 	return items;
 }
@@ -629,7 +654,7 @@ function getCharItems(charName) {
 
 
 	var deferred = $.Deferred();
-	
+
 	// first attempt to load from cache
 	getCache('char-' + charName)
 		//cache hit
@@ -655,7 +680,7 @@ function getCharItems(charName) {
 				})
 			;
 
-					
+
 		})
 	;
 
@@ -679,17 +704,17 @@ function getStashPage(league,index) {
 		.fail(function(){
 
 			postThrottle.queue(function() { return $.post(getEndpoint('get-stash-items'), {league: league, tabIndex: index, tabs: index === 0 ? 1 : 0}) })
-					
+
 					.done(function (stashResp) {
-						
+
 						if(stashResp.error != undefined) {
 							// early exit if web server returns the "you've requested too frequently" error
 							deferred.reject();
 							return;
-						}	
+						}
 
-						if (index === 0) {			    			
-			    			setCache('oTabs',stashResp.tabs);							
+						if (index === 0) {
+			    			setCache('oTabs',stashResp.tabs);
 						}
 
 						stashResp.tabIndex = index;
@@ -702,7 +727,7 @@ function getStashPage(league,index) {
 						return;
 					})
 				;
-			
+
 
 		})
 	;
