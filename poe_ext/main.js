@@ -2,7 +2,7 @@ var aInventory = []
 var craftItems = [];
 
 $('#resetCols').click(function(){
-	$('#inventoryCols input[type=checkbox]:checked').prop('checked',false); 
+	$('#inventoryCols input[type=checkbox]:checked').prop('checked',false);
 	return false;
 })
 
@@ -78,14 +78,14 @@ function setupInventoryRendering(items) {
 
 	// load previous settings
 	var oPromise = getCache('inventoryCols')
-	
+
 		.done(function(aCols){
 			aVisibleCols = aCols;
-			$(aCols.toString()).prop('checked',true);			
+			$(aCols.toString()).prop('checked',true);
 			deferred.resolve();
 		})
-	
-		.fail(function(aCols){							
+
+		.fail(function(aCols){
 			deferred.resolve();
 		})
 	;
@@ -107,16 +107,16 @@ $('#applyColSelection').click(function(){
 
 
 	var aSelected = [];
-	
+
 	$('input[name=viewProps]:checked').each(function(idx,item){
 		aSelected.push('#' + $(item).attr('id'));
-	});	
+	});
 	$('input[name=viewMods]:checked').each(function(idx,item){
 		aSelected.push('#' + $(item).attr('id'));
-	});	
+	});
 	$('input[name=viewCalc]:checked').each(function(idx,item){
 		aSelected.push('#' + $(item).attr('id'));
-	});	
+	});
 	$('input[name=viewReq]:checked').each(function(idx,item){
 		aSelected.push('#' + $(item).attr('id'));
 	});
@@ -156,11 +156,11 @@ function getCraftingIgnores(){
 		aIgnoreChars.push($(item).val());
 	});
 
-	return {chars: aIgnoreChars, tabs:aIgnoreTabs };	
+	return {chars: aIgnoreChars, tabs:aIgnoreTabs };
 }
 
 
-function getCraftingItems(items){	
+function getCraftingItems(items){
 
 	craftItems = [];
 
@@ -180,7 +180,7 @@ function getCraftingItems(items){
 function renderCrafting(items) {
 
 	try {
-	
+
 		var matches = allMatches(getCraftingItems(items));
 
 		var idx = 0;
@@ -208,7 +208,7 @@ function renderCrafting(items) {
 			var match_group = matches[item];
 
 			for (var i = 0; i < match_group.length; i++) {
-				match = match_group[i];				
+				match = match_group[i];
 				// calculate the distance between each item (in tabs, 0 for inventory)
 				var distance = 0;
 				var last_node = 0;
@@ -222,25 +222,25 @@ function renderCrafting(items) {
 				match.distance = distance;
 			}
 
-			// sort on distance			
+			// sort on distance
 			match_group.sort(function(a,b) {
-				// % - distance - closest first item to start 
-				if (b.complete == a.complete){ 
+				// % - distance - closest first item to start
+				if (b.complete == a.complete){
 					if (a.distance == b.distance) {
 						return a.items[0].location.tabIndex - b.items[0].location.tabIndex;
 					}
 					return a.distance - b.distance;
 				}
-				return b.complete - a.complete;				
-			});			
+				return b.complete - a.complete;
+			});
 
 
-			for (var i = 0; i < match_group.length; i++) {	
+			for (var i = 0; i < match_group.length; i++) {
 				match = match_group[i];
 				$('<tr>')
 					.append('<td>' + parseInt(match.complete * 10000) / 100 + '%</td>')
 					.append($('<td>').append(getItemsUL(match.items)))
-					.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')			
+					.append('<td>' + ((match.complete < 1 && match.missing != null) ? match.missing.join('<br>') : '') + '</td>')
 					.appendTo(oTBody)
 				;
 			}
@@ -260,10 +260,10 @@ function renderCrafting(items) {
 
 		$('ul#craftingTabs li.crafting-page a').click(function(){
 			$('#rareList').hide();
-			$('div#crafting-content div.crafting-block').hide();			
+			$('div#crafting-content div.crafting-block').hide();
 			$('#menu2, #menu3, ul#craftingTabs li').removeClass('active');
-			$(this).parent().addClass('active');		
-			$(this).closest('.dropdown').addClass('active');		
+			$(this).parent().addClass('active');
+			$(this).closest('.dropdown').addClass('active');
 			$('div#crafting-content div[data-index=' + $(this).data('index') + ']').show();
 			lastView = 'ul#craftingTabs li.crafting-page a[data-index=' + $(this).data('index') + ']';
 			setCache('last-view', lastView);
@@ -282,7 +282,7 @@ function renderCrafting(items) {
 
 		console.log('last match group processed:');
 		console.log(item);
-		
+
 	}
 
 
@@ -307,9 +307,9 @@ function processItems(items){
 			try {
 
 				// render rare list
-				$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();				
+				$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();
 
-				$('#openRareList')		
+				$('#openRareList')
 					.click(function(){
 						lastView = '#openRareList';
 						setCache('last-view', lastView);
@@ -318,13 +318,13 @@ function processItems(items){
 
 						$(this).closest('li.dropdown').addClass('active');
 						$('div#crafting-content div.crafting-block').hide();
-						$('#rareList').show();						
+						$('#rareList').show();
 						$(this).parent().addClass('active');
-					});					
+					});
 				;
 
 				deferred.resolve();
-	
+
 			} catch (e) {
 
 				console.log('error occured while rendering stash');
@@ -332,7 +332,7 @@ function processItems(items){
 
 				$('#err').html('An error occured while rendering the stash. Please ' +
 							   'select refresh then full to try again. If the error persists, contact the author.');
-				
+
 			}
 
 		})
@@ -407,7 +407,7 @@ function getLocationTable (item, category) {
 
 			for (var j = 0; j < 12; j++) {
 				var cell = $('<div>').addClass('locationTableCell');
-				
+
 				if ((j >= left && j <= right) && (i >= top && i <= bottom)) {
 					cell.addClass('containsItem');
 				}
@@ -423,24 +423,27 @@ function getLocationTable (item, category) {
 }
 
 function getItemsUL(aItems) {
-	
+
 	var oUL = $('<ul class="unstyled">');
 
 	for (var i=0; i < aItems.length; i++) {
-		
+
 		var item = aItems[i];
 
 		var oItem = getItemLink(item);
-		var plainLocation = $('<span>').append(' (' + item.location.section + ':' + item.location.page + ') '); 
+		var plainLocation = $('<span>').append(' (' + item.location.section + ':' + item.location.page + ') ');
 
 
-		$('<li>')
+		var thisLI = $('<li>')
 			.append(oItem)
 			.append(plainLocation)
 			.append(getLocationLink(item, 'Crafting'))
 			.append(getLocationTable(item, 'Crafting'))
 			.appendTo(oUL)
 		;
+
+		if (item.quality === 20) thisLI.prepend('<span class="perfect">*</span>');
+
 	}
 
 	return oUL;
@@ -452,13 +455,13 @@ function getItemLink(item) {
 		var oItem = $('<a>')
 			.append(item.name)
 			.addClass('item-' + item.rarity)
-			
+
 			.popover({
-				//title: item.name, 
-				content: function(){ 		
+				//title: item.name,
+				content: function(){
 
 					var html = $('<div>').append('<img src="' + item.rawItem.icon + '" class="pull-left"/>');
-					
+
 					if (item.sockets.numSockets > 0) {
 						html.append(displaySockets(item));
 					}
@@ -469,12 +472,12 @@ function getItemLink(item) {
 					;
 
 
-					$('<div class="clearfix">').appendTo(html);	
+					$('<div class="clearfix">').appendTo(html);
 					return html;
 				},
 				placement: 'bottom',
 				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
-				delay: { show: 500, hide: 100 }				
+				delay: { show: 500, hide: 100 }
 			})
 			.click(function(){
 				copy_cb(itemToString(item));
@@ -488,14 +491,14 @@ function getItemLink(item) {
 
 // TODO (Spacke): adjust this to the new socket/link icons
 function displaySockets(item) {
-	
+
 	// Simulate vertical alignment depending on the item type and number of sockets
 	var adjustRatio = item.rawItem.h - Math.ceil(item.sockets.numSockets / item.rawItem.w);
 	var globalOffsetY = '';
 	if (adjustRatio > 0) {
 		globalOffsetY = '; margin-top: ' + (adjustRatio * 25) + 'px';
 	}
-	
+
 	var sockets = $('<div class="sockets" style="width: ' + parseInt(48 * item.rawItem.w) + 'px; height: ' + $('.itemIcon').height() + 'px' + globalOffsetY + '">');
 	var icon = {};
 	icon['S'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJTIjt9/aToxO2k6NTt9/cba0412822/Socket.png';
@@ -505,18 +508,18 @@ function displaySockets(item) {
 	link['H'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjA7fWk6MTtpOjU7/fQ,,/ba11e10fa2/Socket_Link_Horizontal.png';
 	link['V'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjE7fWk6MTtpOjU7/fQ,,/3b93f7f851/Socket_Link_Vertical.png';
 	var cssPosition = new Array("pull-left", "pull-right", "pull-right", "pull-left", "pull-left", "pull-right");
-	
+
 	// Adjust horizontal alignment for the unique socket on a 2-square width item case
 	var globalOffsetX = '';
 	if (item.rawItem.w > 1 && item.sockets.numSockets == 1) {
 		globalOffsetX = ' style="margin-left: 24px"';
 	}
-	
+
 	var activeGroup = 0;
 	for (var i = 0; i < item.sockets.numSockets; i++) {
 		// Socket
 		sockets.append('<img src="' + icon[item.rawItem.sockets[i].attr] + '" alt="" class="' + cssPosition[i] + '"' + globalOffsetX + ' />');
-		
+
 		// Link
 		if (item.rawItem.w == 1) {
 			// Item width is 1
@@ -551,23 +554,23 @@ function displaySockets(item) {
 				sockets.append('<img src="' + link['H'] + '" class="link" style="top: 111px; left: 35px" />');
 			}
 		}
-		
+
 		activeGroup = item.rawItem.sockets[i].group;
 	}
-	
+
 	return sockets;
 }
 
 function itemToString(item) {
-	
+
 	var oRaw = item.rawItem;
 	var sItem = '';
 	sItem += 'Rarity: ' + capitaliseFirstLetter(item.rarity) + '\n';
 	sItem += oRaw.name + '\n';
 	sItem += oRaw.typeLine + '\n';
-	
 
-	if (oRaw.hasOwnProperty('properties')) {						
+
+	if (oRaw.hasOwnProperty('properties')) {
 		sItem += '--------\n';
 		for (var i = 0; i < oRaw.properties.length; i++) {
 			var oThis = oRaw.properties[i];
@@ -603,14 +606,14 @@ function itemToString(item) {
 		}
 	}
 
-	if (oRaw.hasOwnProperty('implicitMods')) {						
+	if (oRaw.hasOwnProperty('implicitMods')) {
 		sItem += '--------\n';
 		for (var i = 0; i < oRaw.implicitMods.length; i++) {
 			sItem += oRaw.implicitMods[i] + '\n';
 		}
 	}
 
-	if (oRaw.hasOwnProperty('requirements')) {						
+	if (oRaw.hasOwnProperty('requirements')) {
 		sItem += '--------\n';
 		for (var i = 0; i < oRaw.requirements.length; i++) {
 			var oThis = oRaw.requirements[i];
@@ -618,14 +621,14 @@ function itemToString(item) {
 		}
 	}
 
-	if (oRaw.hasOwnProperty('explicitMods')) {						
+	if (oRaw.hasOwnProperty('explicitMods')) {
 		sItem += '--------\n';
 		for (var i = 0; i < oRaw.explicitMods.length; i++) {
 			sItem += oRaw.explicitMods[i] + '\n';
 		}
 	}
 
-	if (oRaw.hasOwnProperty('flavourText')) {						
+	if (oRaw.hasOwnProperty('flavourText')) {
 		sItem += '--------\n';
 		for (var i = 0; i < oRaw.flavourText.length; i++) {
 			sItem += oRaw.flavourText[i] + '\n';
@@ -652,17 +655,17 @@ function formatRareListPlain(sortedRares, separators) {
 		}
 		out += rareName +'\n';
 	}
-	return out;	
+	return out;
 }
 
 function formatRareList(sortedRares, bSetupDropdown) {
-	
+
 
 	var oTypes = {};
-	
-	var oRarity = {}
 
-	var oTable = $('<table class="table table-condensed table-striped">');		
+	var oRarity = {};
+
+	var oTable = $('<table class="table table-condensed table-striped">');
 
 	var oHead = $('<thead>');
 
@@ -678,19 +681,20 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	$('input[name=viewProps]:checked').each(function(idx,item){
 		oView.props.push($(item).val());
 	});
-	
+
 	$('input[name=viewMods]:checked').each(function(idx,item){
 		oView.mods.push($(item).val());
 	});
-	
+
 	$('input[name=viewCalc]:checked').each(function(idx,item){
 		oView.calculated.push($(item).val());
 	});
-	
+
 	$('input[name=viewReq]:checked').each(function(idx,item){
 		oView.reqs.push($(item).val());
 	});
 
+	var j = 0;
 
 	for (var i = 0; i < sortedRares.length; ++i) {
 
@@ -699,46 +703,51 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		var oRaw = item.rawItem;
 
 		var oItem = getItemLink(item);
-		var plainLocation = $('<span>').append('(' + item.location.section + ':' + item.location.page + ') '); 
-				
+		var plainLocation = $('<span>').append('(' + item.location.section + ':' + item.location.page + ') ');
+
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
-			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))			
+			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))
 			.append( $('<td>').append( getItemLink(item) ).append(' ').append(getLocationLink(item, 'Inventory')).append(getLocationTable(item, 'Inventory')) )
 		;
 
-		for (var j = 0; j < oView.props.length; j++) {
+
+		for (j = 0; j < oView.props.length; j++) {
 			tr.append( $('<td>').text( item.properties.hasOwnProperty(oView.props[j]) ? item.properties[oView.props[j]] : '' ) );
 		}
-		for (var j = 0; j < oView.mods.length; j++) {
+		for (j = 0; j < oView.mods.length; j++) {
 			tr.append( $('<td>').text( item.combinedMods.hasOwnProperty(oView.mods[j]) ? item.combinedMods[oView.mods[j]] : '' ) );
 		}
-		for (var j = 0; j < oView.calculated.length; j++) {
+		for (j = 0; j < oView.calculated.length; j++) {
 			tr.append( $('<td>').text( item.calculated.hasOwnProperty(oView.calculated[j]) ? item.calculated[oView.calculated[j]] : '' ) );
 		}
-		for (var j = 0; j < oView.reqs.length; j++) {
+		for (j = 0; j < oView.reqs.length; j++) {
 			tr.append( $('<td>').text( item.requirements.hasOwnProperty(oView.reqs[j]) ? item.requirements[oView.reqs[j]] : '' ) );
 		}
-		
+
 		tr.appendTo(oBody);
 	}
 
 	var th = $('<tr>')
-		.append( $('<th class="type-int">').text('Tab') )		
+		.append( $('<th class="type-int">').text('Tab') )
 		.append( $('<th class="type-string">').text('Item') )
 	;
-	
-	for (var j = 0; j < oView.props.length; j++) {
-		th.append( $('<th class="type-float">').text(oView.props[j]) );
+
+	for (j = 0; j < oView.props.length; j++) {
+		if (oView.props[j] === 'Base Type') {
+			th.append( $('<th class="type-string">').text(oView.props[j]) );
+		} else {
+			th.append( $('<th class="type-float">').text(oView.props[j]) );
+		}
 	}
-	for (var j = 0; j < oView.mods.length; j++) {
+	for (j = 0; j < oView.mods.length; j++) {
 		th.append( $('<th class="type-int">').text(oView.mods[j]) );
 	}
-	for (var j = 0; j < oView.calculated.length; j++) {
+	for (j = 0; j < oView.calculated.length; j++) {
 		th.append( $('<th class="type-float">').text(oView.calculated[j]) );
 	}
-	for (var j = 0; j < oView.reqs.length; j++) {
+	for (j = 0; j < oView.reqs.length; j++) {
 		th.append( $('<th class="type-int">').text(oView.reqs[j]) );
 	}
 
@@ -747,24 +756,24 @@ function formatRareList(sortedRares, bSetupDropdown) {
 	oTable
 		.append(oHead)
 		.append(oBody)
-	;		
+	;
 
 	return oTable;
 }
 
 function getSortedItems(items) {
-	
+
 	var sortedRares = [];
 	var oRarity = {};
 	var oType = {};
 
 	$('input[name=viewRarity]:checked').each(function(idx,item){
 		oRarity[$(item).val()] = true;
-	});	
+	});
 
 	$('input[name=viewType]:checked').each(function(idx,item){
 		oType[$(item).val()] = true;
-	});	
+	});
 
 	for (var i = 0; i < items.length; i++) {
 		var oThis = items[i];
@@ -781,19 +790,19 @@ function getSortedItems(items) {
 		}
 		return 0;
 	});
-	
+
 	return sortedRares;
-	
+
 }
 
 
 function getSortedRares(items) {
 	var available = getCraftingItems(items);
-	
+
 	var rares = available.filter(function(i) {
 		return (i.rarity == 'rare') && i.identified;
 	});
-	
+
 	var sortedRares = rares.sort(function(a,b) {
 		if(a.rareName<b.rareName) {
 			return -1;
@@ -803,8 +812,8 @@ function getSortedRares(items) {
 		}
 		return 0;
 	});
-	
+
 	return sortedRares;
-	
+
 }
 

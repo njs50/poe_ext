@@ -1,21 +1,9 @@
-function dictMap(d, f) {
-	var o = new Object();
-	for (var i in d) {
-		if (d.hasOwnProperty(i)) {
-			o[i] = f(i, d[i]);
-		}
-	}
-	return o;
-}
-
-function ttj(t) {
-	return eval('(' + t + ')');
-}
-
 
 function parseError(item,message) {
-	console.log(message);
+	console.log('<--- error begins...');
 	console.log(item);
+	console.log(message);
+	console.log('error ends --->');
 }
 
 
@@ -70,19 +58,19 @@ function parseItem(rawItem, loc) {
 		switch(rawItem.frameType) {
 			case 0: item.rarity = 'normal'; break;
 			case 1: item.rarity = 'magic'; break;
-			case 2: item.rarity = 'rare'; ; break;
+			case 2: item.rarity = 'rare'; break;
 			case 3: item.rarity = 'unique'; break;
 			case 4:
-							item.rarity = 'skillGem';
-							break;
+				item.rarity = 'skillGem';
+				break;
 			case 5:
-							item.rarity = 'currency';
-							item.baseType = item.name;
-							item.calculated.Quantity = rawItem.properties[0].values[0]; //TODO: regex the actualy quantity
-							break;
+				item.rarity = 'currency';
+				item.baseType = item.name;
+				item.calculated.Quantity = rawItem.properties[0].values[0]; //TODO: regex the actualy quantity
+				break;
 			case 6: item.rarity = 'quest'; break;
 			default:
-							parseError(item, 'unknown item rarity');
+				parseError(item, 'unknown item rarity');
 		}
 
 		item.baseType = itemBaseType(item);
@@ -90,7 +78,7 @@ function parseItem(rawItem, loc) {
 		// get the item category if it's not a skill gem
 		if (item.rarity !== 'skillGem') {
 			item.category = itemCategory(item.baseType);
-			if(item.category == null)  parseError(item,'unknown item category');
+			if(item.category === null)  parseError(item,'unknown item category');
 		}
 		else {
 			item.category = 'skillGem';
@@ -111,15 +99,21 @@ function parseItem(rawItem, loc) {
 
 		}
 
+		item.properties['Base Type'] = item.baseType;
+		oProps['Base Type'] = '';
+
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
 		item.quality = itemQuality(item);
 
 		item.itemRealType = item.baseType;
+
+		var tmpCat = '';
+
 		if (item.rarity == 'currency') {
-			var tmpCat = "Currency";
+			tmpCat = "Currency";
 		}
 		else if (item.category) {
-			var tmpCat =  item.category.charAt(0).toUpperCase() + item.category.slice(1);
+			tmpCat =  item.category.charAt(0).toUpperCase() + item.category.slice(1);
 		}
 		if (!oTypes.hasOwnProperty(tmpCat)) oTypes[tmpCat] = {};
 		if (!oTypes[tmpCat].hasOwnProperty(item.itemRealType)) oTypes[tmpCat][item.itemRealType] = '';
@@ -162,7 +156,7 @@ function parseItem(rawItem, loc) {
 		errorDump(e);
 
 		$('#err').html('An error occured while parsing an item in the stash. Please ' +
-					   'click refresh to try again. If the error persists, contact the author.');
+						'click refresh to try again. If the error persists, contact the author.');
 
 	}
 
@@ -175,19 +169,23 @@ function nameValueArrayToObj(aPairs, oKeys){
 	var max  = aPairs.length;
 	var oRet = {};
 	for (var i = 0; i < max; i++){
+
+		var key = aPairs[i].name;
+
 		// some properties dont have a value
-		if (aPairs[i].values.length == 0) {
-			var key = aPairs[i].name;
-			oRet[key] = 'X';
+		if (aPairs[i].values.length === 0) {
+
+			oRet[key] = '';
+
+		} else {
+
+			var val = aPairs[i].values[0][0];
+			if (val[0] === '<') val = $(val).text();
+			oRet[key] = val;
 			if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
-			continue;
+
 		}
 
-		var val = aPairs[i].values[0][0];
-		var key = aPairs[i].name;
-		if (val[0] == '<') val = $(val).text();
-		oRet[key] = val;
-		if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
 	}
 	return oRet;
 }
@@ -415,20 +413,20 @@ function processMods(aExplicit,oKeys) {
 		var key = '';
 
 		aMatch = bonusRegexp.exec(thisMod);
-		if (aMatch != null) {
-			 key = '+ ' + aMatch[2];
+		if (aMatch !== null) {
+			key = '+ ' + aMatch[2];
 		} else {
 			aMatch = percentRegexp.exec(thisMod);
-			if (aMatch != null) {
+			if (aMatch !== null) {
 				key = '% ' + aMatch[2];
 
 			} else {
 				aMatch = damRegexp.exec(thisMod);
-				if (aMatch != null) key = aMatch[2];
+				if (aMatch !== null) key = aMatch[2];
 			}
 		}
 
-		if (aMatch != null) {
+		if (aMatch !== null) {
 			oExplicit[key] = aMatch[1];
 			if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
 		}
@@ -441,8 +439,8 @@ function processMods(aExplicit,oKeys) {
 
 function itemLevel(item) {
 
-	if (item.requirements.hasOwnProperty('Required Level')) return parseInt(item.requirements['Required Level']);
-	if (item.properties.hasOwnProperty('Required Level')) return parseInt(item.properties['Required Level']);
+	if (item.requirements.hasOwnProperty('Required Level')) return parseInt(item.requirements['Required Level'],10);
+	if (item.properties.hasOwnProperty('Required Level')) return parseInt(item.properties['Required Level'],10);
 
 	if (item.category == 'skillGem') console.log(item);
 
@@ -457,35 +455,12 @@ function itemRealType(item){
 
 	if (item.rarity == 'currency') return 'Currency';
 
-	if (item.category != null) return capitaliseFirstLetter(item.category);
+	if (item.category !== null) return capitaliseFirstLetter(item.category);
 
 	return '';
 
 }
 
-function itemRequirements(item) {
-	return parseNameValuePairs( item.find('div.requirements span.lc span.name,div.requirements span.lc span.value') );
-}
-
-function itemProperties(item) {
-	return parseNameValuePairs( item.find('div.displayProperty span.lc span.name,div.displayProperty span.lc span.value') );
-}
-
-function itemExplicitMods(item) {
-	var aMods = [];
-	item.find('div.explicitMod span.lc').each(function(idx,item){
-		aMods.push($(item).text());
-	});
-	return aMods;
-}
-
-function itemImplicitMods(item) {
-	var aMods = [];
-	item.find('div.implicitMod span.lc').each(function(idx,item){
-		aMods.push($(item).text());
-	});
-	return aMods;
-}
 
 function itemBaseType(item) {
 	if(item.rarity == 'currency') {
@@ -623,18 +598,17 @@ function itemQuality(item) {
 				var oProp = item.rawItem.properties[i];
 				if (oProp.name === 'Quality') {
 					item.properties.Quality = oProp.values[0];
-					return parseInt(oProp.values[0]);
+					return parseInt(oProp.values[0],10);
 				}
 			}
 		}
 
-	}
-	else {
-		for (var i = 0; i < item.properties.length; i++) {
-			if (item.properties[i].name == "Quality") {
-				return parseInt(item.properties[i].values[0]);
-			}
+	} else {
+
+		if (item.properties.hasOwnProperty('Quality')) {
+			return parseInt(item.properties.Quality,10);
 		}
+
 	}
 
 	return 0;

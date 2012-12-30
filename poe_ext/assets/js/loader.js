@@ -184,11 +184,12 @@ function refreshData(callback) {
 
 							// look up how many tabs we have
 							for(var league in oLeagues) {
-							    if(oLeagues.hasOwnProperty(league)) {
 
-							    	// load first leagues first stash tab to get tab info
-							    	getStashPage(league,0)
-							    		.done(function(oStash){
+								if(oLeagues.hasOwnProperty(league)) {
+
+								// load first leagues first stash tab to get tab info
+									getStashPage(league,0)
+										.done(function(oStash){
 
 											oTabs = oStash.tabs;
 											numTabs = oTabs.length;
@@ -199,17 +200,17 @@ function refreshData(callback) {
 
 											if(jQuery.isFunction(callback)) callback();
 
-							    		})
-							    	;
+										})
+									;
 
-							        break;
-							    }
+									break;
+								}
 							}
 
 
 						});
 
-					})
+					});
 
 				})
 

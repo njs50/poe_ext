@@ -13,7 +13,7 @@ var Match = Class.extend({
 	//     1 is complete.
 	//     *Bodged in additional meaning to this value. More than 1 is interpreted as meaning the ingredients can generate multiples of the output.
 	//     e.g. 18x chromaticOrb + 18x fusingOrb = 18x jewelersOrb. The 'complete' value should be 18.
-	//     It's basically a way of preventing the recipe hits from flooding the output with trivial repeat data, while still giving the user the data they need.  
+	//     It's basically a way of preventing the recipe hits from flooding the output with trivial repeat data, while still giving the user the data they need.
 	//
 	// - items: owned items that we matched on
 	// - missing: a list of strings to display to the user carrying items that
@@ -25,26 +25,25 @@ var Match = Class.extend({
 
 
 var RarenameMatch = Match.extend({
-	init: function(count) {
+	init: function(count,bQuality) {
 		this.count = count;
+		this.bQuality = bQuality;
 		this.matches = {}
 	},
 
 	take: function(i) {
 		if (i.rarity != 'rare' || !i.identified) return;
-		var matchArray = this.matches[i.rareName];
-		if (matchArray == null) {
-			matchArray = this.matches[i.rareName] = []
-		}
-		matchArray.push(i);
+		if (this.bQuality && i.quality !== 20) return;
+		if (!this.matches.hasOwnProperty(i.rareName)) this.matches[i.rareName] = [];
+		this.matches[i.rareName].push(i);
 	},
 
 	getMatches: function() {
 		var th = this;
 		return $.map(this.matches, function (v, k) {
-			return {complete: v.length * 1.0 / th.count, 
+			return {complete: v.length * 1.0 / th.count,
 				    items:v,
-					missing: [sprintf('%d rare(s) with this rarename:', th.count - v.length), k]}
+					missing: [sprintf('%d ' + (this.bQuality ? '20% quality' : '') + ' rare(s) with this rarename:', th.count - v.length), k]}
 		});
 	}
 });
@@ -69,7 +68,7 @@ var BaseNameAndTypeMatch = Match.extend({
 	getMatches: function() {
 		var th = this;
 		return $.map(this.matches, function (v, k) {
-			return {complete: v.length * 1.0 / th.count, 
+			return {complete: v.length * 1.0 / th.count,
 				    items:v,
 					missing: [sprintf('%d %s of type:', th.count - v.length, th.type), k]}
 		});
@@ -92,7 +91,7 @@ var CurrencyMatch = Match.extend({
 	take: function (i) {
 		if(i.rarity!='currency') return false; // not currency
 		if(!i.baseType in CURRENCY_DATA) return false; // not recognised type of currency
-		
+
 		var take = false;
 		this.currencyRequirements.forEach(function(currency){
 			if(currency.name==CURRENCY_DATA[i.baseType]) {
@@ -106,33 +105,33 @@ var CurrencyMatch = Match.extend({
 
 	getMatches: function () {
 		var lowestMatchCount = null;
-		
+
 		this.currencyRequirements.forEach(function(currency) {
 			var matchCount = currency.count/currency.quantity;
 			if(lowestMatchCount==null || matchCount<lowestMatchCount) {
 				lowestMatchCount = matchCount;
 			}
 		});
-		
+
 		var out;
-		
+
 		if(lowestMatchCount<1) {
-			
+
 			var missingStuff = "";
-			
+
 			this.currencyRequirements.forEach(function(currency) {
 				if(currency.count<currency.quantity) {
 					missingStuff+=sprintf("%dx %s<br>",currency.quantity-currency.count,currency.name);
 				}
 			});
-			
-			
+
+
 			out = [{complete:lowestMatchCount, items:this.owned, missing:missingStuff}];
 		}
 		else {
 			out = [{complete:lowestMatchCount, items:this.owned}];
 		}
-		
+
 		return out;
 	}
 });
@@ -149,9 +148,9 @@ var QualityMatch = Match.extend({
 	consider: function (i) {
 		if (i.category == null) return false;
 		if (i.quality == 0) return false;
-		return (this.acceptableType == 'weapon' && 
+		return (this.acceptableType == 'weapon' &&
 					$.inArray(i.category, ['weapon1h', 'weapon2h']) != -1) ||
-			(this.acceptableType == 'armor' && 
+			(this.acceptableType == 'armor' &&
 				$.inArray(i.category, ['head', 'chest', 'hands', 'feet']) != -1) ||
 			(this.acceptableType == i.category);  // skillGem or flask
 	},
@@ -176,10 +175,10 @@ var QualityMatch = Match.extend({
 		var out = this.matches.map(function (m) {
 			return { complete: 1, items: m };
 		});
-		out.push({ 
+		out.push({
 			complete: (this.currentQuality / 40.0),
-			items: this.currentMatch, 
-			missing: [sprintf('%ss with %d%% total quality', 
+			items: this.currentMatch,
+			missing: [sprintf('%ss with %d%% total quality',
 				              this.acceptableType,
 				              40 - this.currentQuality)]
 		});
@@ -206,14 +205,14 @@ var PredicateMatcher = Match.extend({
 	}
 });
 
-function TricolorMatch() { 
+function TricolorMatch() {
 	return new PredicateMatcher(function (i) { return i.sockets && i.sockets.tricolor; });
 }
 
 function SocketMatch(reqcount, linked) {
 	return new PredicateMatcher(
-		function (i) { 
-			return i.sockets && ((linked ? i.sockets.maxConnected : i.sockets.numSockets) >= reqcount); 
+		function (i) {
+			return i.sockets && ((linked ? i.sockets.maxConnected : i.sockets.numSockets) >= reqcount);
 		});
 }
 function RareModMatch(modcount) {
@@ -222,11 +221,11 @@ function RareModMatch(modcount) {
 }
 
 var BaseTypeMatch = Match.extend({
-	// The most important rarity should be first, then the second, and so on. 
+	// The most important rarity should be first, then the second, and so on.
 	// We use this to score match completion, with each index getting descending amounts
 	// credit.
 	init: function(rarities, maxQuality, allowedToBePartlyIdentified) {
-		this.scores = {unique:4, rare:2, magical:1, normal: 1}
+		this.scores = {unique:4, rare:2, magic:1, normal: 1}
 		this.rarities = rarities;
 		this.maxQuality = maxQuality;
 		this.allowedToBePartlyIdentified = allowedToBePartlyIdentified;
@@ -244,13 +243,13 @@ var BaseTypeMatch = Match.extend({
 	},
 
 	take: function(i) {
-		// Don't keep anything without a 
+		// Don't keep anything without a
 		if (i.baseType == null || $.inArray(i.rarity, this.rarities) == -1 || (i.quality < 20 && this.maxQuality)) { return; }
-		
+
 		if(!this.allowedToBePartlyIdentified && i.identified) { return false;}
-		
+
 		var baseTypeMap = this.matches[i.baseType]
-		
+
 		if (baseTypeMap == null) {
 			this.matches[i.baseType] = baseTypeMap = {}
 		}
@@ -267,7 +266,7 @@ var BaseTypeMatch = Match.extend({
 	getMatches: function() {
 		var maxCredit = this.credit(this.rarities.length);
 		var th = this;
-			
+
 		return $.map(this.matches, function (v, k) {
 			var itemcredit = 0;
 			var missing = $.map(th.rarities, function(rarity, idx) {
@@ -277,8 +276,8 @@ var BaseTypeMatch = Match.extend({
 			})
 
 			return {
-					items: objToArray(v), 
-				    missing: $.merge([sprintf('%s%s with rarities:', k, th.maxQuality ? ' with %20 quality' : '')], [missing.join(', ')]), 
+					items: objToArray(v),
+				    missing: $.merge([sprintf('%s%s with rarities:', k, th.maxQuality ? ' with %20 quality' : '')], [missing.join(', ')]),
 				    complete: 1 - (1.0 * th.scoreRarities(missing) / th.completeScore)
 				};
 		});
@@ -292,7 +291,7 @@ function objToArray(v) {
 	for (var k in v){
 		if (v.hasOwnProperty(k)) a.push(v[k]);
 	}
-	
+
 	return a;
 
 }
@@ -320,7 +319,7 @@ var BaseTypeAndRarityMatch = Match.extend({
 	take: function(i) {
 		if(i.baseType==null) {return false;}
 		if(i.rarity!='rare' && i.rarity!='magic' && i.rarity!='unique') {return false;}
-		
+
 		var combinedName = i.rarity + ' ' + i.baseType;
 		var items = this.itemMap[combinedName];
 		if(items==null) {
@@ -330,19 +329,19 @@ var BaseTypeAndRarityMatch = Match.extend({
 		return true;
 	},
 	getMatches: function() {
-		
+
 		var out = [];
-		
+
 		for(var combinedName in this.itemMap) {
 			var itemArray = this.itemMap[combinedName];
 			var isComplete = itemArray.length>=this.countNeeded;
 			out.push({ complete : isComplete?1:(itemArray.length/this.countNeeded),
 						items:itemArray.slice(0,5),
-						missing: isComplete?null:[sprintf("%dx %s", this.countNeeded-itemArray.length, combinedName)]		
+						missing: isComplete?null:[sprintf("%dx %s", this.countNeeded-itemArray.length, combinedName)]
 			});
-			
+
 		}
-		
+
 		return out;
 	}
 });
@@ -366,15 +365,15 @@ var FullsetMatch = Match.extend({
 			shield: [],
 		};
 		this.armorPart = count(['head', 'chest', 'hands', 'feet', 'belt', 'ring', 'ring', 'amulet']);
-		this.weaponPart = [count(['weapon1h', 'shield']), count(['weapon2h']), 
+		this.weaponPart = [count(['weapon1h', 'shield']), count(['weapon2h']),
 		                   count(['weapon1h', 'weapon1h'])];
 	},
 
 	hasCount: function(c) {
 		var th = this;
-		var has = all(c, function (v, k) { 
+		var has = all(c, function (v, k) {
 			var res = th.matchedParts[k].length >= v;
-			return res; 
+			return res;
 		});
 		return has;
 	},
@@ -435,10 +434,10 @@ var FullsetMatch = Match.extend({
 		});
 		// Get a composition of items that represents a partial suit. The slice is to prevent taking
 		// more than required (we only want one chest, etc. for the partial match).
-		var partialItems = $.map(this.matchedParts, 
-								 function (v, k) { 
+		var partialItems = $.map(this.matchedParts,
+								 function (v, k) {
 								 	if (requirements[k]) {
-								 		return v.slice(0, requirements[k]); 
+								 		return v.slice(0, requirements[k]);
 								 	}
 								 });
 		if (missing.length) {
@@ -446,8 +445,8 @@ var FullsetMatch = Match.extend({
 										  this.rarity, this.topQuality ? '20% quality ' : '');
 			missing = $.merge([firstMissingRow], missing);
 		}
-		matches.push({complete: 1 - ((missing.length * 1.0) / (missing.length + partialItems.length)), 
-					  items: partialItems, 
+		matches.push({complete: 1 - ((missing.length * 1.0) / (missing.length + partialItems.length)),
+					  items: partialItems,
 					  missing: missing});
 		return matches;
 	},
@@ -466,62 +465,69 @@ function allMatches(available) {
 	var results = {};
 
 	var matchRules = $.map([
-	                        {result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.98},
-	                		{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},
-	                		{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
-	                		{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},
-	                		{result: "Chromatic Orb", matcher: TricolorMatch()},
-	                		{result: "Divine Orb", matcher: SocketMatch(6, true)},
+							{result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.98},
+							{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},
+							{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
+							{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},
+							{result: "Chromatic Orb", matcher: TricolorMatch()},
+							{result: "Divine Orb", matcher: SocketMatch(6, true)},
 
-	                		{result: "Gemcutter's Prism", matcher: new QualityMatch('skillGem'), display:0.3},
+							{result: "Gemcutter's Prism", matcher: new QualityMatch('skillGem'), display:0.3},
 
-	                		{result: "Cartographer's Chisel", matcher: new QualityMatch('map'), display:0.3},
+							{result: "Cartographer's Chisel", matcher: new QualityMatch('map'), display:0.3},
 
-	                		{result: "Glassblower's Bauble", matcher: new QualityMatch('flask')},
-	                		
-	                		{result: "Jeweler's Orb", matcher: new CurrencyMatch([{name:'chromaticOrb'},{name:'fusingOrb'}])},
-	                		{result: "7 Jeweler's Orbs", matcher: SocketMatch(6, false)},
+							{result: "Glassblower's Bauble", matcher: new QualityMatch('flask')},
 
-	                		{result: "Orb of Alchemy", matcher: new RarenameMatch(2), display:0.51},
-	                		{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, true), display:0.51},
-	                		{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], true, false), display:0.51}, //This rule is unverified.
-	                			                		
-	                		{result: "Map one level higher", matcher: new BaseNameAndTypeMatch('map',3), display:0.51}, //This rule is unverified.	                		
+							{result: "Jeweler's Orb", matcher: new CurrencyMatch([{name:'chromaticOrb'},{name:'fusingOrb'}])},
+							{result: "7 Jeweler's Orbs", matcher: SocketMatch(6, false)},
 
-	                		{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, true), display:0.51},
-	                		{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magical', 'normal'], false, false), display:0.51},
-	                		{result: "Orb of Augmentation", matcher: RareModMatch(6)}, //This rule is flawed. It is impossible to reliably determine if a rare has 6 mods.
+							{result: "Orb of Chance", matcher: new RarenameMatch(2,false), display:0.51},
+							{result: "Orb of Alchemy", matcher: new RarenameMatch(3,false), display:0.94},
 
-	                		{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magical', 'normal'], false, true), display: 0.5},
-	                		{result: "Regal Orb", matcher: new RarenameMatch(3), display:0.94},
-	                		
-	                		{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},
-	                		{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, true), display:0.3},
-	                		{result: "1 Divine, 2 Exalted and 5 Regal Orbs",  matcher: new CurrencyMatch([{name:'mirrorOfKalandra'}]), display:0.98},
-	                		
-	                		{result: "New unidentified item of same base type & rarity",  matcher: new BaseTypeAndRarityMatch(5), display:0.5}
-	                		
-	                		//TODO The rules that rely upon allowedToBePartlyIdentified are slightly bugged at the moment.
-	                		// When set they'll accept all unidentified, which should be taken by the more valuable rule. 
-	                		//TODO add obvious recipes?
+							{result: "Orb of Alchemy", matcher: new RarenameMatch(2,true), display:0.51},
+							{result: "Regal Orb", matcher: new RarenameMatch(3,true), display:0.6},
 
-		
+
+							{result: "Orb of Augmentation", matcher: new BaseTypeMatch(['rare', 'magic', 'normal'], false, true), display:0.51},
+							{result: "2 Orbs of Augmentation", matcher: new BaseTypeMatch(['rare', 'magic', 'normal'], false, false), display:0.51},
+
+							{result: "Orb of Alchemy", matcher: new BaseTypeMatch(['rare', 'magic', 'normal'], true, true), display:0.51},
+							{result: "2 Orbs of Alchemy", matcher: new BaseTypeMatch(['rare', 'magic', 'normal'], true, false), display:0.51}, //This rule is unverified.
+
+							{result: "Map one level higher", matcher: new BaseNameAndTypeMatch('map',3), display:0.51}, //This rule is unverified.
+
+							{result: "Orb of Augmentation", matcher: RareModMatch(6)}, //This rule is flawed. It is impossible to reliably determine if a rare has 6 mods.
+
+							{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magic', 'normal'], false, true), display: 0.5},
+
+
+							{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},
+							{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, true), display:0.3},
+							{result: "1 Divine, 2 Exalted and 5 Regal Orbs",  matcher: new CurrencyMatch([{name:'mirrorOfKalandra'}]), display:0.98},
+
+							{result: "New unidentified item of same base type & rarity",  matcher: new BaseTypeAndRarityMatch(5), display:0.5}
+
+							//TODO The rules that rely upon allowedToBePartlyIdentified are slightly bugged at the moment.
+							// When set they'll accept all unidentified, which should be taken by the more valuable rule.
+							//TODO add obvious recipes?
+
+
 	], function (v, _) {
 		// Defaults.
 		if (v.display == null) { v.display = 0; }
 		return v;
 	});
-	
+
 	// iterate over the rules
 	$.each(matchRules, function (_, rule) {
-		
+
 		var matcher = rule.matcher;
-		
+
 		// let the matcher take the items it's interested in.
 		$.map(available, function (i) { matcher.take(i); });
-		// filter out matches that fall below the display threshold. 
+		// filter out matches that fall below the display threshold.
 		var matches = (matcher.getMatches().filter(function(m) { return m.complete > rule.display; }));
-		
+
 		// if this rule made any matches, then the matches need adding to the results
 		if (matches.length) {
 			if (results[rule.result] == null) {
