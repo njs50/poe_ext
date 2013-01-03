@@ -225,7 +225,7 @@ var BaseTypeMatch = Match.extend({
 	// We use this to score match completion, with each index getting descending amounts
 	// credit.
 	init: function(rarities, maxQuality, allowedToBePartlyIdentified) {
-		this.scores = {unique:4, rare:2, magic:1, normal: 1}
+		this.scores = {unique:4, rare:2, magic:1, normal: 1};
 		this.rarities = rarities;
 		this.maxQuality = maxQuality;
 		this.allowedToBePartlyIdentified = allowedToBePartlyIdentified;
@@ -244,14 +244,14 @@ var BaseTypeMatch = Match.extend({
 
 	take: function(i) {
 		// Don't keep anything without a
-		if (i.baseType == null || $.inArray(i.rarity, this.rarities) == -1 || (i.quality < 20 && this.maxQuality)) { return; }
+		if (i.baseType === null || $.inArray(i.rarity, this.rarities) === -1 || (i.quality < 20 && this.maxQuality)) { return; }
 
 		if(!this.allowedToBePartlyIdentified && i.identified) { return false;}
 
-		var baseTypeMap = this.matches[i.baseType]
+		var baseTypeMap = this.matches[i.baseType];
 
-		if (baseTypeMap == null) {
-			this.matches[i.baseType] = baseTypeMap = {}
+		if (baseTypeMap === null) {
+			this.matches[i.baseType] = baseTypeMap = {};
 		}
 
 		baseTypeMap[i.rarity] = i;  // It's fine to replace what's already here.
@@ -259,7 +259,7 @@ var BaseTypeMatch = Match.extend({
 	},
 
 	credit: function(i) {
-		if (i == 0) { return 0; }
+		if (i === 0) { return 0; }
 		return i + this.credit(i-1);
 	},
 
@@ -273,13 +273,13 @@ var BaseTypeMatch = Match.extend({
 				if (!(rarity in v)) {
 					return rarity;
 				}
-			})
+			});
 
 			return {
-					items: objToArray(v),
-				    missing: $.merge([sprintf('%s%s with rarities:', k, th.maxQuality ? ' with %20 quality' : '')], [missing.join(', ')]),
-				    complete: 1 - (1.0 * th.scoreRarities(missing) / th.completeScore)
-				};
+				items: objToArray(v),
+				missing: $.merge([sprintf('%s%s with rarities:', k, th.maxQuality ? ' with %20 quality' : '')], [missing.join(', ')]),
+				complete: 1 - (1.0 * th.scoreRarities(missing) / th.completeScore)
+			};
 		});
 	}
 
@@ -348,6 +348,7 @@ var BaseTypeAndRarityMatch = Match.extend({
 
 
 var FullsetMatch = Match.extend({
+
 	init: function(rarity, mustBeTopQuality, mustBeUnidentified) {
 		this.rarity = rarity;
 		this.mustBeTopQuality = mustBeTopQuality;
@@ -362,11 +363,10 @@ var FullsetMatch = Match.extend({
 			amulet: [],
 			weapon1h: [],
 			weapon2h: [],
-			shield: [],
+			shield: []
 		};
 		this.armorPart = count(['head', 'chest', 'hands', 'feet', 'belt', 'ring', 'ring', 'amulet']);
-		this.weaponPart = [count(['weapon1h', 'shield']), count(['weapon2h']),
-		                   count(['weapon1h', 'weapon1h'])];
+		this.weaponPart = [count(['weapon1h', 'shield']), count(['weapon2h']), count(['weapon1h', 'weapon1h'])];
 	},
 
 	hasCount: function(c) {
@@ -386,7 +386,7 @@ var FullsetMatch = Match.extend({
 			var out = [];
 			for (var countNeeded = v; countNeeded > 0; --countNeeded) {
 				out.push(th.matchedParts[k].pop());
-			};
+			}
 			return out;
 		});
 	},
@@ -435,19 +435,20 @@ var FullsetMatch = Match.extend({
 		// Get a composition of items that represents a partial suit. The slice is to prevent taking
 		// more than required (we only want one chest, etc. for the partial match).
 		var partialItems = $.map(this.matchedParts,
-								 function (v, k) {
-								 	if (requirements[k]) {
-								 		return v.slice(0, requirements[k]);
-								 	}
-								 });
+								function (v, k) {
+									if (requirements[k]) {
+										return v.slice(0, requirements[k]);
+									}
+								});
 		if (missing.length) {
-			var firstMissingRow = sprintf('%s %sitems in slots:',
-										  this.rarity, this.topQuality ? '20% quality ' : '');
+			var firstMissingRow = sprintf('%s %sitems in slots:', this.rarity, this.topQuality ? '20% quality ' : '');
 			missing = $.merge([firstMissingRow], missing);
 		}
-		matches.push({complete: 1 - ((missing.length * 1.0) / (missing.length + partialItems.length)),
-					  items: partialItems,
-					  missing: missing});
+		matches.push({
+			complete: 1 - ((missing.length * 1.0) / (missing.length + partialItems.length)),
+			items: partialItems,
+			missing: missing
+		});
 		return matches;
 	},
 
@@ -458,8 +459,8 @@ var FullsetMatch = Match.extend({
 		if (i.category in this.matchedParts) {
 			this.matchedParts[i.category].push(i);
 		}
-	},
-})
+	}
+});
 
 function allMatches(available) {
 	var results = {};
@@ -467,8 +468,13 @@ function allMatches(available) {
 	var matchRules = $.map([
 							{result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.98},
 							{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},
+
 							{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
 							{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},
+
+							{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},
+							{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, true), display:0.3},
+
 							{result: "Chromatic Orb", matcher: TricolorMatch()},
 							{result: "Divine Orb", matcher: SocketMatch(6, true)},
 
@@ -479,6 +485,7 @@ function allMatches(available) {
 							{result: "Glassblower's Bauble", matcher: new QualityMatch('flask')},
 
 							{result: "Jeweler's Orb", matcher: new CurrencyMatch([{name:'chromaticOrb'},{name:'fusingOrb'}])},
+
 							{result: "7 Jeweler's Orbs", matcher: SocketMatch(6, false)},
 
 							{result: "Orb of Chance", matcher: new RarenameMatch(2,false), display:0.51},
@@ -501,8 +508,7 @@ function allMatches(available) {
 							{result: "5 Orbs of Chance", matcher: new BaseTypeMatch(['unique', 'rare', 'magic', 'normal'], false, true), display: 0.5},
 
 
-							{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},
-							{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, true), display:0.3},
+
 							{result: "1 Divine, 2 Exalted and 5 Regal Orbs",  matcher: new CurrencyMatch([{name:'mirrorOfKalandra'}]), display:0.98},
 
 							{result: "New unidentified item of same base type & rarity",  matcher: new BaseTypeAndRarityMatch(5), display:0.5}
