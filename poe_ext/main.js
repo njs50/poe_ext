@@ -1,10 +1,10 @@
-var aInventory = []
+var aInventory = [];
 var craftItems = [];
 
 $('#resetCols').click(function(){
 	$('#inventoryCols input[type=checkbox]:checked').prop('checked',false);
 	return false;
-})
+});
 
 
 function setupInventoryRendering(items) {
@@ -15,7 +15,7 @@ function setupInventoryRendering(items) {
 	var oPropUL = $('ul#viewProps').empty();
 	for (var key in oProps) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oPropUL.append('<li><label class="checkbox inline" for="prop_' + id + '"><input class="checkbox inline" type="checkbox" id="prop_' + id + '" name="viewProps" value="' + key + '" />' + key + '</label></li>');
+		oPropUL.append('<li><label class="checkbox" for="prop_' + id + '"><input class="checkbox" type="checkbox" id="prop_' + id + '" name="viewProps" value="' + key + '" />' + key + '</label></li>');
 	}
 	sortUL(oPropUL);
 
@@ -24,7 +24,7 @@ function setupInventoryRendering(items) {
 	var oModUL = $('ul#viewMods').empty();
 	for (var key in oMods) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oModUL.append('<li><label class="checkbox inline" for="mod_' + id + '"><input class="checkbox inline" type="checkbox" id="mod_' + id + '" name="viewMods" value="' + key + '" />' + key + '</label></li>');
+		oModUL.append('<li><label class="checkbox" for="mod_' + id + '"><input class="checkbox" type="checkbox" id="mod_' + id + '" name="viewMods" value="' + key + '" />' + key + '</label></li>');
 	}
 	sortUL(oModUL);
 
@@ -34,7 +34,7 @@ function setupInventoryRendering(items) {
 	var oCalcUL = $('ul#viewCalculated').empty();
 	for (var key in oCalc) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oCalcUL.append('<li><label class="checkbox inline" for="calc_' + id + '"><input class="checkbox inline" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
+		oCalcUL.append('<li><label class="checkbox" for="calc_' + id + '"><input class="checkbox" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
 	}
 	sortUL(oCalcUL);
 
@@ -43,18 +43,18 @@ function setupInventoryRendering(items) {
 	var oReqUL = $('ul#viewReqs').empty();
 	for (var key in oRequired) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oReqUL.append('<li><label class="checkbox inline" for="req_' + id + '"><input class="checkbox inline" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
+		oReqUL.append('<li><label class="checkbox" for="req_' + id + '"><input class="checkbox" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
 	}
 	sortUL(oReqUL);
 
 	// setup available types
 	var oTypeUL = $('ul#viewCategories').empty();
 	for (var key in oTypes) {
-		var list = $('<li><label class="checkbox inline"><input type="checkbox" class="checkboxBoss" checked data-target="#view'+key+'"/>'+key+'</label><a class="btn-small" href="#" data-toggle="collapse" data-target="#view'+key+'"><i class="icon-chevron-down"></i></a></li>').appendTo(oTypeUL)
+		var list = $('<li><label class="checkbox"><input type="checkbox" class="checkboxBoss" checked data-target="#view'+key+'"/>'+key+'</label><a class="btn-small" href="#" data-toggle="collapse" data-target="#view'+key+'"><i class="icon-chevron-down"></i></a></li>').appendTo(oTypeUL)
 		var inner =  $('<ul id="view'+key+'" class="collapse" style="list-style: none;"/>').appendTo(list)
 		for (var type in oTypes[key]) {
 			var id = type.replace(/[^a-zA-Z]/g,'_');
-			inner.append('<li><label class="checkbox inline" ><input checked type="checkbox" value="' + type + '" name="viewType"/>' + type + '</label></li>');
+			inner.append('<li><label class="checkbox" ><input checked type="checkbox" value="' + type + '" name="viewType"/>' + type + '</label></li>');
 		}
 	}
 	sortUL(oTypeUL);
@@ -63,7 +63,7 @@ function setupInventoryRendering(items) {
 	var oRarityUL = $('ul#viewRarity').empty();
 	for (var key in oRarity) {
 		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oRarityUL.append('<li><label class="checkbox inline" for="rarity_' + id + '"><input class="checkbox inline" checked type="checkbox" id="rarity_' + id + '" name="viewRarity" value="' + key + '" />' + capitaliseFirstLetter(key) + '</label></li>');
+		oRarityUL.append('<li><label class="checkbox" for="rarity_' + id + '"><input class="checkbox" checked type="checkbox" id="rarity_' + id + '" name="viewRarity" value="' + key + '" />' + capitaliseFirstLetter(key) + '</label></li>');
 	}
 	sortUL(oRarityUL);
 
@@ -149,7 +149,7 @@ function getCraftingIgnores(){
 	var aIgnoreChars =[];
 
 	$('input[name=ignoreTabs]:checked').each(function(idx,item){
-		aIgnoreTabs.push(parseInt($(item).val()));
+		aIgnoreTabs.push(parseInt($(item).val(),10));
 	});
 
 	$('input[name=ignoreChars]:checked').each(function(idx,item){
@@ -320,8 +320,9 @@ function processItems(items){
 						$('div#crafting-content div.crafting-block').hide();
 						$('#rareList').show();
 						$(this).parent().addClass('active');
-					});
+					})
 				;
+
 
 				deferred.resolve();
 
@@ -330,8 +331,8 @@ function processItems(items){
 				console.log('error occured while rendering stash');
 				errorDump(e);
 
-				$('#err').html('An error occured while rendering the stash. Please ' +
-							   'select refresh then full to try again. If the error persists, contact the author.');
+				$('#err').html('An error occured while rendering the stash. ' +
+								'Select refresh then full to try again.');
 
 			}
 
@@ -377,7 +378,7 @@ function getLocationTable (item, category) {
 	var locationTable = '';
 
 	if (item.location.section == 'stash' || item.location.page == 'Inventory') {
-		var locationTable = $('<div>').addClass('locationTable');
+		locationTable = $('<div>').addClass('locationTable');
 		var oRaw = item.rawItem;
 
 		var left = oRaw.x;
@@ -499,7 +500,7 @@ function displaySockets(item) {
 		globalOffsetY = '; margin-top: ' + (adjustRatio * 25) + 'px';
 	}
 
-	var sockets = $('<div class="sockets" style="width: ' + parseInt(48 * item.rawItem.w) + 'px; height: ' + $('.itemIcon').height() + 'px' + globalOffsetY + '">');
+	var sockets = $('<div class="sockets" style="width: ' + parseInt(48 * item.rawItem.w,10) + 'px; height: ' + $('.itemIcon').height() + 'px' + globalOffsetY + '">');
 	var icon = {};
 	icon['S'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJTIjt9/aToxO2k6NTt9/cba0412822/Socket.png';
 	icon['D'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJEIjt9/aToxO2k6NTt9/24adcb67af/Socket.png';
@@ -781,7 +782,7 @@ function getSortedItems(items) {
 	}
 
 	// sort on rare name
-	 sortedRares.sort(function(a,b) {
+	sortedRares.sort(function(a,b) {
 		if(a.rareName<b.name) {
 			return -1;
 		}

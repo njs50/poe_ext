@@ -248,13 +248,11 @@ var BaseTypeMatch = Match.extend({
 
 		if(!this.allowedToBePartlyIdentified && i.identified) { return false;}
 
-		var baseTypeMap = this.matches[i.baseType];
-
-		if (baseTypeMap === null) {
-			this.matches[i.baseType] = baseTypeMap = {};
+		if (!this.matches.hasOwnProperty(i.baseType)) {
+			this.matches[i.baseType] = {};
 		}
 
-		baseTypeMap[i.rarity] = i;  // It's fine to replace what's already here.
+		this.matches[i.baseType][i.rarity] = i;  // It's fine to replace what's already here.
 
 	},
 
@@ -317,12 +315,12 @@ var BaseTypeAndRarityMatch = Match.extend({
 	},
 
 	take: function(i) {
-		if(i.baseType==null) {return false;}
-		if(i.rarity!='rare' && i.rarity!='magic' && i.rarity!='unique') {return false;}
+		if (i.baseType === undefined) {return false;}
+		if (i.rarity != 'rare' && i.rarity != 'magic' && i.rarity != 'unique') { return false; }
 
 		var combinedName = i.rarity + ' ' + i.baseType;
 		var items = this.itemMap[combinedName];
-		if(items==null) {
+		if (items === undefined) {
 			this.itemMap[combinedName] = items = [];
 		}
 		items.push(i);
@@ -511,7 +509,7 @@ function allMatches(available) {
 
 							{result: "1 Divine, 2 Exalted and 5 Regal Orbs",  matcher: new CurrencyMatch([{name:'mirrorOfKalandra'}]), display:0.98},
 
-							{result: "New unidentified item of same base type & rarity",  matcher: new BaseTypeAndRarityMatch(5), display:0.5}
+							{result: "New unidentified item of same base type & rarity",  matcher: new BaseTypeAndRarityMatch(5), display:0.7}
 
 							//TODO The rules that rely upon allowedToBePartlyIdentified are slightly bugged at the moment.
 							// When set they'll accept all unidentified, which should be taken by the more valuable rule.
