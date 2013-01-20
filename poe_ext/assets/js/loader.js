@@ -498,7 +498,11 @@ function resetView() {
 
 function loadLeagueData(league) {
 
-	var oChecked = $('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').find('input[type=checkbox]:checked');
+
+	var aChecked = [];
+	$('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs, #craftingLocation').find('input[type=checkbox]:checked').each(function(idx,item){
+		aChecked.push('#' + $(item).attr('id'));
+	});
 
 	resetView();
 
@@ -515,7 +519,7 @@ function loadLeagueData(league) {
 		for (var i=0; i< aChars.length; i++) {
 			loadQueue.addPromise(
 				getCharItems(aChars[i]).done(function(oChar){
-					$.merge(items, responseToItems(oChar, {section: oChar.charName, page: null, index: 0}))
+					$.merge(items, responseToItems(oChar, {section: oChar.charName, page: null, index: 0}));
 				})
 			);
 			$('#refreshChars').append('<li><label class="checkbox"><input type="checkbox" name="refreshChars" id="char_' + aChars[i] + '" value="char-' + aChars[i] + '">' + aChars[i] + '</label></li>');
@@ -530,13 +534,13 @@ function loadLeagueData(league) {
 
 				oTabs = oData.tabs;
 				numTabs = oTabs.length;
-				$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n), index:oData.tabIndex }))
+				$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n,10), index:oData.tabIndex }));
 
 			} catch (e) {
 
 				$.unblockUI();
 				$('#err').html('An error occured while requesting data from pathofexile.com. Please ' +
-							   'select refresh then full to try again. If the error persists, contact the author.');
+								'select refresh then full to try again. If the error persists, contact the author.');
 				console.log('Error while fetching from pathofexile.com - try clicking "Refresh Data"');
 				errorDump(e);
 			}
@@ -546,14 +550,13 @@ function loadLeagueData(league) {
 			try {
 
 				for (var i=0; i < numTabs; i++ ) {
-					$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" id="stash_' + oTabs[i].n + '" value="stash-' + league + '-' + i + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
-					$('#craftingIgnoreTabs').append('<li><label class="checkbox"><input type="checkbox" name="ignoreTabs" id="ignoreTabs_' + oTabs[i].n + '" value="' + parseInt(oTabs[i].n) + '">Tab:' + parseInt(oTabs[i].n) + '</label></li>');
+					var thisID = 'stash-' + league + '-' + i;
+					$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" id="refresh-' + thisID + '" value="' + thisID + '">Tab:' + parseInt(oTabs[i].n,10) + '</label></li>');
+					$('#craftingIgnoreTabs').append('<li><label class="checkbox"><input type="checkbox" name="ignoreTabs" id="ignore-' + thisID + '" value="' + i + '">Tab:' + parseInt(oTabs[i].n,10) + '</label></li>');
 				}
 
 				// recheck anything that was checked before the load
-				oChecked.each(function(idx,item){
-					$('#' + $(item).attr('id')).prop('checked',true);
-				})
+				if (aChecked.length) $(aChecked.toString()).prop('checked',true);
 
 				for (var i=1; i < numTabs; i++ ) {
 					loadQueue.addPromise(

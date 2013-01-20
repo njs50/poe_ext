@@ -167,7 +167,7 @@ function getCraftingItems(items){
 	var oIgnore = getCraftingIgnores();
 
 	$.map(items,function(item){
-		if(item.location.section === 'stash' && oIgnore.tabs.indexOf(item.location.page) === -1) {
+		if(item.location.section === 'stash' && oIgnore.tabs.indexOf(item.location.tabIndex) === -1) {
 			craftItems.push(item);
 		} else if (item.location.page === 'Inventory' && oIgnore.chars.indexOf(item.location.section) === -1) {
 			craftItems.push(item);
