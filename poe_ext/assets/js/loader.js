@@ -24,7 +24,7 @@ $(function(){
 
 	getVersion();
 
-	postThrottle = new Throttle(30000);
+	postThrottle = new Throttle(35000,25);
 
 	// initialise the local browser db, once going, start loading data...
 	var dbOpenPromise = initCache()
@@ -323,7 +323,7 @@ function initPage(){
 function getVersion() {
 
 	$.getJSON('manifest.json',function(manifest){
- 		$('#version').html("Version: " + manifest.version);
+		$('#version').html("Version: " + manifest.version);
 	});
 
 }
@@ -338,26 +338,27 @@ function PromiseGroup() {
 
 	this.completed = function(fn) {
 		$.when.apply($,aPromise).done(fn);
-	}
+	};
 
 	this.failed = function(fn) {
 		$.when.apply($,aPromise).fail(fn);
-	}
+	};
 
 	this.addPromise = function(promise) {
 		aPromise.push(promise);
-	}
+	};
 
 
 }
 
 
 //constructor for a new throttle instance
-function Throttle(periodDuration) {
+function Throttle(delayDuration,approxRequestsAllowed) {
 
 	var self = this;
 
-	this.period = periodDuration;
+	this.period = delayDuration;
+	this.requestsAllowed = approxRequestsAllowed;
 
 	this.delayQueue = [];
 	this.currentRequest = null;
@@ -367,9 +368,26 @@ function Throttle(periodDuration) {
 	this.ticks = 0;
 
 
-	this.updateStatus = function(delay,undefined) {
-		if (delay == undefined) delay = 0;
-		var estRemaining = Math.round(((self.avTime * self.delayQueue.length) + delay) / 1000);
+	this.updateStatus = function(undefined) {
+
+		var delay = 0;
+		var delay_periods = 0;
+
+		if (self.ticks > 0) {
+			// period less one sec per tick. + one period for every x outstanding requests.
+			delay = self.period - (1000 * self.ticks);
+			delay_periods = Math.floor(self.delayQueue.length / self.requestsAllowed);
+		} else {
+			// requests processed since last theoretical delay + queue length div requests per delay
+			delay_periods = Math.floor( ((self.completedRequests % self.requestsAllowed) + self.delayQueue.length) / self.requestsAllowed);
+		}
+
+		// console.log('req left: ' + self.delayQueue.length + ', delay: ' + delay + ', delay periods: ' + delay_periods);
+
+		delay += delay_periods * self.period;
+
+		var estRemaining = Math.round( ((self.avTime * self.delayQueue.length) + delay) / 1000) ;
+
 		if (estRemaining > 0) {
 			$('#waitOnQueue').html("Estimated time remaining: " + estRemaining + ' seconds');
 		} else {
@@ -403,7 +421,8 @@ function Throttle(periodDuration) {
 								self.updateStatus(self.period);
 								setTimeout(self.runRequest, self.period);
 								self.countDown = setInterval(function(){
-									self.updateStatus(self.period - (1000 * ++self.ticks));
+									self.ticks++;
+									self.updateStatus();
 								},1000);
 
 							} else {
@@ -421,7 +440,6 @@ function Throttle(periodDuration) {
 
 							var endTime = new Date().getTime();
 							self.avTime = ((self.avTime * self.completedRequests) + (endTime - startTime)) / ++self.completedRequests;
-
 							deferred.resolve(result);
 							self.currentRequest = null;
 							self.runRequest();
