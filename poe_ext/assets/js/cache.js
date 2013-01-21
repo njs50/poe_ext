@@ -13,14 +13,21 @@ var tx_readwrite = 1;
 
 function initCache(){
 
+	var deferred = new $.Deferred();
+
 	// if we have a recent version of chrome us the strings instead of identifiers for transactions state
 	var aMatch = navigator.userAgent.match(/Chrome\/(\d+)/);
-	if (aMatch.length == 2 && parseInt(aMatch[1]) >= 21) {
+	// if not chrome disable cache
+	if (!aMatch) {
+		console.log("Chrome not detected, disabling caching...");
+		cache_enabled = false;
+		deferred.resolve();
+		return deferred.promise();
+	} else if (aMatch.length == 2 && parseInt(aMatch[1]) >= 21) {
 		tx_readonly = 'readonly';
 		tx_readwrite = 'readwrite';
 	}
 
-	var deferred = new $.Deferred();
 
 
 	var request = window.indexedDB.open(db_name,db_version);

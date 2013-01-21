@@ -20,7 +20,9 @@ var oMods = {};
 var oCalc = {};
 
 
-$(function(){
+
+
+$(document).ready(function(){
 
 	getVersion();
 
