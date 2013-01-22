@@ -8,27 +8,12 @@ const db_name = "poe_plus";
 const store_name = "cache";
 const db_version = 3;
 
-var tx_readonly = 0;
-var tx_readwrite = 1;
+var tx_readonly = 'readonly';
+var tx_readwrite = 'readwrite';
 
 function initCache(){
 
 	var deferred = new $.Deferred();
-
-	// if we have a recent version of chrome us the strings instead of identifiers for transactions state
-	var aMatch = navigator.userAgent.match(/Chrome\/(\d+)/);
-	// if not chrome disable cache
-	if (!aMatch) {
-		console.log("Chrome not detected, disabling caching...");
-		cache_enabled = false;
-		deferred.resolve();
-		return deferred.promise();
-	} else if (aMatch.length == 2 && parseInt(aMatch[1]) >= 21) {
-		tx_readonly = 'readonly';
-		tx_readwrite = 'readwrite';
-	}
-
-
 
 	var request = window.indexedDB.open(db_name,db_version);
 
@@ -106,21 +91,24 @@ function initCache(){
 
 function resetCache(callback) {
 
-	var request = db.transaction([store_name], tx_readwrite).objectStore(store_name).clear();
+	if (cache_enabled){
 
-	request.onsuccess = function(e) {
-		//console.log('db reset');
-		if(jQuery.isFunction(callback)) callback();
-	};
+		var request = db.transaction([store_name], tx_readwrite).objectStore(store_name).clear();
 
-	request.onerror = function(e){
-		console.log('Error clearing cache DB');
-		cache_enabled = false;
-		console.log(e);
-		// continue on with cache disabled....
-		if(jQuery.isFunction(callback)) callback();
-	};
+		request.onsuccess = function(e) {
+			//console.log('db reset');
+			if(jQuery.isFunction(callback)) callback();
+		};
 
+		request.onerror = function(e){
+			console.log('Error clearing cache DB');
+			cache_enabled = false;
+			console.log(e);
+			// continue on with cache disabled....
+			if(jQuery.isFunction(callback)) callback();
+		};
+
+	}
 
 }
 
