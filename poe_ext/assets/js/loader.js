@@ -147,7 +147,7 @@ function refreshData(callback) {
 
 				.done(function (charResp) {
 
-					if (charResp === null || charResp.error !== undefined) {
+					if (charResp === null || charResp.error !== undefined || charResp[0] === '<') {
 						showCharError();
 						$.unblockUI();
 						return;
@@ -234,7 +234,6 @@ function getChars() {
 	$.post(getEndpoint('get-characters'))
 		.done(function(data) {
 			if (data) {
-
 				deferred.resolve(data);
 			} else {
 				deferred.reject();
@@ -488,7 +487,7 @@ function Throttle(delayDuration,approxRequestsAllowed) {
 
 
 function showCharError() {
-	$('#err').html('You appear not to be signed in to <a href="http://pathofexile.com">' +
+	$('#err').html('Error retrieving character data from <a href="http://pathofexile.com">' +
 				   'Path of Exile</a>.<p>Please sign in and refresh this page.');
 }
 
