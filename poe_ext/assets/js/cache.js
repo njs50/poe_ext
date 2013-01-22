@@ -182,18 +182,27 @@ function setCache(cacheName,value) {
 
 	if (cache_enabled){
 
-		var request = db.transaction([store_name], tx_readwrite).objectStore(store_name).put(value,cacheName);
+		try {
 
-		request.onsuccess = function(e) {
-		    deferred.resolve();
-		};
+			var request = db.transaction([store_name], tx_readwrite).objectStore(store_name).put(value,cacheName);
 
-		request.onerror = function(e){
+			request.onsuccess = function(e) {
+			    deferred.resolve();
+			};
+
+			request.onerror = function(e){
+				console.log('Error adding object to cache');
+				cache_enabled = false;
+				console.log(e);
+				deferred.resolve();
+			};
+
+		} catch (e) {
 			console.log('Error adding object to cache');
 			cache_enabled = false;
 			console.log(e);
 			deferred.resolve();
-		};
+		}
 
 	} else deferred.resolve();
 
