@@ -15,6 +15,14 @@ function initCache(){
 
 	var deferred = new $.Deferred();
 
+	if (window.indexedDB === undefined) {
+		console.log("IndexedDB support not detected, disabling caching...");
+		cache_enabled = false;
+		deferred.resolve();
+		return deferred.promise();
+
+	}
+
 	var request = window.indexedDB.open(db_name,db_version);
 
 	request.onupgradeneeded = function(e) {
