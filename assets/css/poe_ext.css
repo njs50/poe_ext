@@ -1,0 +1,58 @@
+body {
+	padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+
+ul#rares-menu label {
+	padding-left: 26px;
+}
+
+#refreshChars li, #refreshTabs li, #craftingIgnoreChars li, #craftingIgnoreTabs li {
+	float: left;
+	width: 125px;
+}
+
+
+/* custom */
+.popover-inner {
+	width: auto !important;
+}
+
+.popover {
+	margin-left: 100px;
+}
+
+.popover-inner pre {
+	/*width: 360px; */
+}
+
+/*
+.popover-content {
+	background: #333 !important;	
+}
+*/
+
+.itemPopupContainer {
+	max-width: 650px;
+}
+
+.locationTable {
+	border-top:1px solid #353535;
+	border-left:1px solid #353535;
+	display:table;
+}
+
+.locationTableRow {
+	display:table-row;
+}
+
+.locationTableCell {
+	display:table-cell;
+	border-bottom:1px solid #353535;
+	border-right:1px solid #353535;
+	padding:2px;
+}
+
+.containsItem {
+	background-color:red !important;
+}
+

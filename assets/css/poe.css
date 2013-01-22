@@ -1,0 +1,387 @@
+
+@font-face{
+	font-family:'FontinSmallCaps';
+	src:url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.ttf') format("truetype"), url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.svg#webfontSCusr8QL') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+	
+@font-face{
+	font-family:'FontinRegular';
+	src:url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.svg#webfontOAeglf7d') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+	
+	
+@font-face{
+	font-family:'FontinItalic';
+	src:url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.svg#webfontEqJqoBxP') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+	
+@font-face{
+	font-family:'FontinBold';
+	src:url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.eot');
+	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.svg#webfontvK7dhkXe') format("svg");
+	font-weight:normal;
+	font-style:normal;
+}
+
+.FontinSmallCaps{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinSmallCaps', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.54}
+
+.FontinRegular{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinRegular', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.51}
+
+.FontinItalic{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinItalic', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.51}
+
+.FontinBold,h1.t1{font-weight:normal;font-style:normal;line-height:normal;font-family:'FontinBold', Verdana,Arial,Helvetica,sans-serif;font-size-adjust:0.52}
+
+
+
+
+.itemPopupContainer {
+	position: relative;
+	text-align: center;
+	color: #EFEFEF;
+	z-index: 1500;
+	background: url('http://webcdn.pathofexile.com/image/game_ui/hover_background.png?1302486915')
+}
+.itemGemPopup {
+	z-index: 1450
+}
+.itemBox {
+	background: repeat-y
+}
+.itemBoxT {
+	font-size: 1px;
+	line-height: 1px;
+	width: 100%;
+	background: repeat-x top left
+}
+.itemBoxT span,.itemBoxB span {
+	display: block;
+	font-size: 1px;
+	line-height: 1px;
+	position: relative
+}
+.itemBoxT span.l,.itemBoxB span.l {
+	background: left no-repeat;
+	float: left
+}
+.itemBoxT span.r,.itemBoxB span.r {
+	background: right no-repeat;
+	float: right
+}
+.itemBoxContent {
+	position: relative;
+	background: top right repeat-y;
+	font-size: 110%
+}
+.itemBoxB {
+	font-size: 1px;
+	line-height: 1px;
+	width: 100%
+}
+.itemInline {
+	clear: both
+}
+.itemInline .itemIconContainer {
+	float: left
+}
+.itemTitleBar {
+	background: top left repeat-x;
+	position: relative;
+	margin-top: -6px;
+	margin-bottom: -9px
+}
+.itemTitleBar .l {
+	position: absolute
+}
+.itemTitleBar .r {
+	position: absolute
+}
+.itemSeperator {
+	background: top left repeat-x;
+	position: relative
+}
+.itemSeperator .l {
+	position: absolute
+}
+.itemSeperator .r {
+	position: absolute
+}
+.explicitMod,.implicitMod {
+	color: #8888FF
+}
+.unmet {
+	color: #ff4040
+}
+.textUnique,.flavourText, .item-unique {
+	color: #775B47
+}
+.flavourText {
+	font-style: italic
+}
+.textRare {
+	color: #FFFF77
+}
+
+.item-rare {
+	color: #BEAF00
+}
+
+.textMagic, .item-magic {
+	color: #8888FF
+}
+.textNormal, .item-normal {
+	color: #C8C8C8
+}
+.textGem, .item-gem {
+	color: #AA9E82
+}
+.textCurrency, .item-currency {
+	color: #AA9E82
+}
+.itemContainer {
+	z-index: 350;
+	position: relative;
+	margin-bottom: 20px
+}
+.itemContainer noscript {
+	position: absolute;
+	bottom: 23px;
+	left: 0px;
+	text-align: center;
+	color: red;
+	opacity: .5;
+	font-style: italic;
+	font-size: 72%;
+	background: #111
+}
+.itemContainerNotVerified noscript {
+	bottom: 2px
+}
+.itemContainerContentLayoutNotInline {
+	float: left
+}
+.itemContainerContentLayoutNotInline .itemIconContainer {
+	padding: 0px 10px
+}
+.itemContainerVerified {
+	margin-bottom: 24px
+}
+.itemNotInline .itemIcon {
+	cursor: pointer
+}
+.itemIconContainer {
+	text-align: center
+}
+.itemIcon {
+	display: inline-block;
+	margin-top: 5px;
+	text-align: center;
+	position: relative
+}
+.itemContainer .verified {
+	font-weight: bold;
+	color: #AAA;
+	border: 1px solid #333;
+	background-color: #000;
+	padding: 1px 4px
+}
+.itemHovered .verified {
+	border: 1px solid #444;
+	color: #FFFF77
+}
+.itemIcon .socket img {
+	position: relative
+}
+.itemIcon .socket {
+	position: relative;
+	overflow: hidden;
+	float: left
+}
+.itemIcon .socketRight {
+	float: right
+}
+.itemStatusPopup {
+	margin-top: 0px;
+	display: none;
+	position: absolute;
+	z-index: 400;
+	text-align: center;
+	color: #fee;
+	border: 1px solid #333;
+	background-color: #000;
+	padding: 1px 3px 2px 3px;
+	font-style: italic
+}
+.verifiedItemStatusPopup {
+	margin-top: 24px
+}
+.lc,.descriptionText span,.secDescriptionText span {
+	display: inline-block;
+	padding: 0px 10px
+}
+
+#item-data-home .itemTypeContainer {
+	position: absolute
+}
+#item-data-home-weapon .icon {
+	float: left;
+	margin: 10px 0px 0px 22px
+}
+#item-data-home-weapon .label {
+	position: absolute;
+	top: 70px;
+	left: 130px
+}
+#item-data-home-armour {
+	position: relative;
+	height: 190px
+}
+#item-data-home-armour .icon {
+	margin: 32px 0px 0px 12px
+}
+#item-data-home-armour .label {
+	position: absolute;
+	top: 70px;
+	left: 104px
+}
+#item-data-home-currency {
+	position: relative;
+	height: 160px
+}
+#item-data-home-currency .icon {
+	margin: 38px 0px 32px 40px
+}
+#item-data-home-currency .label {
+	position: absolute;
+	top: 32px;
+	left: 115px
+}
+#item-data-home-jewelry {
+	position: relative;
+	height: 160px
+}
+#item-data-home-jewelry .icon {
+	margin: 38px 0px 32px 40px
+}
+#item-data-home-jewelry .label {
+	position: absolute;
+	top: 32px;
+	left: 104px
+}
+#item-data-home-prefixmod {
+	position: relative;
+	height: 160px
+}
+#item-data-home-prefixmod .icon {
+	margin: 38px 0px 32px 40px
+}
+#item-data-home-prefixmod .label {
+	position: absolute;
+	top: 32px;
+	left: 115px
+}
+#item-data-home-suffixmod {
+	position: relative;
+	height: 160px
+}
+#item-data-home-suffixmod .icon {
+	margin: 38px 0px 32px 40px
+}
+#item-data-home-suffixmod .label {
+	position: absolute;
+	top: 32px;
+	left: 104px
+}
+.itemDataTable th {
+	vertical-align: middle;
+	text-align: center;
+	padding: 3px
+}
+.itemDataTable td {
+	vertical-align: middle;
+	text-align: center;
+	padding: 3px
+}
+.itemDataIcon {
+	cursor: pointer
+}
+.itemDataTable .name,.itemDataTable .class {
+	text-align: left
+}
+.itemDataIconHover {
+	position: absolute;
+	padding-right: 10px;
+	z-index: 100
+}
+.itemDataIconHover img {
+	background: #000
+}
+.itemDataTable .even_mod {
+	color: #857ebc;
+	background-color: #0d0f0d
+}
+.itemDataTable .odd_mod {
+	color: #857ebc
+}
+.itemDataIndex {
+	padding-top: 24px
+}
+.itemDataIndex .itemGroup {
+	display: block;
+	float: left
+}
+.itemDataIndex .itemGroup .image {
+	opacity: .6;
+	min-width: 96px;
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center
+}
+.itemDataIndex .itemGroup .label {
+	opacity: .8;
+	display: inline-block;
+	vertical-align: middle;
+	padding: 67px 0px
+}
+.itemDataIndex .itemGroup:hover .image,.itemDataIndex .itemGroup:hover .label {
+	opacity: 1
+}
+.itemDataIndex .itemGroup.large {
+	min-height: 230px
+}
+
+
+/* from inline in the page */
+
+.itemIcon .socket, .itemIcon .socket img
+{
+	width: 47px;
+    height: 47px; 
+}
+.itemIcon .socketWithGem img
+{
+	width: 47.4645030426px;
+	height: 98px;
+}
+.itemIcon .socketHover img
+{
+	top: -50px; 
+}
+.sockets
+{
+    position: absolute;
+    top: 22px;
+    left: 22px
+}
+.link
+{
+    position: absolute
+}
