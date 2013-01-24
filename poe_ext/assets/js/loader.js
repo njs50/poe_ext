@@ -295,6 +295,8 @@ function initPage(){
 		var oThis = $(this);
 		var league = oThis.text();
 
+		$('#err').empty();
+
 		currentLeague = league;
 
 		oThis
@@ -545,6 +547,9 @@ function loadLeagueData(league) {
 			$('#craftingIgnoreChars').append('<li><label class="checkbox"><input type="checkbox" id="ignoreChars_' + aChars[i] + '" name="ignoreChars" value="' + aChars[i] + '">' + aChars[i] + '</label></li>');
 		}
 
+		var merge_function = function(oData){
+			$.merge(items, responseToItems(oData, {section: 'stash', page: oTabs[oData.tabIndex].n, index:oData.tabIndex }));
+		};
 
 		// get the first tab (and tab labels) first...
 		getStashPage(league,0).done(function(oData){
@@ -553,7 +558,12 @@ function loadLeagueData(league) {
 
 				oTabs = oData.tabs;
 				numTabs = oTabs.length;
-				$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n,10), index:oData.tabIndex }));
+				if (numTabs > 0){
+					merge_function(oData);
+				} else {
+					$('#err').html('It appears there is no data available for the ' + league + ' league on the server.<br /> Please ' +
+								'select refresh then full after you have logged in and placed something your stash. If the error persists, contact the author.');
+				}
 
 			} catch (e) {
 
@@ -570,18 +580,18 @@ function loadLeagueData(league) {
 
 				for (var i=0; i < numTabs; i++ ) {
 					var thisID = 'stash-' + league + '-' + i;
-					$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" id="refresh-' + thisID + '" value="' + thisID + '">Tab:' + parseInt(oTabs[i].n,10) + '</label></li>');
-					$('#craftingIgnoreTabs').append('<li><label class="checkbox"><input type="checkbox" name="ignoreTabs" id="ignore-' + thisID + '" value="' + i + '">Tab:' + parseInt(oTabs[i].n,10) + '</label></li>');
+					$('#refreshTabs').append('<li><label class="checkbox"><input type="checkbox" name="refreshTabs" id="refresh-' + thisID + '" value="' + thisID + '">Tab:' + oTabs[i].n + '</label></li>');
+					$('#craftingIgnoreTabs').append('<li><label class="checkbox"><input type="checkbox" name="ignoreTabs" id="ignore-' + thisID + '" value="' + i + '">Tab:' + oTabs[i].n + '</label></li>');
 				}
 
 				// recheck anything that was checked before the load
 				if (aChecked.length) $(aChecked.toString()).prop('checked',true);
 
+
+
 				for (var i=1; i < numTabs; i++ ) {
 					loadQueue.addPromise(
-						getStashPage(league,i).done(function(oData){
-							$.merge(items, responseToItems(oData, {section: 'stash', page: parseInt(oTabs[oData.tabIndex].n), index:oData.tabIndex }))
-						})
+						getStashPage(league,i).done(merge_function)
 					);
 				}
 
@@ -734,6 +744,11 @@ function getStashPage(league,index) {
 							// early exit if web server returns the "you've requested too frequently" error
 							deferred.reject();
 							return;
+						}
+
+						// if the user hasn't put anything in their tabs/made a char/looted something this seems to return false. bleh.
+						if (stashResp === false) {
+							stashResp = {numTabs: 0, items: [], tabs:[]};
 						}
 
 						if (index === 0) {

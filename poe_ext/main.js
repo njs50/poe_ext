@@ -306,23 +306,26 @@ function processItems(items){
 
 			try {
 
-				// render rare list
-				$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();
+				if (items.length){
 
-				$('#openRareList')
-					.click(function(){
-						lastView = '#openRareList';
-						setCache('last-view', lastView);
+					// render rare list
+					$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();
 
-						$('#menu2, #menu3, ul#craftingTabs li').removeClass('active');
+					$('#openRareList')
+						.click(function(){
+							lastView = '#openRareList';
+							setCache('last-view', lastView);
 
-						$(this).closest('li.dropdown').addClass('active');
-						$('div#crafting-content div.crafting-block').hide();
-						$('#rareList').show();
-						$(this).parent().addClass('active');
-					})
-				;
+							$('#menu2, #menu3, ul#craftingTabs li').removeClass('active');
 
+							$(this).closest('li.dropdown').addClass('active');
+							$('div#crafting-content div.crafting-block').hide();
+							$('#rareList').show();
+							$(this).parent().addClass('active');
+						})
+					;
+
+				}
 
 				deferred.resolve();
 

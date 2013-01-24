@@ -545,7 +545,7 @@ function allMatches(available) {
 
 function locationFormat(i) {
 	if (i.location.section == 'character') { return 'char'; }
-	else { return sprintf('stash p%d', i.location.page + 1); }
+	else { return sprintf('stash %s', i.location.page); }
 }
 
 function itemSpan(i) {
