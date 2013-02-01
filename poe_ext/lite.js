@@ -14,14 +14,14 @@
 '		<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
 '' +
 '		<!-- css scraped from the live PoE site -->' +
-'		<link href="/assets/css/poe.css" rel="stylesheet">' +
-'		<link href="/assets/bootstrap/css/bootstrap.css" rel="stylesheet">' +
+'		<link href="http://njs50.github.com/poe_ext/assets/css/poe.css" rel="stylesheet">' +
+'		<link href="http://njs50.github.com/poe_ext/assets/css/bootstrap.css" rel="stylesheet">' +
 '' +
 '		<!-- poe_ext css (incl bootstrap overrides) -->' +
-'		<link href="/assets/css/poe_ext.css" rel="stylesheet">' +
+'		<link href="http://njs50.github.com/poe_ext/assets/css/poe_ext.css" rel="stylesheet">' +
 '' +
 '		<!-- bootstrap css -->' +
-'		<link href="/assets/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">' +
+'		<link href="http://njs50.github.com/poe_ext/assets/css/bootstrap-responsive.css" rel="stylesheet">' +
 '' +
 '' +
 '		<script src="/assets/js/date.js"></script>' +
