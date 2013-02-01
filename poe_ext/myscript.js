@@ -392,6 +392,14 @@ function combineMods(explicitMods,implicitMods){
 		}
 	}
 
+	// add "elemental resistance" onto their respective elements
+	if (oCombined.hasOwnProperty('% Elemental Resistances')){
+		var allEleRes = parseInt(oCombined['% Elemental Resistances'],10);
+		oCombined['% Lightning Resistance'] = parseInt(oCombined['% Lightning Resistance'] || 0,10) + allEleRes + '%';
+		oCombined['% Cold Resistance'] = parseInt(oCombined['% Cold Resistance'] || 0,10) + allEleRes + '%';
+		oCombined['% Fire Resistance'] = parseInt(oCombined['% Fire Resistance'] || 0,10) + allEleRes + '%';
+	}
+
 	return oCombined;
 
 }
