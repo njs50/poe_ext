@@ -20,7 +20,7 @@ var Match = Class.extend({
 	//            were not found in the list.
 	getMatches: function () {
 		return [];
-	},
+	}
 });
 
 
@@ -28,22 +28,30 @@ var RarenameMatch = Match.extend({
 	init: function(count,bQuality) {
 		this.count = count;
 		this.bQuality = bQuality;
-		this.matches = {}
+		this.matches = {};
 	},
 
 	take: function(i) {
-		if (i.rarity != 'rare' || !i.identified) return;
-		if (this.bQuality && i.quality !== 20) return;
-		if (!this.matches.hasOwnProperty(i.rareName)) this.matches[i.rareName] = [];
+		if (i.rarity !== 'rare' || !i.identified) {
+			return;
+		}
+		if (this.bQuality && i.quality !== 20){
+			return;
+		}
+		if (!this.matches.hasOwnProperty(i.rareName)){
+			this.matches[i.rareName] = [];
+		}
 		this.matches[i.rareName].push(i);
 	},
 
 	getMatches: function() {
 		var th = this;
 		return $.map(this.matches, function (v, k) {
-			return {complete: v.length * 1.0 / th.count,
-				    items:v,
-					missing: [sprintf('%d ' + (this.bQuality ? '20% quality' : '') + ' rare(s) with this rarename:', th.count - v.length), k]}
+			return {
+					complete: v.length * 1.0 / th.count,
+					items:v,
+					missing: [sprintf('%d ' + (this.bQuality ? '20% quality' : '') + ' rare(s) with this rarename:', th.count - v.length), k]
+				};
 		});
 	}
 });
@@ -141,30 +149,28 @@ var QualityMatch = Match.extend({
 	init: function(acceptableType) {
 		this.currentQuality = 0.0;
 		this.acceptableType = acceptableType;
-		this.currentMatch = []
-		this.matches = []
+		this.currentMatch = [];
+		this.matches = [];
 	},
 
 	consider: function (i) {
-		if (i.category == null) return false;
-		if (i.quality == 0) return false;
-		return (this.acceptableType == 'weapon' &&
-					$.inArray(i.category, ['weapon1h', 'weapon2h']) != -1) ||
-			(this.acceptableType == 'armor' &&
-				$.inArray(i.category, ['head', 'chest', 'hands', 'feet']) != -1) ||
-			(this.acceptableType == i.category);  // skillGem or flask
+		if (i.category === undefined) {return false;}
+		if (i.quality === 0) {return false;}
+		return (this.acceptableType === 'weapon' && $.inArray(i.category, ['weapon1h', 'weapon2h']) !== -1) ||
+			(this.acceptableType === 'armor' && $.inArray(i.category, ['head', 'chest', 'hands', 'feet','shield']) !== -1) ||
+			(this.acceptableType === i.category);  // skillGem or flask
 	},
 
 	take: function (i) {
-		if (!this.consider(i)) return;
-
-		if (i.quality == 20) {
-			this.matches.push([i]);
+		if (!this.consider(i)) { return; }
+		// only normal quality 20% is acceptable it seems...
+		if (i.quality === 20 && i.rarity === 'normal') {
+			this.matches.push({complete: 1, items: [i]});
 		} else {
 			this.currentMatch.push(i);
 			this.currentQuality += i.quality;
 			if (this.currentQuality >= 40) {
-				this.matches.push(this.currentMatch);
+				this.matches.push({complete: this.currentQuality / 40, items: this.currentMatch});
 				this.currentMatch = [];
 				this.currentQuality = 0;
 			}
@@ -172,15 +178,11 @@ var QualityMatch = Match.extend({
 	},
 
 	getMatches: function () {
-		var out = this.matches.map(function (m) {
-			return { complete: 1, items: m };
-		});
+		var out = this.matches;
 		out.push({
 			complete: (this.currentQuality / 40.0),
 			items: this.currentMatch,
-			missing: [sprintf('%ss with %d%% total quality',
-				              this.acceptableType,
-				              40 - this.currentQuality)]
+			missing: [sprintf('%ss with %d%% total quality', this.acceptableType, 40 - this.currentQuality)]
 		});
 		return out;
 	}
