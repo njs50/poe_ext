@@ -11,20 +11,27 @@ function setupInventoryRendering(items) {
 
 	var deferred = new $.Deferred();
 
+	var key = '';
+	var id ='';
+
 	// setup available properties
 	var oPropUL = $('ul#viewProps').empty();
-	for (var key in oProps) {
-		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oPropUL.append('<li><label class="checkbox" for="prop_' + id + '"><input class="checkbox" type="checkbox" id="prop_' + id + '" name="viewProps" value="' + key + '" />' + key + '</label></li>');
+	for (key in oProps) {
+		if (oProps.hasOwnProperty(key)){
+			id = key.replace(/[^a-zA-Z]/g,'_');
+			oPropUL.append('<li><label class="checkbox" for="prop_' + id + '"><input class="checkbox" type="checkbox" id="prop_' + id + '" name="viewProps" value="' + key + '" />' + key + '</label></li>');
+		}
 	}
 	sortUL(oPropUL);
 
 
 	// setup available mods
 	var oModUL = $('ul#viewMods').empty();
-	for (var key in oMods) {
-		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oModUL.append('<li><label class="checkbox" for="mod_' + id + '"><input class="checkbox" type="checkbox" id="mod_' + id + '" name="viewMods" value="' + key + '" />' + key + '</label></li>');
+	for (key in oMods) {
+		if (oMods.hasOwnProperty(key)){
+			id = key.replace(/[^a-zA-Z]/g,'_');
+			oModUL.append('<li><label class="checkbox" for="mod_' + id + '"><input class="checkbox" type="checkbox" id="mod_' + id + '" name="viewMods" value="' + key + '" />' + key + '</label></li>');
+		}
 	}
 	sortUL(oModUL);
 
@@ -32,38 +39,52 @@ function setupInventoryRendering(items) {
 
 	// setup available calculated cols
 	var oCalcUL = $('ul#viewCalculated').empty();
-	for (var key in oCalc) {
-		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oCalcUL.append('<li><label class="checkbox" for="calc_' + id + '"><input class="checkbox" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
+	for (key in oCalc) {
+		if (oCalc.hasOwnProperty(key)){
+			id = key.replace(/[^a-zA-Z]/g,'_');
+			oCalcUL.append('<li><label class="checkbox" for="calc_' + id + '"><input class="checkbox" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
+		}
 	}
 	sortUL(oCalcUL);
 
 
 	// setup available requirements
 	var oReqUL = $('ul#viewReqs').empty();
-	for (var key in oRequired) {
-		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oReqUL.append('<li><label class="checkbox" for="req_' + id + '"><input class="checkbox" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
+	for (key in oRequired) {
+		if (oRequired.hasOwnProperty(key)) {
+			id = key.replace(/[^a-zA-Z]/g,'_');
+			oReqUL.append('<li><label class="checkbox" for="req_' + id + '"><input class="checkbox" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
+		}
 	}
 	sortUL(oReqUL);
 
 	// setup available types
 	var oTypeUL = $('ul#viewCategories').empty();
-	for (var key in oTypes) {
-		var list = $('<li><label class="checkbox"><input type="checkbox" class="checkboxBoss" checked data-target="#view'+key+'"/>'+key+'</label><a class="btn-small" href="#" data-toggle="collapse" data-target="#view'+key+'"><i class="icon-chevron-down"></i></a></li>').appendTo(oTypeUL)
-		var inner =  $('<ul id="view'+key+'" class="collapse" style="list-style: none;"/>').appendTo(list)
-		for (var type in oTypes[key]) {
-			var id = type.replace(/[^a-zA-Z]/g,'_');
-			inner.append('<li><label class="checkbox" ><input checked type="checkbox" value="' + type + '" name="viewType"/>' + type + '</label></li>');
+	for (key in oTypes) {
+		if (oTypes.hasOwnProperty(key)) {
+			var cbox = '<input type="checkbox" class="checkboxBoss" checked data-target="#view' + key + '"/>';
+			var expandLink = '<a class="btn-small" href="#" data-toggle="collapse" data-target="#view' + key + '"><i class="icon-chevron-down"></i></a>';
+			var list = $('<li><label class="checkbox">'+ cbox + key +'' + expandLink + '</label></li>')
+				.appendTo(oTypeUL);
+			var inner =  $('<ul id="view'+key+'" class="collapse" style="list-style: none;"/>').appendTo(list);
+
+			for (var type in oTypes[key]) {
+				if (oTypes[key].hasOwnProperty(type)) {
+					id = type.replace(/[^a-zA-Z]/g,'_');
+					inner.append('<li><label class="checkbox" ><input checked type="checkbox" value="' + type + '" name="viewType"/>' + type + '</label></li>');
+				}
+			}
 		}
 	}
 	sortUL(oTypeUL);
 
 	// setup available rarity
 	var oRarityUL = $('ul#viewRarity').empty();
-	for (var key in oRarity) {
-		var id = key.replace(/[^a-zA-Z]/g,'_');
-		oRarityUL.append('<li><label class="checkbox" for="rarity_' + id + '"><input class="checkbox" checked type="checkbox" id="rarity_' + id + '" name="viewRarity" value="' + key + '" />' + capitaliseFirstLetter(key) + '</label></li>');
+	for (key in oRarity) {
+		if (oRarity.hasOwnProperty(key)) {
+			id = key.replace(/[^a-zA-Z]/g,'_');
+			oRarityUL.append('<li><label class="checkbox" for="rarity_' + id + '"><input class="checkbox" checked type="checkbox" id="rarity_' + id + '" name="viewRarity" value="' + key + '" />' + capitaliseFirstLetter(key) + '</label></li>');
+		}
 	}
 	sortUL(oRarityUL);
 

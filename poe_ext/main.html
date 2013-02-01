@@ -200,18 +200,56 @@
 			    <h3>Select Items</h3>
 			  </div>
 			  <div class="modal-body">
-			    	<h3>
-			    		<label class="checkbox"><input type="checkbox" class="checkboxBoss" data-target="#viewCategories" checked id="toggleCategories">Types</input></label>
-         			<a class="btn-small" href="#" data-toggle="collapse" data-target="#viewCategories"><i class="icon-chevron-down"></i></a>
-         		</h3>
-			    	<ul id="viewCategories" class="collapse" style="list-style:none;"></ul>
-			    	<div class="clearfix"></div>
-			    	<h3>
-			    		<label class="checkbox"><input type="checkbox" class="toggleCheckboxes" checked data-toggling="viewRarity" id="toggleRarity">Rarity</input></label>
-         				<a class="btn-small" href="#" data-toggle="collapse" data-target="#viewRarity"><i class="icon-chevron-down"></i></a>
-         			</h3>
-			    	<ul id="viewRarity" class="unstyled collapse"></ul>
-			    	<div class="clearfix"></div>
+
+			  		<div class="accordion" id="">
+
+
+						<div class="accordion-group">
+
+				  			<div class="accordion-heading">
+				  				<a class="accordion-toggle" data-toggle="collapse" href="#collapseTypes">
+				  					Types
+				  				</a>
+				  			</div>
+
+							<div id="collapseTypes" class="accordion-body collapse">
+								<div class="accordion-inner">
+									<label class="checkbox">
+										<input type="checkbox" class="checkboxBoss checkbox" data-target="#viewCategories" checked id="toggleCategories">
+										Select All / None
+									</label>
+									<ul id="viewCategories" class="unstyled"></ul>
+									<div class="clearfix"></div>
+								</div>
+						    </div>
+
+						</div>
+
+						<div class="accordion-group">
+
+				  			<div class="accordion-heading">
+				  				<a class="accordion-toggle" data-toggle="collapse" href="#collapseRarity">
+				  					Rarity
+				  				</a>
+				  			</div>
+
+							<div id="collapseRarity" class="accordion-body collapse">
+								<div class="accordion-inner">
+									<label class="checkbox">
+										<input type="checkbox" class="toggleCheckboxes checkbox" checked data-toggling="viewRarity" id="toggleRarity">
+										Select All / None
+									</label>
+									<ul id="viewRarity" class="unstyled"></ul>
+									<div class="clearfix"></div>
+								</div>
+						    </div>
+
+						</div>
+
+			  		</div>
+
+
+
 			  </div>
 			  <div class="modal-footer">
 			    <a href="#" class="btn" data-dismiss="modal">Close</a>
