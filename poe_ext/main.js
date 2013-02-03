@@ -5,6 +5,10 @@ $('#resetCols').click(function(){
 	$('#inventoryCols input[type=checkbox]:checked').prop('checked',false);
 	return false;
 });
+$('#showAllCols').click(function(){
+	$('#inventoryCols input[type=checkbox]').prop('checked',true);
+	return false;
+});
 
 
 function setupInventoryRendering(items) {
