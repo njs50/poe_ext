@@ -156,8 +156,8 @@ var QualityMatch = Match.extend({
 	consider: function (i) {
 		if (i.category === undefined) {return false;}
 		if (i.quality === 0) {return false;}
-		return (this.acceptableType === 'weapon' && $.inArray(i.category, ['weapon1h', 'weapon2h']) !== -1) ||
-			(this.acceptableType === 'armor' && $.inArray(i.category, ['head', 'chest', 'hands', 'feet','shield']) !== -1) ||
+		return (this.acceptableType === 'weapon' && $.inArray(i.parentCategory, ['weapon1h', 'weapon2h']) !== -1) ||
+			(this.acceptableType === 'armor' && i.parentCategory === 'armor') ||
 			(this.acceptableType === i.category);  // skillGem or flask
 	},
 
@@ -456,8 +456,9 @@ var FullsetMatch = Match.extend({
 		if(this.mustBeUnidentified && i.identified) { return false; }
 		if (this.rarity != i.rarity) { return false; }
 		if (this.mustBeTopQuality && i.quality != 20) { return false; }
-		if (i.category in this.matchedParts) {
-			this.matchedParts[i.category].push(i);
+		var cat = (i.parentCategory === 'weapon1h' || i.parentCategory === 'weapon2h') ? i.parentCategory : i.category;
+		if (cat in this.matchedParts) {
+			this.matchedParts[cat].push(i);
 		}
 	}
 });

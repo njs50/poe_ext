@@ -31,6 +31,7 @@ CURRENCY_DATA = {
 		"Medicine Chest": 'questItem',
 		"Maligaro's Spike": 'questItem',
 		"Golden Hand": 'questItem',
+		"Sewer Keys": 'questItem',
 		"Alira's Amulet": 'questItem',
 		"Kraityn's Amulet": 'questItem',
 		"Oak's Amulet": 'questItem',

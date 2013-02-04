@@ -29,6 +29,7 @@ function parseItem(rawItem, loc) {
 			requirements: {},
 			sockets: {},
 			calculated: {Quantity: 1},
+			parentCategory: '',
 			rawItem: rawItem
 
 		};
@@ -78,11 +79,22 @@ function parseItem(rawItem, loc) {
 		// get the item category if it's not a skill gem
 		if (item.rarity !== 'skillGem') {
 			item.category = itemCategory(item.baseType);
+			if (item.category === 'weapon1h' || item.category === 'weapon2h') {
+				item.parentCategory = item.category;
+				item.category = item.rawItem.properties[0].name.replace(/ /g,'');
+			} else if ($.inArray(item.category, ['head', 'chest', 'hands', 'feet','shield']) !== -1) {
+				item.parentCategory = 'armor';
+			} else if ($.inArray(item.category, ['amulet', 'belt', 'ring', 'quiver']) !== -1) {
+				item.parentCategory = 'accessory';
+			} else {
+				item.parentCategory = 'misc'
+			}
 			if(item.category === null)  parseError(item,'unknown item category');
-		}
-		else {
+		} else {
 			item.category = 'skillGem';
 		}
+
+
 
 		// get properties/mods/requirements into usable format
 		if (rawItem.hasOwnProperty('requirements')) item.requirements = nameValueArrayToObj(rawItem.requirements,oRequired);
@@ -111,10 +123,10 @@ function parseItem(rawItem, loc) {
 
 		if (item.rarity == 'currency') {
 			tmpCat = "Currency";
-		}
-		else if (item.category) {
+		} else if (item.category) {
 			tmpCat =  item.category.charAt(0).toUpperCase() + item.category.slice(1);
 		}
+
 		if (!oTypes.hasOwnProperty(tmpCat)) oTypes[tmpCat] = {};
 		if (!oTypes[tmpCat].hasOwnProperty(item.itemRealType)) oTypes[tmpCat][item.itemRealType] = '';
 
@@ -139,7 +151,6 @@ function parseItem(rawItem, loc) {
 
 		// if the cacl'd properties cols aren't yet set, add them all
 		if (!oCalc.hasOwnProperty('Average Damage')) {
-
 			for (var key in item.calculated) {
 				oCalc[key] = '';
 			}
@@ -172,15 +183,48 @@ function nameValueArrayToObj(aPairs, oKeys){
 
 		var key = aPairs[i].name;
 
+		var keylen = aPairs[i].values.length;
+
 		// some properties dont have a value
-		if (aPairs[i].values.length === 0) {
+		if (keylen === 0) {
 
 			oRet[key] = '';
 
 		} else {
 
-			var val = aPairs[i].values[0][0];
-			if (val[0] === '<') val = $(val).text();
+			var val = '';
+
+			if (key == "Elemental Damage") {
+
+				var sItem = "";
+				var oThis = aPairs[i];
+
+				for (var j = 0; j < keylen; j++) {
+
+					// add the value of the damage
+					sItem += oThis.values[j][0];
+
+					// add the type of the elemental damage
+					switch (oThis.values[j][1]) {
+						case 4: sItem += ' (fire)'; break;
+						case 5: sItem += ' (cold)'; break;
+						case 6: sItem += ' (lightning)'; break;
+						default: sItem += ''; break;
+					}
+
+					// skip the last comma
+					if (j < keylen - 1) sItem += ", ";
+				}
+
+				val = sItem;
+
+			} else {
+
+				val = aPairs[i].values[0][0];
+				if (val[0] === '<') val = $(val).text();
+			}
+
+
 			oRet[key] = val;
 			if (!oKeys.hasOwnProperty(key)) oKeys[key] = '';
 
@@ -305,19 +349,19 @@ function averageDamage(item) {
 	var aTemp, aTemp2 = [];
 
 	// if this is a weap, work it out as dps?
-	if (item.properties.hasOwnProperty('Weapon Class')) {
+	if (item.parentCategory === 'weapon1h' || item.parentCategory === 'weapon2h') {
 
 		// physical
-		aTemp = item.properties['Physical Damage'].split(' to ');
+		aTemp = item.properties['Physical Damage'].split('-');
 
-		dps += ( parseInt(aTemp[0]) + parseInt(aTemp[1]) ) / 2;
+		dps += ( parseInt(aTemp[0],10) + parseInt(aTemp[1],10) ) / 2;
 		if (item.properties.hasOwnProperty('Elemental Damage')) {
 
 			aTemp = item.properties['Elemental Damage'].split(', ');
 
 			aTemp2 = $.map(aTemp,function(range){
 				dps += calcAvRange(range);
-			})
+			});
 
 		}
 
