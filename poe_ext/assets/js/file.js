@@ -6,24 +6,40 @@ function saveItems(fn, items) {
 
     $.each(items,function(idx,item){
         aItems.push({rawItem: item.rawItem, location:item.location});
-    });    
+    });
 
-    var oBlob = new Blob([JSON.stringify(aItems)]);
-    location.href = window.webkitURL.createObjectURL(oBlob);
+    window.webkitRequestFileSystem(window.TEMPORARY, 1024*1024, function(fs) {
+        fs.root.getFile(fn, {create: true}, function(fileEntry) {
+            fileEntry.createWriter(function(fileWriter) {
+
+
+                var blob = new Blob([JSON.stringify(aItems)]);
+
+                fileWriter.addEventListener("writeend", function() {
+                    // navigate to file, will download
+                    location.href = fileEntry.toURL();
+                }, false);
+
+                fileWriter.write(blob);
+            }, function() {});
+        }, function() {});
+    }, function() {});
+
 }
 
-$('body').on('drop',function(evt){
+
+  function handleFileSelect(evt) {
 
     evt.stopPropagation();
     evt.preventDefault();
 
     // they can drop as many as they like but we're only reading the first file :p
-    var file = evt.originalEvent.dataTransfer.files[0]; 
+    var file = evt.dataTransfer.files[0];
 
     var reader = new FileReader();
 
     reader.onload = function(e) {
-        
+
         var items = JSON.parse(e.target.result);
 
         if (items && items.length) {
@@ -46,26 +62,37 @@ $('body').on('drop',function(evt){
 
             processItems(aItems)
                 .done(function(){
-                    $(lastView).trigger('click');                    
+                    $(lastView).trigger('click');
                 })
             ;
         }
 
-    }
+    };
 
     reader.readAsText(file);
+  }
 
-})
+  function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
+
+// Setup the dnd listeners.
+var dropZone = document.getElementById('bodycontainer');
+dropZone.addEventListener('dragover', handleDragOver, false);
+dropZone.addEventListener('drop', handleFileSelect, false);
+
 
 
 
 
 $('#saveAllItems').click(function(){
-    saveItems('inventory.poe',aInventory);
+    saveItems('inventory.bin',aInventory);
 });
 
 $('#saveCraftItems').live('click',function(){
-    saveItems('inventory.poe',craftItems);
+    saveItems('inventory.bin',craftItems);
 });
 
 
@@ -75,4 +102,3 @@ function fileError(e) {
 }
 
 
-                     
