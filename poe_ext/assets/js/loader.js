@@ -513,6 +513,9 @@ function resetView() {
 	// clear reset lists
 	$('#refreshChars, #refreshTabs, #craftingIgnoreChars, #craftingIgnoreTabs').empty();
 
+	$('#inventoryMinLevel').val('0');
+	$('#inventoryMaxLevel').val('100');
+
 	currentItems = null;
 
 }

@@ -819,6 +819,13 @@ function getSortedItems(items) {
 	var oRarity = {};
 	var oType = {};
 
+	var min = parseInt($('#inventoryMinLevel').val(),10);
+	var max = parseInt($('#inventoryMaxLevel').val(),10);
+
+	if (isNaN(min)) min = 0;
+	if (isNaN(max)) max = 100;
+
+
 	$('input[name=viewRarity]:checked').each(function(idx,item){
 		oRarity[$(item).val()] = true;
 	});
@@ -829,7 +836,9 @@ function getSortedItems(items) {
 
 	for (var i = 0; i < items.length; i++) {
 		var oThis = items[i];
-		if (oRarity[oThis.rarity] === true && oType[oThis.itemRealType] === true ) sortedRares.push(oThis);
+		var thisLevel = oThis.requirements.hasOwnProperty('Level') ? parseInt(oThis.requirements.Level,10) : 0;
+
+		if (thisLevel <= max && thisLevel >= min && oRarity[oThis.rarity] === true && oType[oThis.itemRealType] === true ) sortedRares.push(oThis);
 	}
 
 	// sort on rare name
