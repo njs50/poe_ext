@@ -1,6 +1,20 @@
 var aInventory = [];
 var craftItems = [];
 
+$.tablesorter.defaults.theme = 'bootstrap';
+$.tablesorter.defaults.headerTemplate = '{content} {icon}';
+
+$.tablesorter.defaults.widgets = ['uitheme','stickyHeaders'];
+$.tablesorter.defaults.widgetOptions = {uitheme: 'bootstrap', stickyHeaders : 'tablesorter-stickyHeader'};
+
+$.tablesorter.defaults.sortInitialOrder = 'desc';
+$.tablesorter.defaults.sortInitialOrder = 'desc';
+
+// after a resort on a table scroll to the top (as sticky header maybe hiding content)
+$(document).on('sortEnd','table',function(e,t){
+	$.scrollTo(t, {offset: {top: -60}});
+})
+
 $('#resetCols').click(function(){
 	$('#inventoryCols input[type=checkbox]:checked').prop('checked',false);
 	return false;
@@ -90,7 +104,7 @@ function setupInventoryRendering(items) {
 	for (key in oTypes) {
 		if (oTypes.hasOwnProperty(key)) {
 			var cbox = '<input type="checkbox" class="checkboxBoss" checked data-target="#view' + key + '"/>';
-			var expandLink = '<a class="btn-small" href="#" data-toggle="collapse" data-target="#view' + key + '"><i class="icon-chevron-down"></i></a>';
+			var expandLink = '<a class="btn-small" href="#" data-toggle="collapse" data-target="#view' + key + '"><i class="icon-white icon-chevron-down"></i></a>';
 			var list = $('<li><label class="checkbox">'+ cbox + key +'' + expandLink + '</label></li>')
 				.appendTo(oTypeUL);
 			var inner =  $('<ul id="view'+key+'" class="collapse" style="list-style: none;"/>').appendTo(list);
@@ -510,9 +524,11 @@ function getItemLink(item) {
 
 			.popover({
 				//title: item.name,
+				html: true,
+				trigger: 'hover',
 				content: function(){
 
-					var html = $('<div>').append('<img src="' + item.rawItem.icon + '" class="pull-left"/>');
+					var html = $('<div class="fit-content" style="width:500px">').append('<div class="pull-left"  style="width:100px"><img src="' + item.rawItem.icon + '" /></div>');
 
 					if (item.sockets.numSockets > 0) {
 						html.append(displaySockets(item));
@@ -523,12 +539,11 @@ function getItemLink(item) {
 						.appendTo(html)
 					;
 
-
 					$('<div class="clearfix">').appendTo(html);
 					return html;
 				},
 				placement: 'bottom',
-				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+				template: '<div class="popover fit-content"><div class="arrow"></div><div class="popover-inner"><div class="popover-content fit-content"><p></p></div></div></div>',
 				delay: { show: 500, hide: 100 }
 			})
 			.click(function(){

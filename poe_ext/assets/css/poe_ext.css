@@ -1,5 +1,5 @@
 body {
-	padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+	padding-top: 40px; /* 60px to make the container go all the way to the bottom of the topbar */
 }
 
 ul#rares-menu label {
@@ -13,31 +13,32 @@ ul#rares-menu label {
 
 
 /* custom */
-.popover-inner {
+.fit-content {
 	width: auto !important;
 }
 
 .popover {
-	margin-left: 100px;
+	max-width: 800px;
 }
+
+
+.popover pre {
+  text-shadow: none;
+  background-color: #5c5c5c;
+  color: #fff;
+  border: 1px solid #1c1e22;
+  max-width:550px;
+}
+
 
 .popover-inner pre {
 	/*width: 360px; */
 }
 
-/*
-.popover-content {
-	background: #333 !important;	
-}
-*/
-
-.itemPopupContainer {
-	max-width: 650px;
-}
 
 .locationTable {
-	border-top:1px solid #353535;
-	border-left:1px solid #353535;
+	border-top:1px solid #fff;
+	border-left:1px solid #fff;
 	display:table;
 }
 
@@ -47,8 +48,8 @@ ul#rares-menu label {
 
 .locationTableCell {
 	display:table-cell;
-	border-bottom:1px solid #353535;
-	border-right:1px solid #353535;
+	border-bottom:1px solid #fff;
+	border-right:1px solid #fff;
 	padding:2px;
 }
 
@@ -56,3 +57,6 @@ ul#rares-menu label {
 	background-color:red !important;
 }
 
+.tablesorter-stickyHeader {
+	padding-top: 40px;
+}
