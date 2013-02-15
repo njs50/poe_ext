@@ -2,7 +2,7 @@
 function copy_cb(str) {
 
 	var oTemp = $('<textarea>').appendTo('body').val(str).select();
-	var foo = document.execCommand('copy');	
+	var foo = document.execCommand('copy');
 	oTemp.remove();
 
 }
@@ -24,7 +24,7 @@ $(function(){
 	});
 
 
-		
+
 	$('#copyToClipboard').click(function () {
 		if(currentItems!=null) {
 			copy_cb(formatRareListPlain(getSortedRares(currentItems),true));
@@ -32,13 +32,13 @@ $(function(){
 	});
 
 	$('#copyFromClipboard').click(function () {
-		
+
 		if(currentItems!=null) {
 
 			var theirData = paste_cb();
 			// split by line
 			var theirLines = theirData.split('\n');
-	
+
 			// apply a regex to find the rare names (of the form "forename surname") on each line.
 			// this is quite tolerant of junk on the line. So long as the rare's name is the first word pair on the line, it'll find it.
 			var regexedLines = theirLines.map(function(i) {
@@ -49,8 +49,8 @@ $(function(){
 			var theirRares = regexedLines.filter(function(i) {
 				return i!=null;
 			});
-			
-			// sort them into descending alphabetical order to make the comparison more efficient 
+
+			// sort them into descending alphabetical order to make the comparison more efficient
 			theirRares.sort(function(a,b) {
 				if(a<b) {
 					return -1;
@@ -60,12 +60,12 @@ $(function(){
 				}
 				return 0;
 			});
-	
+
 			// get the names of our rares.
 			var ourRareItems = getSortedRares(currentItems);
-	
+
 			var matches = [];
-			
+
 			var theirIndex = 0;
 			for (var i = 0; i < ourRareItems.length; i++) {
 				var ourRare = ourRareItems[i].rareName;
@@ -73,20 +73,20 @@ $(function(){
 					//iterate through until we reach one of their rares that matches, or is alphabetically beyond our rare.
 					theirIndex++;
 				}
-				
+
 				if(theirIndex==theirRares.length) {
-					// reached the end of their Rares, 
+					// reached the end of their Rares,
 					// there cannot be any further matches, as there's nothing more to check.
 					break;
 				}
-	
+
 				var theirCount = 0;
 				var theirIndex2 = theirIndex;
 				while(theirIndex2<theirRares.length && theirRares[theirIndex2++]==ourRare) {
-					// for added usefulness we count the number of their instances that match ours.	
+					// for added usefulness we count the number of their instances that match ours.
 					theirCount++;
 				}
-	
+
 				if(theirCount>0) {
 					// take a (shallow) copy of the rare items that match
 					var ourRareItemCopy = $.extend({}, ourRareItems[i]);
@@ -95,24 +95,24 @@ $(function(){
 					matches.push(ourRareItemCopy);
 				}
 			}
-			
+
 			var html = '';
 
 			if(matches.length==0) {
 				html = "<h4>No matches found</h4>";
 			} else {
-				
+
 				copy_cb(formatRareListPlain(matches),false);
 				// output the matches here
 				html = formatRareList(matches,false);
-			
+
 			}
-			
-			$('#clipboardMatch .modal-body').empty().html(html).find('table').stupidtable();
+
+			$('#clipboardMatch .modal-body').empty().html(html).find('table').tablesorter();
 
 			$('#clipboardMatch').modal('show');
 		}
 	});
-	
+
 
 });

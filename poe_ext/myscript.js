@@ -115,7 +115,12 @@ function parseItem(rawItem, loc) {
 		oProps['Base Type'] = '';
 
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
+
 		item.quality = itemQuality(item);
+
+		if (item.properties.hasOwnProperty('Quality')) {
+			item.properties['Quality'] = item.quality.toString() +'%';
+		}
 
 		item.itemRealType = item.baseType;
 

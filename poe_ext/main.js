@@ -10,6 +10,29 @@ $('#showAllCols').click(function(){
 	return false;
 });
 
+// enable shift click for checkboxes
+
+//craftingIgnoreTabs,craftingIgnoreChars,refreshTabs,refreshChars
+var cbLastID = '';
+var cbLastName = '';
+
+$(document).on("click","li input[type=checkbox]",function(evt){
+
+	var oThis = $(evt.target);
+
+	var thisName = oThis.attr('name');
+	var thisID = oThis.attr('id');
+
+	if (thisName === cbLastName && $.trim(thisName !== '') && evt.shiftKey ) {
+		var aCB = $('input[name="' + thisName + '"]');
+		var oFirst = $('#' + cbLastID);
+		aCB.slice($.inArray(oFirst[0],aCB), $.inArray($('#' + thisID)[0],aCB)+1).prop('checked',oFirst.prop('checked'));
+	}
+
+	cbLastID = thisID;
+	cbLastName = thisName;
+
+});
 
 function setupInventoryRendering(items) {
 
@@ -149,7 +172,7 @@ $('#applyColSelection').click(function(){
 	aVisibleCols = aSelected;
 	setCache('inventoryCols',aSelected);
 
-	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').stupidtable();
+	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').tablesorter();
 
 	$('#openRareList').trigger('click');
 
@@ -157,7 +180,7 @@ $('#applyColSelection').click(function(){
 
 $('#applyItemSelection').click(function(){
 
-	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').stupidtable();
+	$('#rareList').empty().append( formatRareList(getSortedItems(aInventory),false) ).find('table').tablesorter();
 	$('#openRareList').trigger('click');
 
 })
@@ -334,7 +357,7 @@ function processItems(items){
 				if (items.length){
 
 					// render rare list
-					$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').stupidtable();
+					$('#rareList').append( formatRareList(getSortedItems(items)) ).find('table').tablesorter();
 
 					$('#openRareList')
 						.click(function(){
