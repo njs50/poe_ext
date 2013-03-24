@@ -112,7 +112,12 @@ function parseItem(rawItem, loc) {
 		}
 
 		item.properties['Base Type'] = item.baseType;
+
+		item.properties['Category'] = capitaliseFirstLetter(item.category);
+
+
 		oProps['Base Type'] = '';
+		oProps['Category'] = '';
 
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
 

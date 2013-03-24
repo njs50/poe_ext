@@ -36,6 +36,7 @@ CURRENCY_DATA = {
 		"Kraityn's Amulet": 'questItem',
 		"Oak's Amulet": 'questItem',
 		"Allflame": 'questItem',
+		"Thaumetic Sulphite": 'questItem',
 		"Cartographer's Chisel": 'cartographerChisel'
 }
 

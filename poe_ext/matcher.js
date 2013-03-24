@@ -144,12 +144,50 @@ var CurrencyMatch = Match.extend({
 	}
 });
 
+var combine = function(a, min, max, targetqual, itemBin) {
+    var fn = function(n, src, got, all) {
+        if (n === 0) {
+			var quality = 0;
+			for (var count = 0; count < got.length; count++) {
+				quality += got[count].quality;
+			}
+            if (got.length > 0 && quality == targetqual) {
+
+				for (var g=0; g < got.length; g++) {
+					if (itemBin.indexOf(got[g]) != -1) {
+						return;
+					}
+				}
+				all.push( {itemset: got, quality: quality} );
+				for (var g=0; g < got.length; g++) {
+					itemBin.push(got[g]);
+				}
+            }
+            return;
+        }
+        for (var j = 0; j < src.length; j++) {
+			fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
+        }
+        return;
+    };
+    var all = [];
+    for (var i = min; i <= max; i++) {
+        fn(i, a, [], all);
+    }
+    return all;
+};
+
+
 var QualityMatch = Match.extend({
 	// acceptableType: one of armor, flask, skillGem, or weapon.
 	init: function(acceptableType) {
-		this.currentQuality = 0.0;
 		this.acceptableType = acceptableType;
-		this.currentMatch = [];
+		this.maxItems = 75;
+		this.maxSetQuality = 44;
+		this.itemList = []; // [{item, quality}]
+		this.setList = []; // [{itemset: [{item, quality}], quality}]
+		this.usedItems = [];
+		this.totalQuality = 0;
 		this.matches = [];
 	},
 
@@ -166,25 +204,66 @@ var QualityMatch = Match.extend({
 		// only normal quality 20% is acceptable it seems...
 		if (i.quality === 20 && i.rarity === 'normal') {
 			this.matches.push({complete: 1, items: [i]});
-		} else {
-			this.currentMatch.push(i);
-			this.currentQuality += i.quality;
-			if (this.currentQuality >= 40) {
-				this.matches.push({complete: this.currentQuality / 40, items: this.currentMatch});
-				this.currentMatch = [];
-				this.currentQuality = 0;
-			}
 		}
+		else if (i.rarity == 'unique') {
+			return;
+		}
+		else if (this.itemList.length < this.maxItems) {
+			this.itemList.push( {item: i, quality: i.quality} );
+			this.totalQuality += i.quality;
+			}
 	},
 
 	getMatches: function () {
-		var out = this.matches;
-		out.push({
-			complete: (this.currentQuality / 40.0),
-			items: this.currentMatch,
-			missing: [sprintf('%ss with %d%% total quality', this.acceptableType, 40 - this.currentQuality)]
-		});
-		return out;
+
+		if (this.itemList.length === 0) {
+			return [];
+		}
+
+		if (this.itemList.length < 30) {
+			maxSetSize = 7;
+		} else if (this.itemList.length >= 30 && this.itemList.length < 40) {
+			maxSetSize = 6;
+		} else if (this.itemList.length >= 40) {
+			maxSetSize = 5;
+		}
+
+		var remainingItems = this.itemList.slice(0);
+		for (var z=40; z <= this.maxSetQuality; z++) {
+			this.setList = this.setList.concat(combine(remainingItems, 2, maxSetSize, z, this.usedItems));
+			remainingItems = [];
+			for (var t=0; t < this.itemList.length; t++) {
+				if (this.usedItems.indexOf(this.itemList[t]) == -1) {
+					remainingItems.push(this.itemList[t]);
+				}
+			}
+			if (remainingItems.length === 0)
+				{ break; }
+		}
+		if (this.setList.length === 0) {
+			return [];
+		}
+
+		var setsQuality = 0;
+		for (var t=0; t < this.setList.length; t++) {
+			setsQuality += this.setList[t].quality;
+		}
+		// console.log("this.acceptabletype: " + this.acceptableType + " itemList.length: " + this.itemList.length + " setList.length: " + this.setList.length + " usedItems.length: " + this.usedItems.length + " Quality: " + setsQuality + "/" + this.totalQuality);
+
+		// List unused items
+		// console.log(remainingItems);
+
+
+		for (var t=0; t < this.setList.length;t++) {
+
+			var myItems = [];
+			for (var u=0; u < this.setList[t].itemset.length; u++) {
+				myItems = myItems.concat(this.setList[t].itemset[u].item);
+			}
+			this.matches.push({complete: this.setList[t].quality / 100, items: myItems});
+		}
+
+		return this.matches;
 	}
 });
 
@@ -202,8 +281,8 @@ var PredicateMatcher = Match.extend({
 
 	getMatches: function() {
 		return $.map(this.matches, function (v, _) {
-			return {complete: 1, items:[v]}
-		})
+			return {complete: 1, items:[v]};
+		});
 	}
 });
 
@@ -467,8 +546,8 @@ function allMatches(available) {
 	var results = {};
 
 	var matchRules = $.map([
-							{result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.98},
-							{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.98},
+							{result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.39},
+							{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.39},
 
 							{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
 							{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},

@@ -508,8 +508,6 @@ function getItemsUL(aItems) {
 			.appendTo(oUL)
 		;
 
-		if (item.quality === 20) thisLI.prepend('<span class="perfect">*</span>');
-
 	}
 
 	return oUL;
@@ -520,6 +518,7 @@ function getItemLink(item) {
 
 		var oItem = $('<a>')
 			.append(item.name)
+			.append( item.quality ? ' (' + item.quality + '%)' : '')
 			.addClass('item-' + item.rarity)
 
 			.popover({
@@ -528,21 +527,20 @@ function getItemLink(item) {
 				trigger: 'hover',
 				content: function(){
 
-					var html = $('<div class="fit-content" style="width:500px">')
+					var html = $('<div class="fit-content" style="width:500px">');
 
+					var left = $('<div class="pull-left"  style="width:100px">');
+					left.append('<img src="' + item.rawItem.icon + '" />');
 
-          var left = $('<div class="pull-left"  style="width:100px">')
-              left.append('<img src="' + item.rawItem.icon + '" />');
+					var tableContainer = $('<div style="position: absolute; bottom: 25px">');
+					var table = getLocationTable(item, "Inventory");
+					if(table) table.css('display','table'); // I don't like having to set this again
+					// but it's better than making the executive decision
+					// to refactor how the tables work in the main table
+					tableContainer.append(table);
 
-          var tableContainer = $('<div style="position: absolute; bottom: 25px">');
-          var table = getLocationTable(item, "Inventory");
-          if(table) table.css('display','table'); // I don't like having to set this again
-                                        // but it's better than making the executive decision
-                                        // to refactor how the tables work in the main table
-          tableContainer.append(table);
-
-          left.append(tableContainer);
-          html.append(left);
+					left.append(tableContainer);
+					html.append(left);
 
 					if (item.sockets.numSockets > 0) {
 						html.append(displaySockets(item));
