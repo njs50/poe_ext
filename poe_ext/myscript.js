@@ -113,14 +113,10 @@ function parseItem(rawItem, loc) {
 
 		item.properties['Base Type'] = item.baseType;
 
-		item.properties['Category'] = capitaliseFirstLetter(item.category);
-
-
 		oProps['Base Type'] = '';
 		oProps['Category'] = '';
 
 		// get quality (gems and flasks need to be checked for this as props weren't parsed...)
-
 		item.quality = itemQuality(item);
 
 		if (item.properties.hasOwnProperty('Quality')) {
@@ -136,6 +132,8 @@ function parseItem(rawItem, loc) {
 		} else if (item.category) {
 			tmpCat =  item.category.charAt(0).toUpperCase() + item.category.slice(1);
 		}
+
+		item.properties['Category'] = tmpCat;
 
 		if (!oTypes.hasOwnProperty(tmpCat)) oTypes[tmpCat] = {};
 		if (!oTypes[tmpCat].hasOwnProperty(item.itemRealType)) oTypes[tmpCat][item.itemRealType] = '';
