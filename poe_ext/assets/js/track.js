@@ -10,7 +10,7 @@ _gaq.push(['_trackPageview']);
 
   $(function(){
 
-	  $('div.navbar a').on('click', function() { 
+	  $('div.navbar a').live('click', function() { 
 	  	var oThis = $(this);
 	  	var action = $.trim(oThis.text());
 	  	var category = "primaryNav";

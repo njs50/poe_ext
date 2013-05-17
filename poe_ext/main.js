@@ -157,9 +157,12 @@ function setupInventoryRendering(items) {
 }
 
 $('#applyDisplaySelection').click(function () {
-
+	if ($('#inventoryLocation').find('input[type=checkbox]:checked').prop('id') == 'showInventoryLocationTable') {
 		$('#rareList').find('.locationLink').text('(hide)').parent().children('.locationTable').show();
-	
+	}
+	else {
+		$('#rareList').find('.locationLink').text('(show)').parent().children('.locationTable').hide();
+	}
 })
 
 $('#applyColSelection').click(function(){
@@ -411,6 +414,30 @@ function errorDump(e) {
 	if (e.hasOwnProperty('stack')) console.log(e.stack);
 }
 
+function getLocationLink (item, category) {
+	var locationLink = '';
+	if (item.location.section == 'stash' || item.location.page == 'Inventory') {
+		locationLink = $('<a>')
+			.append('(show)')
+			.addClass('locationLink')
+			.on('click', function(){
+				$(this).parent().children('.locationTable').toggle();
+				if ($(this).text() == '(show)') {
+					$(this).text('(hide)');
+				}
+				else {
+					$(this).text('(show)');
+				}
+			})
+			;
+
+		// check if the table shall be initially displayed
+		if ($('#' + category.toLowerCase() + 'Location').find('input[type=checkbox]:checked').prop('id') == 'show' + category + 'LocationTable') {
+			locationLink.text('(hide)');
+		}
+	}
+	return locationLink;
+}
 
 function getLocationTable (item, category) {
 	var locationTable = '';
@@ -424,9 +451,14 @@ function getLocationTable (item, category) {
 		var top = oRaw.y;
 		var bottom = top + oRaw.h - 1;
 
-
+		// check if the table shall be initially displayed
+		if ($('#' + category.toLowerCase() + 'Location').find('input[type=checkbox]:checked').prop('id') == 'show' + category + 'LocationTable') {
 			locationTable.css('display','table');
-	
+		}
+		else {
+			locationTable.css('display', 'none');
+		}
+
 		// if the item is in the stash, draw a 12*12 table
 		if (item.location.section == 'stash') {
 			height = 12;
@@ -471,7 +503,7 @@ function getItemsUL(aItems) {
 		var thisLI = $('<li>')
 			.append(oItem)
 			.append(plainLocation)
-			
+			.append(getLocationLink(item, 'Crafting'))
 			.append(getLocationTable(item, 'Crafting'))
 			.appendTo(oUL)
 		;
@@ -755,9 +787,8 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
-			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)).append(getLocationTable(item, 'Inventory')))
-			.append( $('<td>').append('<img src="' + item.rawItem.icon + '" />'))
-			.append( $('<td>').append( getItemLink(item) ))
+			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))
+			.append( $('<td>').append( getItemLink(item) ).append(' ').append(getLocationLink(item, 'Inventory')).append(getLocationTable(item, 'Inventory')) )
 		;
 
 
@@ -779,7 +810,6 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 	var th = $('<tr>')
 		.append( $('<th class="type-int">').text('Tab') )
-		.append( $('<th class="type-image">').text('Image') )
 		.append( $('<th class="type-string">').text('Item') )
 	;
 
