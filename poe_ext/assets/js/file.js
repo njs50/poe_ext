@@ -91,7 +91,7 @@ $('#saveAllItems').click(function(){
     saveItems('inventory.bin',aInventory);
 });
 
-$('#saveCraftItems').live('click',function(){
+$('#saveCraftItems').on('click',function(){
     saveItems('inventory.bin',craftItems);
 });
 
