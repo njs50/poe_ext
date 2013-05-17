@@ -60,7 +60,7 @@ ul#rares-menu label {
 .tablesorter-stickyHeader {
 	padding-top: 40px;
 }
-td
+.type-int
 {
-	 white-space: nowrap;
+	font-size:130%;
 }

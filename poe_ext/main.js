@@ -157,10 +157,15 @@ function setupInventoryRendering(items) {
 }
 
 $('#applyDisplaySelection').click(function () {
-
-		$('#rareList').find('.locationLink').text('(hide)').parent().children('.locationTable').show();
-	
+if ($('#inventoryLocation').find('input[type=checkbox]:checked').prop('id') == 'showInventoryLocationTable') {
+$('#rareList').find('.locationLink').text('(hide)').parent().children('.locationTable').show();
+}
+else {
+$('#rareList').find('.locationLink').text('(show)').parent().children('.locationTable').hide();
+}
 })
+
+
 
 $('#applyColSelection').click(function(){
 
@@ -424,8 +429,13 @@ function getLocationTable (item, category) {
 		var top = oRaw.y;
 		var bottom = top + oRaw.h - 1;
 
-
-			locationTable.css('display','table');
+	if ($('#' + category.toLowerCase() + 'Location').find('input[type=checkbox]:checked').prop('id') == 'show' + category + 'LocationTable') {
+locationTable.css('display','table');
+}
+else {
+locationTable.css('display', 'none');
+}
+	
 	
 		// if the item is in the stash, draw a 12*12 table
 		if (item.location.section == 'stash') {
@@ -704,6 +714,30 @@ function formatRareListPlain(sortedRares, separators) {
 	}
 	return out;
 }
+function getLocationLink (item, category) {
+var locationLink = '';
+if (item.location.section == 'stash' || item.location.page == 'Inventory') {
+locationLink = $('<a>')
+.append('(show)')
+.addClass('locationLink')
+.on('click', function(){
+$(this).parent().children('.locationTable').toggle();
+if ($(this).text() == '(show)') {
+$(this).text('(hide)');
+}
+else {
+$(this).text('(show)');
+}
+})
+;
+
+// check if the table shall be initially displayed
+if ($('#' + category.toLowerCase() + 'Location').find('input[type=checkbox]:checked').prop('id') == 'show' + category + 'LocationTable') {
+locationLink.text('(hide)');
+}
+}
+return locationLink;
+}
 
 function formatRareList(sortedRares, bSetupDropdown) {
 
@@ -755,9 +789,9 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
-			.append( $('<td width="50">').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))
-			.append( $('<td>').append(getLocationTable(item, 'Inventory')))
-			.append( $('<td width="50" style="text-align:center;">').append('<img src="' + item.rawItem.icon + '" style="height: 30px;" />'))
+			.append( $('<td style="white-space: nowrap;">').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))
+			.append( $('<td>').append(getLocationLink(item, 'Inventory')).append(getLocationTable(item, 'Inventory')))
+			.append( $('<td style="text-align:center;">').append('<img src="' + item.rawItem.icon + '" style="max-height: 25px;max-width:30px" />'))
 			.append( $('<td>').append( getItemLink(item) ))
 		;
 
