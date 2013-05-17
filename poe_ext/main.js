@@ -756,6 +756,7 @@ function formatRareList(sortedRares, bSetupDropdown) {
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
 			.append( $('<td width="50">').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))
+			.append( $('<td>').append(getLocationTable(item, 'Inventory')))
 			.append( $('<td width="50" style="text-align:center;">').append('<img src="' + item.rawItem.icon + '" style="height: 30px;" />'))
 			.append( $('<td>').append( getItemLink(item) ))
 		;
@@ -779,7 +780,8 @@ function formatRareList(sortedRares, bSetupDropdown) {
 
 	var th = $('<tr>')
 		.append( $('<th class="type-int">').text('Tab') )
-		.append( $('<th class="type-image">').text('Image') )
+		.append( $('<th>').text('Location') )
+		.append( $('<th>').text('Image') )
 		.append( $('<th class="type-string">').text('Item') )
 	;
 
