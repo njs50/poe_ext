@@ -874,4 +874,3 @@ function getSortedRares(items) {
 	return sortedRares;
 
 }
-
