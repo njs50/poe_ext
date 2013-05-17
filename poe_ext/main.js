@@ -60,7 +60,7 @@ function setupInventoryRendering(items) {
 	for (key in oProps) {
 		if (oProps.hasOwnProperty(key)){
 			id = key.replace(/[^a-zA-Z]/g,'_');
-			oPropUL.append('<li><label class="checkbox" for="prop_' + id + '"><input class="checkbox" type="checkbox" id="prop_' + id + '" name="viewProps" value="' + key + '" />' + key + '</label></li>');
+			oPropUL.append('<li><label class="checkbox" for="prop_' + id + '"><input class="checkbox" type="checkbox" id="prop_' + id + '" name="viewProps" checked="checked" value="' + key + '" />' + key + '</label></li>');
 		}
 	}
 	sortUL(oPropUL);
@@ -71,7 +71,7 @@ function setupInventoryRendering(items) {
 	for (key in oMods) {
 		if (oMods.hasOwnProperty(key)){
 			id = key.replace(/[^a-zA-Z]/g,'_');
-			oModUL.append('<li><label class="checkbox" for="mod_' + id + '"><input class="checkbox" type="checkbox" id="mod_' + id + '" name="viewMods" value="' + key + '" />' + key + '</label></li>');
+			oModUL.append('<li><label class="checkbox" for="mod_' + id + '"><input class="checkbox" type="checkbox" id="mod_' + id + '" name="viewMods"  checked="checked"  value="' + key + '" />' + key + '</label></li>');
 		}
 	}
 	sortUL(oModUL);
@@ -83,7 +83,7 @@ function setupInventoryRendering(items) {
 	for (key in oCalc) {
 		if (oCalc.hasOwnProperty(key)){
 			id = key.replace(/[^a-zA-Z]/g,'_');
-			oCalcUL.append('<li><label class="checkbox" for="calc_' + id + '"><input class="checkbox" type="checkbox" id="calc_' + id + '" name="viewCalc" value="' + key + '" />' + key + '</label></li>');
+			oCalcUL.append('<li><label class="checkbox" for="calc_' + id + '"><input class="checkbox" type="checkbox" id="calc_' + id + '" name="viewCalc"  checked="checked"  value="' + key + '" />' + key + '</label></li>');
 		}
 	}
 	sortUL(oCalcUL);
@@ -94,7 +94,7 @@ function setupInventoryRendering(items) {
 	for (key in oRequired) {
 		if (oRequired.hasOwnProperty(key)) {
 			id = key.replace(/[^a-zA-Z]/g,'_');
-			oReqUL.append('<li><label class="checkbox" for="req_' + id + '"><input class="checkbox" type="checkbox" id="req_' + id + '" name="viewReq" value="' + key + '" />' + key + '</label></li>');
+			oReqUL.append('<li><label class="checkbox" for="req_' + id + '"><input class="checkbox" type="checkbox" id="req_' + id + '" name="viewReq"  checked="checked"  value="' + key + '" />' + key + '</label></li>');
 		}
 	}
 	sortUL(oReqUL);
@@ -755,8 +755,8 @@ function formatRareList(sortedRares, bSetupDropdown) {
 		var tr = $('<tr>')
 			.addClass(oTypes[item.itemRealType])
 			.addClass(oRarity[item.rarity])
-			.append( $('<td>').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)).append(getLocationTable(item, 'Inventory')))
-			.append( $('<td>').append('<img src="' + item.rawItem.icon + '" />'))
+			.append( $('<td width="50">').text(  (item.location.section === 'stash' ? currentLeague : item.location.section)  + ' ' + (item.location.page === null ? 0 : item.location.page)))
+			.append( $('<td width="50" style="text-align:center;">').append('<img src="' + item.rawItem.icon + '" style="height: 30px;" />'))
 			.append( $('<td>').append( getItemLink(item) ))
 		;
 

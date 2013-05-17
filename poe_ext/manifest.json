@@ -11,10 +11,10 @@
       "128": "/assets/images/icon_128.png",
       "16": "/assets/images/icon_16.png"
    },
-   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD2n8AIEcCIQjpDZaGD/5YiJILIWlsrktvPUAnuJ6sK3dz67l7N74nzACR3aOpMGYVyHALr1A17jblp4cQrcwen8Esie+9srKmlxTm6OGgo421XblptJeAb7STjr+8Up9PYA+VtNvR3THC29HwqDcsmTpiDc4i8XdQPGKfHDBV1DwIDAQAB",
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC0MYQD9vdwwA5No3Xf6GIWLDKq/1cUtUQ0MD+aFzVyJj9pcqkaHr1yPBFA8gcNOjdJ3k/i/4nWveQ9sF31J2C+c8LWMufFLdUXiQnCJ5rP3KhC3GyUnnijoBlQeHYCfhr+UebKKnOEBdZvhp8lYrzA7OFCzRCvk/cQqeGqeuhAYwIDAQAB",
    "manifest_version": 2,
    "name": "PoE Helper",
    "permissions": [ "http://www.pathofexile.com/*", "http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead", "unlimitedStorage" ],
    "update_url": "https://raw.github.com/Zeracles/poe_ext/master/poe_updates.xml",
-   "version": "0.90"
+   "version": "0.91"
 }

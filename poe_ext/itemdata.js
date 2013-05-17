@@ -696,7 +696,6 @@ ITEM_TYPE_DATA = {
 	"Arcade Map": "map",
 	"Ghetto Map": "map",
 	"Grotto Map": "map",
-	"Arsenal Map": "map",
 	"Jungle Valley Map": "map",
 	"Marsh Map": "map",
 	"Maze Map": "map",
