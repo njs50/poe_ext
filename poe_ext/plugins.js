@@ -7157,7 +7157,7 @@ function sortUL(list) {
 	var mylist = $(list);
 	var listitems = mylist.children('li').get();
 	listitems.sort(function(a, b) {
-			  console.log ($(a).text().toUpperCase().localeCompare($(b).text().toUpperCase()) + '\\\\ ' + $(a).text().toUpperCase() + ' ||| ' + $(b).text().toUpperCase());
+			//  console.log ($(a).text().toUpperCase().localeCompare($(b).text().toUpperCase()) + '\\\\ ' + $(a).text().toUpperCase() + ' ||| ' + $(b).text().toUpperCase());
 			  if (($(a).text().toUpperCase()=='BASE TYPE') || ($(a).text().toUpperCase()=='CATEGORY'))
 			  {
 			  	return -1;	

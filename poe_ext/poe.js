@@ -1590,7 +1590,7 @@ function loadLeagueData(league) {
 							
 							
 					);
-					console.log('Requesting #' + i +'/'+numTabs+' from cache ');
+				//	console.log('Requesting #' + i +'/'+numTabs+' from cache ');
 				}
 
 				loadQueue.completed(function(){
@@ -1679,7 +1679,8 @@ function responseToItems(response, location) {
 
 
 function getEndpoint(method) {
-		console.log('Accesing pathofexile.com');
+		$("div.blockMsg").html('<h3>Accesing pathofexile.com...</h3><h4 id="waitOnQueue"></h4>');
+	//	console.log('Accesing pathofexile.com');
 	return "http://www.pathofexile.com/character-window/" + method;
 }
 
@@ -1734,7 +1735,7 @@ function getStashPage(league,index) {
 		//cache hit
 		.done(function(oData){
 			deferred.resolve(oData);
-					console.log('Got stash page #' + (index+1) + ' cache');
+					//console.log('Got stash page #' + (index+1) + ' cache');
 		})
 
 		// cache miss
@@ -3103,7 +3104,7 @@ $.tablesorter.defaults.theme = 'bootstrap';
 $.tablesorter.defaults.headerTemplate = '{content} {icon}';
 
 $.tablesorter.defaults.widgets = ['uitheme','stickyHeaders','zebra', 'filter'];
-$.tablesorter.defaults.widgetOptions = {uitheme: 'bootstrap', stickyHeaders : 'tablesorter-stickyHeader'};
+$.tablesorter.defaults.widgetOptions = {uitheme: 'bootstrap', stickyHeaders : 'tablesorter-stickyHeader', stickyOffset: '100'};
 
 $.tablesorter.defaults.sortInitialOrder = 'desc';
 $.tablesorter.defaults.sortInitialOrder = 'desc';
@@ -3433,17 +3434,17 @@ function renderCrafting(items) {
 
 	} catch (e) {
 
-		console.log('error occured while processing/rendering crafting matches');
+		// console.log('error occured while processing/rendering crafting matches');
 		errorDump(e);
 
 		$('#err').html('An error occured while processing matches in the stash. Please ' +
 					   'select refresh then full to try again. If the error persists, contact the author.');
 
-		console.log('last match item processed');
-		console.log(match);
+		//console.log('last match item processed');
+//	console.log(match);
 
-		console.log('last match group processed:');
-		console.log(item);
+		//console.log('last match group processed:');
+		//console.log(item);
 
 	}
 
@@ -3458,7 +3459,7 @@ function processItems(items){
 	// used to rerender the page
 	aInventory = items;
 			
-		console.log('Processing your items');
+//		console.log('Processing your items');
 	// seems to be used by the clipboard
 	currentItems = items;
 
@@ -3497,7 +3498,7 @@ function processItems(items){
 
 			} catch (e) {
 
-				console.log('error occured while rendering stash');
+	//		console.log('error occured while rendering stash');
 				errorDump(e);
 
 				$('#err').html('An error occured while rendering the stash. ' +
