@@ -16,5 +16,5 @@
    "name": "PoE Helper",
    "permissions": [ "http://www.pathofexile.com/*", "http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead", "unlimitedStorage" ],
    "update_url": "https://raw.github.com/Zeracles/poe_ext/master/poe_updates.xml",
-   "version": "0.91"
+   "version": "0.92"
 }
