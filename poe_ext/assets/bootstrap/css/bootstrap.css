@@ -2013,6 +2013,7 @@ table {
   text-align: left;
   vertical-align: top;
   border-top: 1px solid #1c1e22;
+  font-family:'FontinBold';
 }
 
 .table th {
@@ -4356,7 +4357,7 @@ input[type="submit"].btn.btn-mini {
 .navbar {
   *position: relative;
   *z-index: 2;
-  margin-bottom: 21px;
+ 
   overflow: visible;
 }
 

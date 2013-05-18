@@ -1,25 +1,20 @@
 {
-  "name": "PoE Helper",
-  "version": "0.84",
-  "manifest_version": 2,
-
-  "description": "Inventory and Crafting Helper for Path of Exile",
-
-  "app": {
-    "launch": {
-      "local_path": "main.html",
-      "container": "tab"
-    }
-  },
-
-  "icons" : {
-      "16" : "/assets/images/icon_16.png",
-      "128" : "/assets/images/icon_128.png"
-    },
-
-  "update_url": "https://raw.github.com/njs50/poe_ext/master/poe_updates.xml",
-
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
-
-  "permissions": ["http://www.pathofexile.com/*","http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead", "unlimitedStorage"]
+   "app": {
+      "launch": {
+         "container": "tab",
+         "local_path": "main.html"
+      }
+   },
+   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
+   "description": "Inventory and Crafting Helper for Path of Exile",
+   "icons": {
+      "128": "/assets/images/icon_128.png",
+      "16": "/assets/images/icon_16.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC0MYQD9vdwwA5No3Xf6GIWLDKq/1cUtUQ0MD+aFzVyJj9pcqkaHr1yPBFA8gcNOjdJ3k/i/4nWveQ9sF31J2C+c8LWMufFLdUXiQnCJ5rP3KhC3GyUnnijoBlQeHYCfhr+UebKKnOEBdZvhp8lYrzA7OFCzRCvk/cQqeGqeuhAYwIDAQAB",
+   "manifest_version": 2,
+   "name": "PoE Helper",
+   "permissions": [ "http://www.pathofexile.com/*", "http://webcdn.pathofexile.com/*", "clipboardWrite", "clipboardRead", "unlimitedStorage" ],
+   "update_url": "https://raw.github.com/Zeracles/poe_ext/master/poe_updates.xml",
+   "version": "0.92.5"
 }
