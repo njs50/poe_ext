@@ -25,6 +25,7 @@ function parseItem(rawItem, loc) {
 			properties: {},
 			explicitMods: {},
 			implicitMods: {},
+			craftedMods: {},
 			combinedMods: {},
 			requirements: {},
 			sockets: {},
@@ -105,9 +106,9 @@ function parseItem(rawItem, loc) {
 			if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties,oProps);
 			if (rawItem.hasOwnProperty('explicitMods')) item.explicitMods = processMods(rawItem.explicitMods,oMods);
 			if (rawItem.hasOwnProperty('implicitMods')) item.implicitMods = processMods(rawItem.implicitMods,oMods);
-
+			if (rawItem.hasOwnProperty('craftedMods')) item.implicitMods = processMods(rawItem.craftedMods,oMods);
 			// combine explicit and implicit mods
-			item.combinedMods = combineMods(item.explicitMods,item.implicitMods);
+			item.combinedMods = combineMods(item.explicitMods,item.implicitMods,item.craftedMods);
 
 		}
 
@@ -412,7 +413,7 @@ function getPropertyOrModsInt(item,prop) {
 	return amt;
 }
 
-function combineMods(explicitMods,implicitMods){
+function combineMods(explicitMods,implicitMods,craftedMods){
 
 	var oCombined = {};
 	for (var key in explicitMods) {
@@ -441,6 +442,32 @@ function combineMods(explicitMods,implicitMods){
 
 		} else {
 			oCombined[key] = implicitMods[key];
+		}
+	}
+
+	for (var key in craftedMods) {
+		if (oCombined.hasOwnProperty(key)) {
+
+			// can be int, % or range (x-y)
+			var a = oCombined[key];
+			var b = craftedMods[key];
+
+			if (a.indexOf('-') > 0){
+				// range
+				a = a.split('-');
+				b = b.split('-');
+				oCombined[key] = (parseInt(a[0]) + parseInt(b[0])) + '-' + (parseInt(a[1]) + parseInt(b[1]));
+			} else if (a.indexOf('%') > 0) {
+				// percents
+				a = parseInt(a.replace('%',''));
+				b = parseInt(b.replace('%',''));
+				oCombined[key] = a + b + '%';
+			} else {
+				oCombined[key] = parseInt(a) + parseInt(b);
+			}
+
+		} else {
+			oCombined[key] = craftedMods[key];
 		}
 	}
 
