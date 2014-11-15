@@ -106,7 +106,7 @@ function parseItem(rawItem, loc) {
 			if (rawItem.hasOwnProperty('properties')) item.properties = nameValueArrayToObj(rawItem.properties,oProps);
 			if (rawItem.hasOwnProperty('explicitMods')) item.explicitMods = processMods(rawItem.explicitMods,oMods);
 			if (rawItem.hasOwnProperty('implicitMods')) item.implicitMods = processMods(rawItem.implicitMods,oMods);
-			if (rawItem.hasOwnProperty('craftedMods')) item.implicitMods = processMods(rawItem.craftedMods,oMods);
+			if (rawItem.hasOwnProperty('craftedMods')) item.craftedMods = processMods(rawItem.craftedMods,oMods);
 			// combine explicit and implicit mods
 			item.combinedMods = combineMods(item.explicitMods,item.implicitMods,item.craftedMods);
 
