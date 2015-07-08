@@ -20,11 +20,7 @@ var oMods = {};
 var oCalc = {};
 
 
-
-
 $(document).ready(function(){
-
-	getVersion();
 
 	postThrottle = new Throttle(35000,25);
 
@@ -231,7 +227,7 @@ function getChars() {
 
 	var deferred = new $.Deferred();
 
-	$.post(getEndpoint('get-characters'))
+	$.post(getEndpoint('get-characters'), {accountName: accountName})
 		.done(function(data) {
 			if (data) {
 				deferred.resolve(data);
@@ -249,34 +245,7 @@ function getChars() {
 
 
 }
-/*
-function getChars() {
 
-	var deferred = new $.Deferred();
-
-	$.get('http://www.pathofexile.com/')
-		.done(function(data) {
-
-			var regexp = new RegExp(/CHARACTERS_DATA=(\{.+?\});/g);
-			var aMatch = regexp.exec(data);
-
-			if (aMatch) {
-				var cdata = JSON.parse(aMatch[1]);
-				deferred.resolve(cdata);
-			} else {
-				deferred.reject();
-			}
-
-		})
-		.fail(function(){
-			deferred.reject();
-		})
-	;
-
-	return deferred.promise();
-
-}
-*/
 
 function initPage(){
 
@@ -313,7 +282,7 @@ function initPage(){
 		$('#output').html('');
 		$('#rareList').html('');
 
-		if (league != '') {
+		if (league !== '') {
 			setCache('last-league',league);
 			loadLeagueData(league, false);
 		}
@@ -321,16 +290,6 @@ function initPage(){
 	});
 
 }
-
-
-function getVersion() {
-
-	$.getJSON('manifest.json',function(manifest){
-		$('#version').html("Version: " + manifest.version);
-	});
-
-}
-
 
 
 function PromiseGroup() {
@@ -681,7 +640,7 @@ function responseToItems(response, location) {
 
 
 function getEndpoint(method) {
-	return "http://www.pathofexile.com/character-window/" + method;
+	return "https://www.pathofexile.com/character-window/" + method;
 }
 
 
@@ -703,7 +662,7 @@ function getCharItems(charName) {
 
 			var thisChar = charName;
 
-			postThrottle.queue( function() { return $.post(getEndpoint('get-items'), {character: thisChar}) } )
+			postThrottle.queue( function() { return $.post(getEndpoint('get-items'), {character: thisChar, accountName: accountName}) } )
 				.done(function(oData){
 					// add char data to cache
 					oData.charName = thisChar;
@@ -739,7 +698,7 @@ function getStashPage(league,index) {
 		// cache miss
 		.fail(function(){
 
-			postThrottle.queue(function() { return $.post(getEndpoint('get-stash-items'), {league: league, tabIndex: index, tabs: index === 0 ? 1 : 0}) })
+			postThrottle.queue(function() { return $.post(getEndpoint('get-stash-items'), {league: league, accountName: accountName, tabIndex: index, tabs: index === 0 ? 1 : 0}) })
 
 					.done(function (stashResp) {
 

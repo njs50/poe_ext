@@ -580,12 +580,12 @@ function displaySockets(item) {
 
 	var sockets = $('<div class="sockets" style="width: ' + parseInt(48 * item.rawItem.w,10) + 'px; height: ' + $('.itemIcon').height() + 'px' + globalOffsetY + '">');
 	var icon = {};
-	icon['S'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJTIjt9/aToxO2k6NTt9/cba0412822/Socket.png';
-	icon['D'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJEIjt9/aToxO2k6NTt9/24adcb67af/Socket.png';
-	icon['I'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJJIjt9/aToxO2k6NTt9/b39c59da99/Socket.png';
+	icon['S'] = 'https://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJTIjt9/aToxO2k6NTt9/cba0412822/Socket.png';
+	icon['D'] = 'https://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJEIjt9/aToxO2k6NTt9/24adcb67af/Socket.png';
+	icon['I'] = 'https://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjI6e3M6Mjoic3Qi/O3M6MDoiIjtzOjY6ImNv/bG91ciI7czoxOiJJIjt9/aToxO2k6NTt9/b39c59da99/Socket.png';
 	var link = {};
-	link['H'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjA7fWk6MTtpOjU7/fQ,,/ba11e10fa2/Socket_Link_Horizontal.png';
-	link['V'] = 'http://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjE7fWk6MTtpOjU7/fQ,,/3b93f7f851/Socket_Link_Vertical.png';
+	link['H'] = 'https://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjA7fWk6MTtpOjU7/fQ,,/ba11e10fa2/Socket_Link_Horizontal.png';
+	link['V'] = 'https://www.pathofexile.com/gen/image/YTozOntpOjA7aTo1O2k6/MjthOjM6e3M6NDoidHlw/ZSI7czo2OiJzb2NrZXQi/O3M6Mjoic3QiO3M6NDoi/bGluayI7czo0OiJ2ZXJ0/IjtiOjE7fWk6MTtpOjU7/fQ,,/3b93f7f851/Socket_Link_Vertical.png';
 	var cssPosition = new Array("pull-left", "pull-right", "pull-right", "pull-left", "pull-left", "pull-right");
 
 	// Adjust horizontal alignment for the unique socket on a 2-square width item case

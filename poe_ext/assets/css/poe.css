@@ -1,33 +1,33 @@
 
 @font-face{
 	font-family:'FontinSmallCaps';
-	src:url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.eot');
-	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.ttf') format("truetype"), url('http://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.svg#webfontSCusr8QL') format("svg");
+	src:url('https://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.eot');
+	src:local("☺"),url('https://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.woff') format("woff"),url('https://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.ttf') format("truetype"), url('https://webcdn.pathofexile.com/font/fontin-smallcaps-webfont.svg#webfontSCusr8QL') format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
-	
+
 @font-face{
 	font-family:'FontinRegular';
-	src:url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.eot');
-	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-regular-webfont.svg#webfontOAeglf7d') format("svg");
+	src:url('https://webcdn.pathofexile.com/font/fontin-regular-webfont.eot');
+	src:local("☺"),url('https://webcdn.pathofexile.com/font/fontin-regular-webfont.woff') format("woff"),url('https://webcdn.pathofexile.com/font/fontin-regular-webfont.ttf') format("truetype"),url('https://webcdn.pathofexile.com/font/fontin-regular-webfont.svg#webfontOAeglf7d') format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
-	
-	
+
+
 @font-face{
 	font-family:'FontinItalic';
-	src:url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.eot');
-	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-italic-webfont.svg#webfontEqJqoBxP') format("svg");
+	src:url('https://webcdn.pathofexile.com/font/fontin-italic-webfont.eot');
+	src:local("☺"),url('https://webcdn.pathofexile.com/font/fontin-italic-webfont.woff') format("woff"),url('https://webcdn.pathofexile.com/font/fontin-italic-webfont.ttf') format("truetype"),url('https://webcdn.pathofexile.com/font/fontin-italic-webfont.svg#webfontEqJqoBxP') format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
-	
+
 @font-face{
 	font-family:'FontinBold';
-	src:url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.eot');
-	src:local("☺"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.woff') format("woff"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.ttf') format("truetype"),url('http://webcdn.pathofexile.com/font/fontin-bold-webfont.svg#webfontvK7dhkXe') format("svg");
+	src:url('https://webcdn.pathofexile.com/font/fontin-bold-webfont.eot');
+	src:local("☺"),url('https://webcdn.pathofexile.com/font/fontin-bold-webfont.woff') format("woff"),url('https://webcdn.pathofexile.com/font/fontin-bold-webfont.ttf') format("truetype"),url('https://webcdn.pathofexile.com/font/fontin-bold-webfont.svg#webfontvK7dhkXe') format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
@@ -48,7 +48,7 @@
 	text-align: center;
 	color: #EFEFEF;
 	z-index: 1500;
-	background: url('http://webcdn.pathofexile.com/image/game_ui/hover_background.png?1302486915')
+	background: url('https://webcdn.pathofexile.com/image/game_ui/hover_background.png?1302486915')
 }
 .itemGemPopup {
 	z-index: 1450
@@ -364,7 +364,7 @@
 .itemIcon .socket, .itemIcon .socket img
 {
 	width: 47px;
-    height: 47px; 
+    height: 47px;
 }
 .itemIcon .socketWithGem img
 {
@@ -373,7 +373,7 @@
 }
 .itemIcon .socketHover img
 {
-	top: -50px; 
+	top: -50px;
 }
 .sockets
 {
