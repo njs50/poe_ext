@@ -254,6 +254,13 @@ function itemCategory(baseType) {
 
   if (baseType.match(/\b(?:flask|vial)\b/i)) { return 'flask'; }
   if (baseType.match(/\bquiver\b/i)) { return 'quiver'; }
+
+  if (baseType.match(/\bjewel\b/i)) { return 'jewel'; }
+
+  if (baseType.match(/(Map|Trial|Paradise|Sacrifice|Chaos|Kun|Atziri|Nightmare|Grandmasters|Sanctum|Tauhu|Asylum|Trove|Taxes)$/)) {
+    return 'map';
+  }
+
   return null;
 }
 
@@ -402,8 +409,20 @@ function averageDamage(item) {
 }
 
 function getAverageDamageOfType(item,mod) {
-  if (item.properties.hasOwnProperty(mod)) return calcAvRange(item.properties[mod]);
-  return item.combinedMods.hasOwnProperty(mod) ? calcAvRange(item.combinedMods[mod]) : 0;
+
+  var avDam = 0;
+
+  if (item.properties.hasOwnProperty(mod)) {
+    avDam = calcAvRange(item.properties[mod]);
+  } else {
+    avDam = item.combinedMods.hasOwnProperty(mod) ? calcAvRange(item.combinedMods[mod]) : 0;
+  }
+
+  if (item.parentCategory === 'weapon1h' || item.parentCategory === 'weapon2h') {
+    avDam = Math.round(avDam * parseFloat(item.properties['Attacks per Second']) * 10) / 10;
+  }
+
+  return avDam;
 }
 
 function calcAvRange(range) {
@@ -587,10 +606,16 @@ function itemBaseType(item) {
     // we can reliably recognise a potion
 
     // njs: not sure why these aren't in item data?
-    if(baseType.match(/\b(?:flask|vial)\b/i)) {
+    if(baseType.match(/\b(?:flask|vial|jewel)\b/i)) {
       // though if it's both a potion AND an unrecognised prefix we've got a problem.
       return baseType;
     }
+
+    // njs: not sure why these aren't in item data, or if any of this junk is actually needed
+    if (baseType.match(/(Map|Trial|Paradise|Sacrifice|Chaos|Kun|Atziri|Nightmare|Grandmasters|Sanctum|Tauhu|Asylum|Trove|Taxes)$/)) {
+      return baseType;
+    }
+
 
     // we must have an unrecognised  item type
     console.log("Unrecognised item type: " + baseType);

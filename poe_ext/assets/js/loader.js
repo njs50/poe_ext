@@ -99,10 +99,7 @@ $('#applyPartialRefresh').click(function(){
 
 	deleteQueue.completed(function(){
 		loadPageData();
-	})
-
-
-
+	});
 
 });
 
@@ -510,7 +507,9 @@ function loadLeagueData(league) {
 		}
 
 		var merge_function = function(oData){
-			$.merge(items, responseToItems(oData, {section: 'stash', page: oTabs[oData.tabIndex].n, index:oData.tabIndex }));
+      if (!oTabs[oData.tabIndex].hidden) {
+        $.merge(items, responseToItems(oData, {section: 'stash', page: oTabs[oData.tabIndex].n, index:oData.tabIndex }));
+      }
 		};
 
 		// get the first tab (and tab labels) first...
@@ -521,7 +520,7 @@ function loadLeagueData(league) {
 				oTabs = oData.tabs;
 				numTabs = oTabs.length;
 				if (numTabs > 0){
-					merge_function(oData);
+          merge_function(oData);
 				} else {
 					$('#err').html('It appears there is no data available for the ' + league + ' league on the server.<br /> Please ' +
 								'select refresh then full after you have logged in and placed something your stash. If the error persists, contact the author.');
@@ -683,7 +682,7 @@ function getCharItems(charName) {
 }
 
 
-// returns a promse, which will return the stash page once loaded
+// returns a promise, which will return the stash page once loaded
 function getStashPage(league,index) {
 
 	var deferred = $.Deferred();
