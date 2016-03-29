@@ -645,8 +645,8 @@ function itemToString(item) {
 	var oRaw = item.rawItem;
 	var sItem = '';
 	sItem += 'Rarity: ' + capitaliseFirstLetter(item.rarity) + '\n';
-	sItem += oRaw.name + '\n';
-	sItem += oRaw.typeLine + '\n';
+	sItem += oRaw.name.replace(/<<[^>]*>>/g,'') + '\n';
+	sItem += oRaw.typeLine.replace(/<<[^>]*>>/g,'') + '\n';
 
 
 	if (oRaw.hasOwnProperty('properties')) {
@@ -700,10 +700,17 @@ function itemToString(item) {
 		}
 	}
 
-	if (oRaw.hasOwnProperty('explicitMods')) {
+  if (oRaw.hasOwnProperty('explicitMods')) {
+    sItem += '--------\n';
+    for (var i = 0; i < oRaw.explicitMods.length; i++) {
+      sItem += oRaw.explicitMods[i] + '\n';
+    }
+  }
+
+	if (oRaw.hasOwnProperty('craftedMods')) {
 		sItem += '--------\n';
-		for (var i = 0; i < oRaw.explicitMods.length; i++) {
-			sItem += oRaw.explicitMods[i] + '\n';
+		for (var i = 0; i < oRaw.craftedMods.length; i++) {
+			sItem += oRaw.craftedMods[i] + '\n';
 		}
 	}
 

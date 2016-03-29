@@ -21,7 +21,8 @@ function parseItem(rawItem, loc) {
       location: loc,
       rarity: '',
       quality: 0,
-      name: $.trim(rawItem.name + ' ' + rawItem.typeLine),
+      name: $.trim(rawItem.name.replace(/<<[^>]*>>/g,'') + ' ' + rawItem.typeLine.replace(/<<[^>]*>>/g,'')),
+      ilvl: rawItem.ilvl,
       identified: rawItem.identified,
       properties: {},
       explicitMods: {},
@@ -71,7 +72,9 @@ function parseItem(rawItem, loc) {
         item.baseType = item.name;
         item.calculated.Quantity = rawItem.properties[0].values[0]; //TODO: regex the actualy quantity
         break;
-      case 6: item.rarity = 'quest'; break;
+      case 6:
+      case 7:
+        item.rarity = 'quest'; break;
       default:
         parseError(item, 'unknown item rarity');
     }
@@ -627,7 +630,7 @@ function itemBaseType(item) {
 
   // TODO(jaguilar): handle uniques.
   if (item.rarity == 'unique') {
-    if (item.rawItem.typeLine.length > 0) return item.rawItem.typeLine;
+    if (item.rawItem.typeLine.length > 0) return item.rawItem.typeLine.replace(/<<[^>]*>>/g,'');
   }
 
   return item.name;

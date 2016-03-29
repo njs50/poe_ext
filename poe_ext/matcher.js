@@ -428,10 +428,11 @@ var BaseTypeAndRarityMatch = Match.extend({
 
 var FullsetMatch = Match.extend({
 
-	init: function(rarity, mustBeTopQuality, mustBeUnidentified) {
+	init: function(rarity, mustBeTopQuality, mustBeUnidentified, minIlvl) {
 		this.rarity = rarity;
 		this.mustBeTopQuality = mustBeTopQuality;
 		this.mustBeUnidentified = mustBeUnidentified;
+    this.minIlvl = minIlvl;
 		this.matchedParts = {
 			head: [],
 			chest: [],
@@ -520,7 +521,11 @@ var FullsetMatch = Match.extend({
 									}
 								});
 		if (missing.length) {
-			var firstMissingRow = sprintf('%s %sitems in slots:', this.rarity, this.topQuality ? '20% quality ' : '');
+			var firstMissingRow = sprintf('%s %s %sitems in slots:',
+        (this.minIlvl ? '>' + this.minIlvl.toString() + 'ilvl ' : ''),
+        this.rarity,
+        (this.topQuality ? '20% quality ' : '')
+      );
 			missing = $.merge([firstMissingRow], missing);
 		}
 		matches.push({
@@ -533,6 +538,7 @@ var FullsetMatch = Match.extend({
 
 	take: function(i) {
 		if(this.mustBeUnidentified && i.identified) { return false; }
+    if (this.minIlvl && i.ilvl < this.minIlvl) { return false; }
 		if (this.rarity != i.rarity) { return false; }
 		if (this.mustBeTopQuality && i.quality != 20) { return false; }
 		var cat = (i.parentCategory === 'weapon1h' || i.parentCategory === 'weapon2h') ? i.parentCategory : i.category;
@@ -549,11 +555,26 @@ function allMatches(available) {
 							{result: "Armorer's Scrap", matcher: new QualityMatch('armor'), display:0.39},
 							{result: "Blacksmith's Whetstone", matcher: new QualityMatch('weapon'), display:0.39},
 
-							{result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false), display:0.3},
-							{result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true), display:0.3},
 
-							{result: "Regal Orb", matcher: new FullsetMatch('rare', true, false), display:0.3},
-							{result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, true), display:0.3},
+              // rarity, mustBeTopQuality, mustBeUnidentified, minIlvl
+
+
+              {result: "Chance Orb", matcher: new FullsetMatch('rare', false, false), display:0.7},
+              {result: "2 Chance Orbs", matcher: new FullsetMatch('rare', false, true), display:0.7},
+              {result: "2 Chance Orbs", matcher: new FullsetMatch('rare', true, false), display:0.7},
+              {result: "3 Chance Orbs", matcher: new FullsetMatch('rare', true, true), display:0.7},
+
+
+              {result: "Chaos Orb", matcher: new FullsetMatch('rare', false, false, 60), display:0.3},
+              {result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', false, true, 60), display:0.3},
+              {result: "2 Chaos Orbs", matcher: new FullsetMatch('rare', true, false, 60), display:0.3},
+              {result: "3 Chaos Orbs", matcher: new FullsetMatch('rare', true, true, 60), display:0.3},
+
+							{result: "Regal Orb", matcher: new FullsetMatch('rare', false, false, 75), display:0.3},
+              {result: "2 Regal Orbs", matcher: new FullsetMatch('rare', false, true, 75), display:0.3},
+              {result: "2 Regal Orbs", matcher: new FullsetMatch('rare', true, false, 75), display:0.3},
+							{result: "3 Regal Orbs", matcher: new FullsetMatch('rare', true, true, 75), display:0.3},
+
 
 							{result: "Chromatic Orb", matcher: TricolorMatch()},
 							{result: "Divine Orb", matcher: SocketMatch(6, true)},

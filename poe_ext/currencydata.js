@@ -34,10 +34,11 @@ CURRENCY_DATA = {
 	"Sewer Keys": 'questItem',
 	"Alira's Amulet": 'questItem',
 	"Kraityn's Amulet": 'questItem',
-	"Oak's Amulet": 'questItem',
+  "Oak's Amulet": 'questItem',
 	"Allflame": 'questItem',
 	"Thaumetic Sulphite": 'questItem',
   "Cartographer's Chisel": 'cartographerChisel',
-	"Vaal Orb": 'vaalOrb'
+  "Vaal Orb": 'vaalOrb',
+	"Perandus Coin": 'perandusCoin'
 };
 
