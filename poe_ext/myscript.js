@@ -28,6 +28,7 @@ function parseItem(rawItem, loc) {
       explicitMods: {},
       implicitMods: {},
       craftedMods: {},
+      hasMTX: false,
       combinedMods: {},
       requirements: {},
       sockets: {},
@@ -111,6 +112,7 @@ function parseItem(rawItem, loc) {
       if (rawItem.hasOwnProperty('explicitMods')) item.explicitMods = processMods(rawItem.explicitMods,oMods);
       if (rawItem.hasOwnProperty('implicitMods')) item.implicitMods = processMods(rawItem.implicitMods,oMods);
       if (rawItem.hasOwnProperty('craftedMods')) item.craftedMods = processMods(rawItem.craftedMods,oMods);
+      if (rawItem.hasOwnProperty('cosmeticMods') && rawItem.cosmeticMods.length) item.hasMTX = true;
       // combine explicit and implicit mods
       item.combinedMods = combineMods(item.explicitMods,item.implicitMods,item.craftedMods);
 
@@ -156,6 +158,7 @@ function parseItem(rawItem, loc) {
     item.calculated['Average Damage'] = averageDamage(item);
     item.calculated['Max Linked Sockets'] = item.sockets.maxConnected;
     item.calculated['Sockets'] = item.sockets.numSockets;
+    item.calculated['Has MTX'] = item.hasMTX ? 'yes' : 'no';
 
     /*
     item.linkedSockets = getSocketLinkage(itemDiv);

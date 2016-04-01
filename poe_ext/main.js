@@ -707,10 +707,17 @@ function itemToString(item) {
     }
   }
 
-	if (oRaw.hasOwnProperty('craftedMods')) {
+  if (oRaw.hasOwnProperty('craftedMods')) {
+    sItem += '--------\n';
+    for (var i = 0; i < oRaw.craftedMods.length; i++) {
+      sItem += oRaw.craftedMods[i] + '\n';
+    }
+  }
+
+	if (oRaw.hasOwnProperty('cosmeticMods')) {
 		sItem += '--------\n';
-		for (var i = 0; i < oRaw.craftedMods.length; i++) {
-			sItem += oRaw.craftedMods[i] + '\n';
+		for (var i = 0; i < oRaw.cosmeticMods.length; i++) {
+			sItem += oRaw.cosmeticMods[i] + '\n';
 		}
 	}
 

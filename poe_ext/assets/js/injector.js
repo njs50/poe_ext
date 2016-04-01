@@ -17,6 +17,16 @@ navLink.click(function(){
   } else {
 
 
+    var getName = function(el) {
+      var name = '';
+      var headers = el.find('h1');
+      if (headers.length) {
+        name = $.trim($(headers[0]).html().toLowerCase());
+      }
+      return name;
+    };
+
+
     var items = {};
 
     var weapons = $.get('https://www.pathofexile.com/item-data/weapon').success(function(weapons){
@@ -26,17 +36,19 @@ navLink.click(function(){
 
           itemType = $(itemType);
 
-          var groupName = $.trim(itemType.find('h1').html().toLowerCase());
+          var groupName = getName(itemType);
 
-          itemType
-            .find('.itemDataTable td.name')
-            .each(function(idx, item) {
-              if (groupName === 'bow' || groupName === 'staff' || groupName.indexOf('two hand') > -1 ) {
-                items[$.trim($(item).html())] = 'weapon2h';
-              } else {
-                items[$.trim($(item).html())] = 'weapon1h';
-              }
-            });
+          if(groupName) {
+            itemType
+              .find('.itemDataTable td.name')
+              .each(function(idx, item) {
+                if (groupName === 'bow' || groupName === 'staff' || groupName.indexOf('two hand') > -1 ) {
+                  items[$.trim($(item).html())] = 'weapon2h';
+                } else {
+                  items[$.trim($(item).html())] = 'weapon1h';
+                }
+              });
+          }
 
         });
 
@@ -50,21 +62,22 @@ navLink.click(function(){
         'gloves': 'hands',
         'helmet': 'head',
         'boots': 'feet'
-      }
+      };
 
       $(armor).find('.layoutBoxFull')
         .each(function(idx, itemType){
 
           itemType = $(itemType);
 
-          var groupName = $.trim(itemType.find('h1').html().toLowerCase());
+          var groupName = getName(itemType);
 
-          itemType
-            .find('.itemDataTable td.name')
-            .each(function(idx, item) {
-              items[$.trim($(item).html())] = armorTypes[groupName];
-            });
-
+          if(groupName) {
+            itemType
+              .find('.itemDataTable td.name')
+              .each(function(idx, item) {
+                items[$.trim($(item).html())] = armorTypes[groupName];
+              });
+          }
 
         });
 
@@ -78,14 +91,17 @@ navLink.click(function(){
 
           itemType = $(itemType);
 
-          var groupName = $.trim(itemType.find('h1').html().toLowerCase());
+          var groupName = getName(itemType);
 
-          itemType
-            .find('.itemDataTable td.name')
-            .each(function(idx, item) {
-              items[$.trim($(item).html())] = groupName;
-            });
+          if(groupName) {
 
+            itemType
+              .find('.itemDataTable td.name')
+              .each(function(idx, item) {
+                items[$.trim($(item).html())] = groupName;
+              })
+            ;
+          }
 
         });
 
