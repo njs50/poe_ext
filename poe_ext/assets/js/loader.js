@@ -370,6 +370,27 @@ function Throttle(delayDuration,approxRequestsAllowed) {
 
 				request()
 
+					.fail(function(result){
+						if(result.status === 429 && result.statusText === 'Too Many Requests') {
+							self.delayQueue.push(self.currentRequest);
+							self.currentRequest = null;
+							self.updateStatus(self.period);
+							setTimeout(self.runRequest, self.period);
+							self.countDown = setInterval(function(){
+								self.ticks++;
+								self.updateStatus();
+							},1000);
+						} else {
+							console.log(typeof result.error.message);
+							console.log('PoE website returned error:');
+							console.log(result.error.message);
+							deferred.reject();
+							self.currentRequest = null;
+							self.runRequest();
+							self.updateStatus();
+						}
+					})
+
 					.done(function(result){
 
 						if ( result.hasOwnProperty('error') ) {
@@ -408,12 +429,7 @@ function Throttle(delayDuration,approxRequestsAllowed) {
 
 					})
 
-					.fail(function(){
-						deferred.reject();
-						self.currentRequest = null;
-						self.runRequest();
-						self.updateStatus();
-					})
+
 				;
 
 			} else {
@@ -460,7 +476,7 @@ function resetView() {
 	$('#rareList').empty();
 
 	oTypes = {};
-	oRarity = {normal: '', magic: '', rare: '', unique: '', skillGem: '', currency: ''};
+	oRarity = {normal: '', magic: '', rare: '', unique: '', skillGem: '', currency: '', divinationCard: ''};
 	oProps = {};
 	oRequired = {};
 	oMods = {};
@@ -669,7 +685,8 @@ function getCharItems(charName) {
 					deferred.resolve(oData);
 				})
 				.fail(function(){
-					deferred.reject();
+					console.error('failed to load items for ' + thisChar + ' are they pending a rename?');
+					deferred.resolve([]);
 					return;
 				})
 			;
@@ -721,7 +738,8 @@ function getStashPage(league,index) {
 						deferred.resolve(stashResp);
 					})
 
-					.fail(function(){
+					.fail(function(err){
+						// early exit if web server returns the "you've requested too frequently" error
 						deferred.reject();
 						return;
 					})

@@ -74,6 +74,7 @@ function parseItem(rawItem, loc) {
         item.calculated.Quantity = rawItem.properties[0].values[0]; //TODO: regex the actualy quantity
         break;
       case 6:
+        item.rarity = 'divinationCard'; break;
       case 7:
         item.rarity = 'quest'; break;
       default:
@@ -82,9 +83,15 @@ function parseItem(rawItem, loc) {
 
     item.baseType = itemBaseType(item);
 
+    if (item.rawItem.properties && item.rawItem.properties[0].name === "Stack Size") {
+      item.category = 'currency';
+    }
+
     // get the item category if it's not a skill gem
-    if (item.rarity !== 'skillGem') {
-      item.category = itemCategory(item.baseType);
+    if (item.rarity !== 'skillGem' && item.rarity !== 'divinationCard' ) {
+
+      item.category = itemCategory(item.baseType, item.category);
+
       if (item.category === 'weapon1h' || item.category === 'weapon2h') {
         item.parentCategory = item.category;
         item.category = item.rawItem.properties[0].name.replace(/ /g,'');
@@ -95,11 +102,18 @@ function parseItem(rawItem, loc) {
       } else {
         item.parentCategory = 'misc';
       }
-      if(item.category === null)  parseError(item,'unknown item category');
-    } else {
+
+    } else if (item.rarity == 'divinationCard') {
+      item.parentCategory = 'divinationCard';
+      item.category = 'divinationCard';
+    }else {
       item.category = 'skillGem';
     }
 
+    if(item.category === null)  {
+      parseError(item,'unknown item category');
+      item.category = 'Unknown';
+    }
 
 
     // get properties/mods/requirements into usable format
@@ -251,7 +265,7 @@ function nameValueArrayToObj(aPairs, oKeys){
 }
 
 
-function itemCategory(baseType) {
+function itemCategory(baseType, cat) {
   if (baseType in ITEM_TYPE_DATA) { return ITEM_TYPE_DATA[baseType]; }
   if (baseType in CURRENCY_DATA) { return CURRENCY_DATA[baseType]; }
 
@@ -263,11 +277,16 @@ function itemCategory(baseType) {
 
   if (baseType.match(/\bjewel\b/i)) { return 'jewel'; }
 
+  if (baseType.match(/\bShard\b/i)) { return 'currency'; }
+  if (baseType.match(/\bOrb\b/i)) { return 'currency'; }
+
+  if (baseType.match(/\bEssence\b/i)) { return 'essence'; }
+
   if (baseType.match(/(Map|Trial|Paradise|Sacrifice|Chaos|Kun|Atziri|Nightmare|Grandmasters|Sanctum|Tauhu|Asylum|Trove|Taxes)$/)) {
     return 'map';
   }
 
-  return null;
+  return cat ? cat.toLowerCase() : null;
 }
 
 
@@ -554,8 +573,6 @@ function itemLevel(item) {
 
   if (item.requirements.hasOwnProperty('Required Level')) return parseInt(item.requirements['Required Level'],10);
   if (item.properties.hasOwnProperty('Required Level')) return parseInt(item.properties['Required Level'],10);
-
-  if (item.category == 'skillGem') console.log(item);
 
   return 1;
 }
